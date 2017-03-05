@@ -4,7 +4,7 @@ Chat by Location
 
 Tutorial included as ChatDemo2
 
-
+```
 //DB notes
 db {
 	users {
@@ -116,4 +116,6 @@ sendMessage ->
 	
 listenMessage -> 
 	subscribe to roomMessages/room(roomID)
+	
+```
 
