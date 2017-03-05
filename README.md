@@ -1,4 +1,5 @@
 # CS595
+<<<<<<< HEAD
 
 Chat by Location
 
@@ -117,3 +118,6 @@ listenMessage ->
 	subscribe to roomMessages/room(roomID)
 
 
+=======
+Tutorial included as ChatDemo2
+>>>>>>> 3c5670302bf86ff3f1e245155197caba2ea27d92
