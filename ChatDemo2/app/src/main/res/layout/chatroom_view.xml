@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity"
+
+    android:id="@+id/activity_main">
+
+    <ListView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_above="@+id/bottomLayout"
+
+        android:divider="@color/listDivider"
+        android:dividerHeight="1dp"
+
+        android:background="@color/messageBg"
+
+        android:stackFromBottom="true"
+        android:transcriptMode="alwaysScroll"
+        android:id="@+id/messageList"/>
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+
+        android:layout_alignParentStart="true"
+        android:layout_alignParentBottom="true"
+
+        android:padding="6dp"
+
+        android:background="@color/bottomLayout"
+
+        android:id="@+id/bottomLayout">
+
+        <EditText
+            android:hint="@string/inputHint"
+
+            android:layout_width="0dp"
+            android:layout_height="24dp"
+
+            android:layout_gravity="center_vertical"
+            android:layout_weight="1"
+
+            android:paddingStart="8dp"
+            android:paddingEnd="4dp"
+            android:layout_marginEnd="4dp"
+
+            android:background="@color/inputBg"
+            android:textColorHint="@color/inputHint"
+            android:textCursorDrawable="@color/colorPrimary"
+
+            android:inputType="text"
+            android:maxLength="140"
+
+            android:id="@+id/textInput"/>
+
+        <Button
+            android:text="@string/sendButton"
+
+            android:layout_width="45dp"
+            android:layout_height="20dp"
+
+            android:layout_gravity="center_vertical"
+
+            android:background="@color/sendButtonBg"
+            android:textColor="@color/sendButton"
+
+            android:onClick="sendButtonClick"
+            android:id="@+id/sendButton"/>
+
+    </LinearLayout>
+
+</RelativeLayout>

@@ -9,11 +9,13 @@ import java.util.Date;
 public class ChatMessage {
     private String messageText;
     private String messageUser;
+    private int    messageIcon;
     private long messageTime;
 
-    public ChatMessage(String messageText, String messageUser) {
+    public ChatMessage(String messageText, String messageUser, int messageIcon) {
         this.messageText = messageText;
         this.messageUser = messageUser;
+        this.messageIcon = messageIcon;
 
         // Initialize to current time
         messageTime = new Date().getTime();
@@ -37,6 +39,12 @@ public class ChatMessage {
 
     public void setMessageUser(String messageUser) {
         this.messageUser = messageUser;
+    }
+
+    public int getMessageIcon() { return messageIcon; }
+
+    public void setMessageIcon(int messageIcon) {
+        this.messageIcon = messageIcon;
     }
 
     public long getMessageTime() {
