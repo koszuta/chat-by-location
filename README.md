@@ -3,6 +3,7 @@
 Chat by Location
 
 Tutorial included as ChatDemo2
+Note: Currently, you must create your own firebase account and add the google-services.json file to your local android project.
 
 ```
 //DB notes
