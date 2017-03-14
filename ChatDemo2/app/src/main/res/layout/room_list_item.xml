@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="10dp"
+    android:id="@+id/roomLayout">
+
+    <TextView
+        android:text="Default Chatroom"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:id="@+id/roomName"/>
+
+    <TextView
+        android:text="43°03′8″ N, 87°57′21″ W"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_below="@id/roomName"
+        android:id="@+id/roomCoords"/>
+
+    <TextView
+        android:text="Radius: 20 m"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/roomCoords"
+        android:id="@+id/roomRadius"/>
+
+    <Button
+        android:text="Enter"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:id="@+id/joinButton"/>
+
+</RelativeLayout>

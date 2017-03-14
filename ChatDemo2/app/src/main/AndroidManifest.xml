@@ -16,6 +16,19 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".AuthActivity"
+            android:label="@string/authActivityLabel">
+
+        </activity>
+        <activity android:name=".SelectActivity"
+            android:label="@string/selectActivityLabel">
+
+        </activity>
+        <activity android:name=".ChatActivity"
+            android:label="@string/chatActivityLabel"
+            android:parentActivityName=".SelectActivity">
+
+        </activity>
         <service android:name=".MyFirebaseMessagingService">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT"/>

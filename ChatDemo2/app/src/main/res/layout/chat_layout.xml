@@ -2,11 +2,12 @@
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    tools:context=".ChatActivity"
+
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity"
 
-    android:id="@+id/activity_main">
+    android:id="@+id/chatLayout">
 
     <ListView
         android:layout_width="match_parent"
@@ -19,7 +20,7 @@
         android:divider="@color/listDivider"
         android:dividerHeight="1dp"
 
-        android:background="@color/messageBg"
+        android:background="@color/background"
 
         android:stackFromBottom="true"
         android:transcriptMode="alwaysScroll"
@@ -33,7 +34,7 @@
         android:layout_alignParentStart="true"
         android:layout_alignParentBottom="true"
 
-        android:padding="6dp"
+        android:padding="5dp"
 
         android:background="@color/bottomLayout"
 
@@ -72,7 +73,7 @@
             android:background="@color/sendButtonBg"
             android:textColor="@color/sendButton"
 
-            android:onClick="sendButtonClick"
+            android:onClick="sendMessageButton"
             android:id="@+id/sendButton"/>
 
     </LinearLayout>
