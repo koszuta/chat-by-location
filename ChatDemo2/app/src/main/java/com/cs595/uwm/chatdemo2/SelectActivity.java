@@ -1,5 +1,6 @@
 package com.cs595.uwm.chatdemo2;
 
+import android.content.Intent;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -62,7 +63,7 @@ public class SelectActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.main_menu, menu);
+        getMenuInflater().inflate(R.menu.select_view_menu, menu);
         return true;
     }
 
@@ -83,6 +84,10 @@ public class SelectActivity extends AppCompatActivity {
                         finish();
                     }
                 });
+                break;
+            case R.id.menu_bypass:
+                Intent intent = new Intent(this, ChatActivity.class);
+                startActivity(intent);
                 break;
             default:
                 break;
