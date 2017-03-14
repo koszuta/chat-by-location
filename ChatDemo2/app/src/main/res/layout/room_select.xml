@@ -6,12 +6,16 @@
     android:id="@+id/mainLayout">
 
     <ListView
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:layout_width="match_parent"
-        android:id="@+id/roomList">
 
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
 
+        android:divider="@color/listDivider"
+        android:dividerHeight="1dp"
 
-    </ListView>
+        android:background="@color/background"
+        android:id="@+id/roomList"/>
 
 </RelativeLayout>
