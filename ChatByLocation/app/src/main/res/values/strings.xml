@@ -1,0 +1,14 @@
+<resources>
+    <string name="app_name">ChatByLocation</string>
+    <string name="sign_out">Sign Out</string>
+
+    <string name="inputHint">Send a message...</string>
+    <string name="sendButton">Chat</string>
+    <string name="dummyMessage">21:13 Koszuta: Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim</string>
+    <string name="chatActivityLabel">Chat Room</string>
+    <string name="selectActivityLabel">Join a Chatroom</string>
+    <string name="authActivityLabel">Sign in</string>
+
+    <string name="chatnameHint">Enter a chatname...</string>
+    <string name="chatnameHelp">Please select a unique chat name:</string>
+</resources>
