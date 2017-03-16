@@ -11,15 +11,17 @@ public class ChatRoom {
     public String name;
     public Location location;
     public int radius;
+    public String password = null;
 
     public ChatRoom() {
 
     }
 
-    public ChatRoom(String name, Location location, int radius) {
+    public ChatRoom(String name, Location location, int radius, String password) {
         this.name = name;
         this.location = location;
         this.radius = radius;
+        this.password = password;
     }
 
     public String getName() {
@@ -41,5 +43,12 @@ public class ChatRoom {
     }
     public void setRadius(int radius) {
         this.radius = radius;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+    public void setPassword(String password) {
+        this.password = password;
     }
 }

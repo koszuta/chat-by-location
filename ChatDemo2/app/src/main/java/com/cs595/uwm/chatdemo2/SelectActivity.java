@@ -1,5 +1,10 @@
 package com.cs595.uwm.chatdemo2;
 
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.app.DialogFragment;
+import android.app.FragmentManager;
+import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
 import android.os.Bundle;
@@ -24,16 +29,29 @@ import com.google.firebase.database.FirebaseDatabase;
 
 public class SelectActivity extends AppCompatActivity {
 
+    private static Context context;
+
+    public static Context getContext() {
+        return context;
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.select_layout);
 
         displayRoomList();
+
+        context = getApplicationContext();
     }
 
-    public void joinRoomButton(View view) {
+    public void joinRoomClick(View view) {
 
+    }
+
+    public void createRoomClick(View view) {
+        DialogFragment dialog = new CreateRoomDialog();
+        dialog.show(getFragmentManager(), "create room");
     }
 
     private void displayRoomList() {
@@ -52,7 +70,10 @@ public class SelectActivity extends AppCompatActivity {
                 roomName.setText(chatroom.getName());
 
                 Location location = chatroom.getLocation();
-                String coords = location.getLatitude() + ", " + location.getLongitude();
+                String coords = "no coords";
+                if (location != null) {
+                    coords = location.getLatitude() + ", " + location.getLongitude();
+                }
                 roomCoords.setText(coords);
                 roomRadius.setText("Radius: " + chatroom.getRadius() + "m");
             }

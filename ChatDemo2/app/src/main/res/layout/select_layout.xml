@@ -15,7 +15,7 @@
 
         android:layout_alignParentStart="true"
         android:layout_alignParentTop="true"
-        android:layout_above="@+id/newRoomButton"
+        android:layout_above="@+id/createRoomButton"
 
         android:divider="@color/listDivider"
         android:dividerHeight="1dp"
@@ -32,6 +32,7 @@
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
 
-        android:id="@+id/newRoomButton"/>
+        android:onClick="createRoomClick"
+        android:id="@+id/createRoomButton"/>
 
 </RelativeLayout>
