@@ -15,6 +15,7 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.SeekBar;
+import android.widget.TextView;
 
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
@@ -27,6 +28,10 @@ import com.google.firebase.database.FirebaseDatabase;
 
 public class CreateRoomDialog extends DialogFragment {
 
+    private static final int MIN_RADIUS = 100;
+    private static final int MAX_RADIUS = 1000;
+    private static final int RADIUS_INCREMENT = 10;
+
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
@@ -36,8 +41,30 @@ public class CreateRoomDialog extends DialogFragment {
         final View dialogView = inflater.inflate(R.layout.create_room_dialog_layout, null);
         builder.setView(dialogView);
 
-        // Add checkbox listener; enables password field
-        CheckBox roomIsPrivate = (CheckBox) dialogView.findViewById(R.id.roomIsPrivate);
+        // Get layout components for later use
+        final EditText roomName = (EditText) dialogView.findViewById(R.id.roomName);
+        final SeekBar roomRadius = (SeekBar) dialogView.findViewById(R.id.roomRadius);
+        final TextView radiusValue = (TextView) dialogView.findViewById(R.id.radiusValue);
+        final CheckBox roomIsPrivate = (CheckBox) dialogView.findViewById(R.id.roomIsPrivate);
+        final EditText roomPassword = (EditText) dialogView.findViewById(R.id.roomPassword);
+
+        // Seekbar listener; updates radius text and sets minimum and increment
+        roomRadius.setMax((MAX_RADIUS - MIN_RADIUS) / RADIUS_INCREMENT);
+        roomRadius.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                int radius = MIN_RADIUS + seekBar.getProgress() * RADIUS_INCREMENT;
+
+                radiusValue.setText(Integer.toString(radius));
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {}
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {}
+        });
+
+        // Checkbox listener; enables password field
         roomIsPrivate.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -51,22 +78,16 @@ public class CreateRoomDialog extends DialogFragment {
             }
         });
 
-        // Set "Create" button action
+        // "Create" button action
         builder.setPositiveButton("CREATE", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                final EditText roomName = (EditText) dialogView.findViewById(R.id.roomName);
                 String name = roomName.getText().toString();
 
-                final SeekBar roomRadius = (SeekBar) dialogView.findViewById(R.id.roomRadius);
-                int radius = roomRadius.getProgress();
+                int radius = MIN_RADIUS + roomRadius.getProgress() * RADIUS_INCREMENT;
 
-
-                final CheckBox roomIsPrivate = (CheckBox) dialogView.findViewById(R.id.roomIsPrivate);
                 String password = null;
-
                 if (roomIsPrivate.isChecked()) {
-                    final EditText roomPassword = (EditText) dialogView.findViewById(R.id.roomPassword);
                     password = roomPassword.getText().toString();
                 }
 
@@ -82,7 +103,7 @@ public class CreateRoomDialog extends DialogFragment {
             }
         });
 
-        // Set "Cancel" button action
+        // "Cancel" button action
         builder.setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
