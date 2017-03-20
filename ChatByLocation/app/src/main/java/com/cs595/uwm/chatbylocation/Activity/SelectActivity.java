@@ -1,5 +1,7 @@
 package com.cs595.uwm.chatbylocation.Activity;
 
+import android.app.Dialog;
+import android.app.DialogFragment;
 import android.content.Intent;
 import android.location.Location;
 import android.os.Bundle;
@@ -35,6 +37,11 @@ public class SelectActivity extends AppCompatActivity {
 
     public void joinRoomButton(View view) {
 
+    }
+
+    public void createRoomClick(View view) {
+        DialogFragment dialogFragment = new CreateRoomDialog();
+        dialogFragment.show(getFragmentManager(), "Create Room");
     }
 
     private void displayRoomList() {

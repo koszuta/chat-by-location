@@ -33,6 +33,9 @@
 
         </activity>
 
+        <dialog android:name=".Activity.CreateRoomDialog"
+            android:label="Create Room"></dialog>
+
     </application>
 
 </manifest>
