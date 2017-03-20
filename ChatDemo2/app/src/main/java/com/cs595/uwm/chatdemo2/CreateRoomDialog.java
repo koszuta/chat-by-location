@@ -16,10 +16,13 @@ import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.DetectedActivity;
 import com.google.android.gms.location.LocationServices;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
 /**
@@ -97,9 +100,32 @@ public class CreateRoomDialog extends DialogFragment {
                 System.out.println(name + ", " + radius + ", " + location + ", " + password);
 
                 // TODO: Lowell: Update putting in database
-                FirebaseDatabase.getInstance().getReference().push().setValue(
-                        new ChatRoom(name, null, radius, password)
-                );
+                DatabaseReference dbRef = FirebaseDatabase.getInstance().getReference();
+                DatabaseReference roomIDRef = dbRef.child(Database.DB.ROOM_ID.name());
+                DatabaseReference roomUsersRef = dbRef.child(Database.DB.ROOM_USERS.name());
+                DatabaseReference roomMsgsRef = dbRef.child(Database.DB.ROOM_MESSAGES.name());
+
+                String roomID = roomIDRef.push().getKey();
+                String userID = FirebaseAuth.getInstance().getCurrentUser().getUid();
+
+                DatabaseReference roomIDInst = roomIDRef.child("/room/" + roomID);
+                roomIDInst.child("name").setValue(name);
+                roomIDInst.child("longg").setValue(40); //todo
+                roomIDInst.child("lat").setValue(40); //todo
+                roomIDInst.child("rad").setValue(radius);
+                if(password != null) roomIDInst.child("password").setValue(password);
+
+                DatabaseReference roomUsersInst = roomUsersRef.child("/room/" + roomID);
+                roomUsersInst.child("ownerID").setValue(userID);
+                roomUsersInst.child("users").child(userID).setValue(true);
+
+
+
+//                Toast.makeText(SelectActivity.getContext(),  "id:" + roomID, Toast.LENGTH_SHORT).show();
+
+//                .push().setValue(
+//                        new ChatRoom(name, null, radius, password)
+//                );
             }
         });
 

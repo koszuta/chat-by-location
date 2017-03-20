@@ -33,6 +33,7 @@ db {
 			long
 			lat
 			rad
+			password
 		}
 		...
 	}
