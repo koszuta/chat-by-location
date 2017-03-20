@@ -53,8 +53,11 @@ public class SelectActivity extends AppCompatActivity {
                 roomName.setText(chatroom.getName());
 
                 Location location = chatroom.getLocation();
-                String coords = location.getLatitude() + ", " + location.getLongitude();
-                roomCoords.setText(coords);
+                String coords = "0, 0";
+                if(location != null) {
+                    coords = location.getLatitude() + ", " + location.getLongitude();
+                    roomCoords.setText(coords);
+                }
                 roomRadius.setText("Radius: " + chatroom.getRadius() + "m");
             }
         };
