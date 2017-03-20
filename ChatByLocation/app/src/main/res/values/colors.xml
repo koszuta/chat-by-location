@@ -8,11 +8,12 @@
     <color name="transparent">#0000</color>
 
     <color name="messageBg">#FAFAFA</color>
+    <color name="background">#FAFAFA</color>
     <color name="listDivider">#DADADA</color>
 
     <color name="inputHint">#999999</color>
     <color name="inputBg">#FAFAFA</color>
-    <color name="sendButton">@color/colorPrimary</color>
+    <color name="sendButton">@color/colorPrimaryDark</color>
     <color name="sendButtonBg">@color/transparent</color>
     <color name="bottomLayout">#EEEEEE</color>
 
