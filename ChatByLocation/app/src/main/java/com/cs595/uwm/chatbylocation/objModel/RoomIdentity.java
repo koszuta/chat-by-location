@@ -1,4 +1,4 @@
-package com.cs595.uwm.chatbylocation.model;
+package com.cs595.uwm.chatbylocation.objModel;
 
 
 public class RoomIdentity {

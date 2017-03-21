@@ -1,6 +1,6 @@
 package com.cs595.uwm.chatbylocation.service;
 
-import com.cs595.uwm.chatbylocation.model.ChatMessage;
+import com.cs595.uwm.chatbylocation.objModel.ChatMessage;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;

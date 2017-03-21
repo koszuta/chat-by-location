@@ -19,10 +19,9 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.cs595.uwm.chatbylocation.model.ChatMessage;
+import com.cs595.uwm.chatbylocation.objModel.ChatMessage;
 import com.cs595.uwm.chatbylocation.R;
 import com.cs595.uwm.chatbylocation.service.Database;
-import com.cs595.uwm.chatbylocation.service.UserRegistrationInfo;
 import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.database.FirebaseListAdapter;
 import com.google.android.gms.tasks.OnCompleteListener;
