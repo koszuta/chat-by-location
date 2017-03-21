@@ -36,18 +36,9 @@ public class MainActivity extends AppCompatActivity {
             );
 
         } else {
-            System.out.println("user display name" + user.getDisplayName());
             startNextCorrectActivity();
         }
     }
-
-    public void startNextCorrectActivity(){
-        System.out.println("username: " + Database.getUserUsername());
-        startActivity(Database.getUserUsername() == null ?
-                new Intent(this, ChatNameSelectionActivity.class) :
-                new Intent(this, SelectActivity.class));
-    }
-
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -63,5 +54,11 @@ public class MainActivity extends AppCompatActivity {
                 //TODO: display sign in error
             }
         }
+    }
+
+    public void startNextCorrectActivity(){
+        startActivity(Database.getUserUsername() == null ?
+                new Intent(this, ChatNameSelectionActivity.class) :
+                new Intent(this, SelectActivity.class));
     }
 }

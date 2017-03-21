@@ -29,31 +29,28 @@ public class ChatNameSelectionActivity extends AppCompatActivity {
         EditText input = (EditText) findViewById(R.id.chatname);
         String name = input.getText().toString();
 
-        //if(name.equals("") || !Database.getUsernameUnique(name)){
+        if (name.equals("") || !Database.getUsernameUnique(name)) {
             //TODO: display error message
 
-        //} else {
+        } else {
 
-        Database.createUser();
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
-                .setDisplayName(name)
-                .build();
-        user.updateProfile(profileUpdates)
-                .addOnCompleteListener(new OnCompleteListener<Void>() {
-                    @Override
-                    public void onComplete(Task<Void> task) {
-                        if (task.isSuccessful()) {
-                            //username is updated
-                            Intent intent = new Intent(ChatNameSelectionActivity.this, SelectActivity.class);
-                            startActivity(intent);
+            Database.createUser();
+
+            FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+            UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
+                    .setDisplayName(name)
+                    .build();
+            user.updateProfile(profileUpdates)
+                    .addOnCompleteListener(new OnCompleteListener<Void>() {
+                        @Override
+                        public void onComplete(Task<Void> task) {
+                            if (task.isSuccessful()) {
+                                startActivity(new Intent(ChatNameSelectionActivity.this, SelectActivity.class));
+                            }
                         }
-                    }
-                });
+                    });
 
-
-        //}
-
+        }
 
     }
 }

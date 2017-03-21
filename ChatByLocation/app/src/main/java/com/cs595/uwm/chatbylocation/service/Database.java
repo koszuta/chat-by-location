@@ -55,6 +55,8 @@ public class Database {
     }
 
     public static String getUserCurrentRoomID(){
+        //todo: this won't work
+
         String userID = getUserID();
 
         final String[] roomID = new String[1];
@@ -81,34 +83,11 @@ public class Database {
 
     }
 
-    public static void setUserUsername(String username){
-        String userID = getUserID();
-
-        DatabaseReference userRef = FirebaseDatabase.getInstance().getReference().child("users").child(userID);
-        userRef.child("username").setValue(username);
-    }
-
     public static boolean getUsernameUnique(final String username){
-        DatabaseReference usersRef = FirebaseDatabase.getInstance().getReference().child("users");
-        final boolean[] unique = {true};
-        usersRef.addListenerForSingleValueEvent(
-                new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        for (Map.Entry<String, Object> entry : ((Map<String,Object>) dataSnapshot.getValue()).entrySet()){
-                            Map user = (Map) entry.getValue();
-                            if(String.valueOf(user.get("username")).toLowerCase().equals(username.toLowerCase())){
-                                unique[0] = false;
-                                break;
-                            }
-                        }
-                    }
 
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
-                    }
-                });
-        return unique[0];
+        //todo
+
+        return true;
     }
 
     public static String createRoom(String ownerID, String name, String longg, String lat,
