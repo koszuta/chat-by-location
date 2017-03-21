@@ -29,10 +29,11 @@
         android:id="@+id/roomRadius"/>
 
     <Button
-        android:text="Enter"
+        android:id="@+id/joinButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
-        android:id="@+id/joinButton"/>
+        android:onClick="joinRoomClick"
+        android:text="Enter" />
 
 </RelativeLayout>

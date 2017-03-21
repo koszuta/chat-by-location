@@ -9,6 +9,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -44,6 +45,10 @@ public class SelectActivity extends AppCompatActivity {
     }
 
     public void joinRoomClick(View view) {
+        Toast.makeText(SelectActivity.this,
+                "RoomID: " + view.getTag(),
+                Toast.LENGTH_SHORT)
+                .show();
 
     }
 
@@ -55,19 +60,23 @@ public class SelectActivity extends AppCompatActivity {
     private void displayRoomList() {
         ListView listOfRooms = (ListView) findViewById(R.id.roomList);
 
-        FirebaseListAdapter<RoomIdentity> adapter = new FirebaseListAdapter<RoomIdentity>(this,
+        final FirebaseListAdapter<RoomIdentity> adapter = new FirebaseListAdapter<RoomIdentity>(this,
                 RoomIdentity.class,
                 R.layout.room_list_item,
                 FirebaseDatabase.getInstance().getReference().child("roomIdentity")) {
             @Override
-            protected void populateView(View view, RoomIdentity roomID, int position) {
+            protected void populateView(View view, RoomIdentity roomIdentity, int position) {
                 TextView roomName = (TextView) view.findViewById(R.id.roomName);
                 TextView roomCoords = (TextView) view.findViewById(R.id.roomCoords);
                 TextView roomRadius = (TextView) view.findViewById(R.id.roomRadius);
 
-                roomName.setText(roomID.getName());
-                roomCoords.setText(roomID.getLongg() + ", " + roomID.getLat());
-                roomRadius.setText("Radius: " + roomID.getRad() + "m");
+                roomName.setText(roomIdentity.getName());
+                roomCoords.setText(roomIdentity.getLongg() + ", " + roomIdentity.getLat());
+                roomRadius.setText("Radius: " + roomIdentity.getRad() + "m");
+
+                Button joinButton = (Button) view.findViewById(R.id.joinButton);
+                joinButton.setTag(getRef(position).getKey());
+
 
             }
         };
