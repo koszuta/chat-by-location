@@ -50,15 +50,13 @@ db {
 	
 	roomMessages {
 		roomID {
-			messages {
-				message {
-					userID
-					styleInfo
-					time
-					text
-				}
-				...
+			messageID {
+				userID
+				styleInfo
+				time
+				text
 			}
+			...
 		}
 		...
 	}

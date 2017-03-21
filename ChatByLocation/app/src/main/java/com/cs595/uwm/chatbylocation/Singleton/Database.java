@@ -1,5 +1,6 @@
 package com.cs595.uwm.chatbylocation.Singleton;
 
+import com.cs595.uwm.chatbylocation.Model.ChatMessage;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
@@ -9,6 +10,15 @@ import com.google.firebase.database.FirebaseDatabase;
  */
 
 public class Database {
+
+    public static void createUser(String username){
+        String userID = getUserID();
+
+        DatabaseReference userRef = FirebaseDatabase.getInstance().getReference().child("users").child(userID);
+        userRef.child("username").setValue(username);
+        userRef.child("currentRoomID").setValue(null);
+
+    }
 
     public static void addUserToRoom(String roomID){
         String userID = getUserID();
@@ -21,16 +31,14 @@ public class Database {
 
     }
 
-    public static void createUser(String username){
+    public static String getUserCurrentRoomID(){
         String userID = getUserID();
-
         DatabaseReference userRef = FirebaseDatabase.getInstance().getReference().child("users").child(userID);
-        userRef.child("username").setValue(username);
-        userRef.child("currentRoomID").setValue(null);
-
+        return userRef.child("currentRoomID").toString();
     }
 
-    public static void createRoom(String ownerID, String name, String longg, String lat,
+
+    public static String createRoom(String ownerID, String name, String longg, String lat,
                                   int rad, String password){
 
         DatabaseReference dbRef = FirebaseDatabase.getInstance().getReference();
@@ -45,6 +53,15 @@ public class Database {
         roomIDInst.child("lat").setValue(lat);
         roomIDInst.child("rad").setValue(rad);
         roomIDInst.child("password").setValue(password);
+
+        return roomID;
+
+    }
+
+    public static void sendChatMessage(ChatMessage chatMessage, String roomID){
+
+        FirebaseDatabase.getInstance().getReference().child("roomMessages").child(roomID)
+                .push().setValue(chatMessage);
 
     }
 

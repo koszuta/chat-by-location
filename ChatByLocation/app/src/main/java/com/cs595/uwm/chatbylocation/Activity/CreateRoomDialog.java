@@ -4,8 +4,10 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.location.Location;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.CheckBox;
@@ -94,8 +96,13 @@ public class CreateRoomDialog extends DialogFragment {
                 String longg = "50";
                 String lat = "50";
 
-                Database.createRoom(FirebaseAuth.getInstance().getCurrentUser().getUid(),
+                String roomID = Database.createRoom(FirebaseAuth.getInstance().getCurrentUser().getUid(),
                         name, longg, lat, radius, password);
+
+                //todo: move this to the join room button
+                Database.addUserToRoom(roomID);
+                Intent intent = new Intent(SelectActivity.getContext(), ChatActivity.class);
+                startActivity(intent);
 
             }
         });

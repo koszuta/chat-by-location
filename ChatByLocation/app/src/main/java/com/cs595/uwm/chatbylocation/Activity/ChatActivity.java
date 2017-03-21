@@ -2,6 +2,7 @@ package com.cs595.uwm.chatbylocation.Activity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
 import android.support.v4.content.res.ResourcesCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -21,12 +22,18 @@ import android.widget.Toast;
 
 import com.cs595.uwm.chatbylocation.Model.ChatMessage;
 import com.cs595.uwm.chatbylocation.R;
+import com.cs595.uwm.chatbylocation.Singleton.Database;
 import com.cs595.uwm.chatbylocation.Singleton.UserRegistrationInfo;
 import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.database.FirebaseListAdapter;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.Date;
 import java.util.Random;
@@ -54,15 +61,31 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     public void sendMessageButton(View view) {
-        EditText input = (EditText) findViewById(R.id.textInput);
 
-        FirebaseDatabase.getInstance().getReference().push().setValue(
-                new ChatMessage(input.getText().toString(),
-                        UserRegistrationInfo.getInstance().getChatName(),
-                        getIcon())
-        );
+        ValueEventListener roomChangeListener = new ValueEventListener(){
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                String roomID = String.valueOf(dataSnapshot.getValue());
 
-        input.setText("");
+                EditText input = (EditText) findViewById(R.id.textInput);
+
+                Database.sendChatMessage(new ChatMessage(input.getText().toString(),
+                        UserRegistrationInfo.getInstance().getChatName(), getIcon()), roomID);
+
+                input.setText("");
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+            }
+
+        };
+
+        DatabaseReference userRoomRef = FirebaseDatabase.getInstance().getReference().child("users")
+                .child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child("currentRoomID");
+        userRoomRef.addValueEventListener(roomChangeListener);
+
     }
 
     @Override
@@ -96,42 +119,62 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     private void displayChatMessages() {
-        ListView listOfMessages = (ListView) findViewById(R.id.messageList);
 
-        FirebaseListAdapter<ChatMessage> adapter = new FirebaseListAdapter<ChatMessage>(this,
-                ChatMessage.class,
-                R.layout.message,
-                FirebaseDatabase.getInstance().getReference()) {
+        ValueEventListener roomChangeListener = new ValueEventListener(){
             @Override
-            protected void populateView(View view, ChatMessage chatMessage, int position) {
-                // Get reference to the views of message.xml
-                ImageView userIcon = (ImageView) view.findViewById(R.id.userIcon);
-                userIcon.setImageResource(chatMessage.getMessageIcon());
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                String roomID = String.valueOf(dataSnapshot.getValue());
 
-                TextView messageText = (TextView) view.findViewById(R.id.messageText);
+                FirebaseListAdapter<ChatMessage> chatMessageListener = new FirebaseListAdapter<ChatMessage>(
+                        ChatActivity.this,
+                        ChatMessage.class,
+                        R.layout.message,
+                        FirebaseDatabase.getInstance().getReference().child("roomMessages").child(roomID)) {
+                    @Override
+                    protected void populateView(View view, ChatMessage chatMessage, int position) {
+                        // Get reference to the views of message.xml
+                        ImageView userIcon = (ImageView) view.findViewById(R.id.userIcon);
+                        userIcon.setImageResource(chatMessage.getMessageIcon());
 
-                // Set their text
-                String timestamp = formatTimestamp(chatMessage.getMessageTime());
-                if (timestamp == null) timestamp = "";
-                String username = chatMessage.getMessageUser();
-                if (username == null) username = "no name";
+                        TextView messageText = (TextView) view.findViewById(R.id.messageText);
 
-                SpannableString ss = new SpannableString(timestamp + ' ' + username + ": " + chatMessage.getMessageText());
+                        // Set their text
+                        String timestamp = formatTimestamp(chatMessage.getMessageTime());
+                        if (timestamp == null) timestamp = "";
+                        String username = chatMessage.getMessageUser();
+                        if (username == null) username = "no name";
 
-                StyleSpan bold = new StyleSpan(android.graphics.Typeface.BOLD);
-                RelativeSizeSpan timeSize = new RelativeSizeSpan(0.8f);
-                ForegroundColorSpan timeColor = new ForegroundColorSpan(ResourcesCompat.getColor(getResources(), R.color.timestamp, null));
+                        SpannableString ss = new SpannableString(timestamp + ' ' + username + ": " + chatMessage.getMessageText());
 
-                int timeLength = timestamp.length() + 1;
-                ss.setSpan(timeSize, 0, timeLength, Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
-                ss.setSpan(timeColor, 0, timeLength, Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
-                ss.setSpan(bold, timeLength, timeLength + username.length(), Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
+                        StyleSpan bold = new StyleSpan(android.graphics.Typeface.BOLD);
+                        RelativeSizeSpan timeSize = new RelativeSizeSpan(0.8f);
+                        ForegroundColorSpan timeColor = new ForegroundColorSpan(ResourcesCompat.getColor(getResources(), R.color.timestamp, null));
 
-                messageText.setText(ss);
+                        int timeLength = timestamp.length() + 1;
+                        ss.setSpan(timeSize, 0, timeLength, Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
+                        ss.setSpan(timeColor, 0, timeLength, Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
+                        ss.setSpan(bold, timeLength, timeLength + username.length(), Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
+
+                        messageText.setText(ss);
+                    }
+                };
+
+                ListView listOfMessages = (ListView) findViewById(R.id.messageList);
+                listOfMessages.setAdapter(chatMessageListener);
+
             }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+            }
+
         };
 
-        listOfMessages.setAdapter(adapter);
+        DatabaseReference userRoomRef = FirebaseDatabase.getInstance().getReference().child("users")
+                .child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child("currentRoomID");
+        userRoomRef.addValueEventListener(roomChangeListener);
+
+
     }
 
     private String formatTimestamp(long timeMillis) {
