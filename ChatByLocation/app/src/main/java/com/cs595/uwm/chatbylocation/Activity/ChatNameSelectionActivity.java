@@ -28,11 +28,16 @@ public class ChatNameSelectionActivity extends AppCompatActivity {
         isRegistered = UserRegistrationInfo.getInstance().setChatName(chatName);
 
         if(isRegistered) {
+
+            //todo write user to db
+
             Intent intent = new Intent(this, SelectActivity.class);
             startActivity(intent);
         }
         else {
             //TODO: display error message
         }
+
+
     }
 }

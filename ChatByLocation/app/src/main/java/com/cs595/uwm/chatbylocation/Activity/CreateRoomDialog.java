@@ -110,11 +110,6 @@ public class CreateRoomDialog extends DialogFragment {
 
                 DatabaseReference roomIDInst = roomIDRef.child(roomID);
                 roomIDInst.setValue(new RoomIdentity(name, "40", "40", radius, password));
-//                roomIDInst.child("name").setValue(name);
-//                roomIDInst.child("longg").setValue(40); //todo
-//                roomIDInst.child("lat").setValue(40); //todo
-//                roomIDInst.child("rad").setValue(radius);
-//                if(password != null) roomIDInst.child("password").setValue(password);
 
                 DatabaseReference roomUsersInst = roomUsersRef.child(roomID);
                 roomUsersInst.child("ownerID").setValue(userID);
