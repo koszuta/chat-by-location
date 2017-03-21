@@ -3,26 +3,19 @@ package com.cs595.uwm.chatbylocation.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.location.Location;
-import android.location.LocationManager;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.SeekBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.cs595.uwm.chatbylocation.Model.RoomIdentity;
 import com.cs595.uwm.chatbylocation.R;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.location.DetectedActivity;
-import com.google.android.gms.location.LocationServices;
+import com.cs595.uwm.chatbylocation.Singleton.Database;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
@@ -97,23 +90,12 @@ public class CreateRoomDialog extends DialogFragment {
                 }
 
                 // TODO: Graham: Get current device location
-                Location location = null;
+                //These can change to whatever kinds of values location actually uses:
+                String longg = "50";
+                String lat = "50";
 
-                System.out.println(name + ", " + radius + ", " + location + ", " + password);
-
-                DatabaseReference dbRef = FirebaseDatabase.getInstance().getReference();
-                DatabaseReference roomIDRef = dbRef.child("roomIdentity");
-                DatabaseReference roomUsersRef = dbRef.child("roomUsers");
-
-                String roomID = roomIDRef.push().getKey();
-                String userID = FirebaseAuth.getInstance().getCurrentUser().getUid();
-
-                DatabaseReference roomIDInst = roomIDRef.child(roomID);
-                roomIDInst.setValue(new RoomIdentity(name, "40", "40", radius, password));
-
-                DatabaseReference roomUsersInst = roomUsersRef.child(roomID);
-                roomUsersInst.child("ownerID").setValue(userID);
-                roomUsersInst.child("users").child(userID).setValue(true);
+                Database.createRoom(FirebaseAuth.getInstance().getCurrentUser().getUid(),
+                        name, longg, lat, radius, password);
 
             }
         });

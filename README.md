@@ -13,7 +13,6 @@ db {
 			userName
 			userPref*
 			currentRoomID
-			currentRoomOwner
 			mutedUsers {
 				userID
 				...
@@ -26,17 +25,17 @@ db {
 	roomIdentities {
 		roomID {
 			name
-			long
+			longg
 			lat
 			rad
 			password
+			ownerID
 		}
 		...
 	}
 
 	roomUsers {
 		roomID {
-			ownerID
 			users {
 				userID
 				...

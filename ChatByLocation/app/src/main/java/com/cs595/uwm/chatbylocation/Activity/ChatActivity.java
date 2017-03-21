@@ -103,20 +103,20 @@ public class ChatActivity extends AppCompatActivity {
                 R.layout.message,
                 FirebaseDatabase.getInstance().getReference()) {
             @Override
-            protected void populateView(View view, ChatMessage model, int position) {
+            protected void populateView(View view, ChatMessage chatMessage, int position) {
                 // Get reference to the views of message.xml
                 ImageView userIcon = (ImageView) view.findViewById(R.id.userIcon);
-                userIcon.setImageResource(model.getMessageIcon());
+                userIcon.setImageResource(chatMessage.getMessageIcon());
 
                 TextView messageText = (TextView) view.findViewById(R.id.messageText);
 
                 // Set their text
-                String timestamp = formatTimestamp(model.getMessageTime());
+                String timestamp = formatTimestamp(chatMessage.getMessageTime());
                 if (timestamp == null) timestamp = "";
-                String username = model.getMessageUser();
+                String username = chatMessage.getMessageUser();
                 if (username == null) username = "no name";
 
-                SpannableString ss = new SpannableString(timestamp + ' ' + username + ": " + model.getMessageText());
+                SpannableString ss = new SpannableString(timestamp + ' ' + username + ": " + chatMessage.getMessageText());
 
                 StyleSpan bold = new StyleSpan(android.graphics.Typeface.BOLD);
                 RelativeSizeSpan timeSize = new RelativeSizeSpan(0.8f);
