@@ -91,7 +91,7 @@ public class CreateRoomDialog extends DialogFragment {
                 String longg = "50";
                 String lat = "50";
 
-                String roomID = Database.createRoom(FirebaseAuth.getInstance().getCurrentUser().getUid(),
+                Database.createRoom(FirebaseAuth.getInstance().getCurrentUser().getUid(),
                         name, longg, lat, radius, password);
 
 

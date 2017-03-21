@@ -1,7 +1,6 @@
 package com.cs595.uwm.chatbylocation.view;
 
 import android.content.Intent;
-import android.provider.ContactsContract;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -9,7 +8,6 @@ import android.view.View;
 
 import com.cs595.uwm.chatbylocation.R;
 import com.cs595.uwm.chatbylocation.service.Database;
-import com.cs595.uwm.chatbylocation.service.UserRegistrationInfo;
 import com.firebase.ui.auth.AuthUI;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -38,11 +36,13 @@ public class MainActivity extends AppCompatActivity {
             );
 
         } else {
+            System.out.println("user display name" + user.getDisplayName());
             startNextCorrectActivity();
         }
     }
 
     public void startNextCorrectActivity(){
+        System.out.println("username: " + Database.getUserUsername());
         startActivity(Database.getUserUsername() == null ?
                 new Intent(this, ChatNameSelectionActivity.class) :
                 new Intent(this, SelectActivity.class));

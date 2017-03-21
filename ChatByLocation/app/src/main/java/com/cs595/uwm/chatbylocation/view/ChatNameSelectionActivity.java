@@ -8,7 +8,11 @@ import android.widget.EditText;
 
 import com.cs595.uwm.chatbylocation.R;
 import com.cs595.uwm.chatbylocation.service.Database;
-import com.cs595.uwm.chatbylocation.service.UserRegistrationInfo;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.UserProfileChangeRequest;
 
 /**
  * Created by Jason on 3/15/2017.
@@ -22,22 +26,33 @@ public class ChatNameSelectionActivity extends AppCompatActivity {
     }
 
     public void registerChatName(View v) {
-        boolean isRegistered = false;
         EditText input = (EditText) findViewById(R.id.chatname);
-        String chatName = input.getText().toString();
+        String name = input.getText().toString();
 
-        isRegistered = UserRegistrationInfo.getInstance().setChatName(chatName);
-
-        if(isRegistered) {
-
-            Database.createUser(chatName);
-
-            Intent intent = new Intent(this, SelectActivity.class);
-            startActivity(intent);
-        }
-        else {
+        //if(name.equals("") || !Database.getUsernameUnique(name)){
             //TODO: display error message
-        }
+
+        //} else {
+
+        Database.createUser();
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
+                .setDisplayName(name)
+                .build();
+        user.updateProfile(profileUpdates)
+                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(Task<Void> task) {
+                        if (task.isSuccessful()) {
+                            //username is updated
+                            Intent intent = new Intent(ChatNameSelectionActivity.this, SelectActivity.class);
+                            startActivity(intent);
+                        }
+                    }
+                });
+
+
+        //}
 
 
     }
