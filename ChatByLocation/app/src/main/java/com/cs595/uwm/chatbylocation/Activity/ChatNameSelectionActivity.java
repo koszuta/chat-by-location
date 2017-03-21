@@ -8,6 +8,9 @@ import android.widget.EditText;
 
 import com.cs595.uwm.chatbylocation.R;
 import com.cs595.uwm.chatbylocation.Singleton.UserRegistrationInfo;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 /**
  * Created by Jason on 3/15/2017.
@@ -29,7 +32,11 @@ public class ChatNameSelectionActivity extends AppCompatActivity {
 
         if(isRegistered) {
 
-            //todo write user to db
+            String userID = FirebaseAuth.getInstance().getCurrentUser().getUid();
+            DatabaseReference userRef = FirebaseDatabase.getInstance().getReference().child("users").child(userID);
+            userRef.child("username").setValue(chatName);
+            userRef.child("currentRoomID").setValue(null);
+            userRef.child("currentRoomOwner").setValue(false);
 
             Intent intent = new Intent(this, SelectActivity.class);
             startActivity(intent);

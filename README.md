@@ -9,14 +9,11 @@ Note: Currently, you must create your own firebase account and add the google-se
 //DB notes
 db {
 	users {
-		user {
-			userID
+		userID {
 			userName
 			userPref*
-			currentRoom {
-				roomID
-				isOwner
-			}
+			currentRoomID
+			currentRoomOwner
 			mutedUsers {
 				userID
 				...
@@ -27,8 +24,7 @@ db {
 	}
 	
 	roomIdentities {
-		room {
-			roomID
+		roomID {
 			name
 			long
 			lat
@@ -39,8 +35,7 @@ db {
 	}
 
 	roomUsers {
-		room {
-			roomID
+		roomID {
 			ownerID
 			users {
 				userID
@@ -55,8 +50,7 @@ db {
 	}
 	
 	roomMessages {
-		room {
-			roomID
+		roomID {
 			messages {
 				message {
 					userID
