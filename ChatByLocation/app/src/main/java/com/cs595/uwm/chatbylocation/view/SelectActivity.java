@@ -1,4 +1,4 @@
-package com.cs595.uwm.chatbylocation.Activity;
+package com.cs595.uwm.chatbylocation.view;
 
 import android.app.DialogFragment;
 import android.content.Context;
@@ -14,8 +14,9 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.cs595.uwm.chatbylocation.Model.RoomIdentity;
+import com.cs595.uwm.chatbylocation.model.RoomIdentity;
 import com.cs595.uwm.chatbylocation.R;
+import com.cs595.uwm.chatbylocation.service.Database;
 import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.database.FirebaseListAdapter;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -39,17 +40,20 @@ public class SelectActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.select_layout);
 
+//        if(Database.getUserCurrentRoomID() != null){
+//            Intent intent = new Intent(SelectActivity.getContext(), ChatActivity.class);
+//            startActivity(intent);
+//        }
+
         displayRoomList();
 
         context = getApplicationContext();
     }
 
     public void joinRoomClick(View view) {
-        Toast.makeText(SelectActivity.this,
-                "RoomID: " + view.getTag(),
-                Toast.LENGTH_SHORT)
-                .show();
-
+        Database.addUserToRoom(String.valueOf(view.getTag()));
+        Intent intent = new Intent(SelectActivity.getContext(), ChatActivity.class);
+        startActivity(intent);
     }
 
     public void createRoomClick(View view) {
@@ -76,7 +80,6 @@ public class SelectActivity extends AppCompatActivity {
 
                 Button joinButton = (Button) view.findViewById(R.id.joinButton);
                 joinButton.setTag(getRef(position).getKey());
-
 
             }
         };

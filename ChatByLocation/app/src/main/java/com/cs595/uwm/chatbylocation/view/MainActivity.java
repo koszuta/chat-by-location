@@ -1,13 +1,15 @@
-package com.cs595.uwm.chatbylocation.Activity;
+package com.cs595.uwm.chatbylocation.view;
 
 import android.content.Intent;
+import android.provider.ContactsContract;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 
 import com.cs595.uwm.chatbylocation.R;
-import com.cs595.uwm.chatbylocation.Singleton.UserRegistrationInfo;
+import com.cs595.uwm.chatbylocation.service.Database;
+import com.cs595.uwm.chatbylocation.service.UserRegistrationInfo;
 import com.firebase.ui.auth.AuthUI;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -34,26 +36,18 @@ public class MainActivity extends AppCompatActivity {
                     AuthUI.getInstance().createSignInIntentBuilder().setTheme(R.style.AppTheme).build(),
                     SIGN_IN_REQUEST_CODE
             );
+
         } else {
-            // User is already signed in.
             startNextCorrectActivity();
         }
     }
 
-    private void startNextCorrectActivity() {
-        if(isChatNameCreated()) {
-            Intent intent = new Intent(this, SelectActivity.class);
-            startActivity(intent);
-        }
-        else {
-            Intent intent = new Intent(this, ChatNameSelectionActivity.class);
-            startActivity(intent);
-        }
+    public void startNextCorrectActivity(){
+        startActivity(Database.getUserUsername() == null ?
+                new Intent(this, ChatNameSelectionActivity.class) :
+                new Intent(this, SelectActivity.class));
     }
 
-    private boolean isChatNameCreated() {
-        return UserRegistrationInfo.getInstance().getChatName() != "";
-    }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {

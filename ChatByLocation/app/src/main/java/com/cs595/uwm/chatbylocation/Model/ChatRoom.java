@@ -1,4 +1,4 @@
-package com.cs595.uwm.chatbylocation.Model;
+package com.cs595.uwm.chatbylocation.model;
 
 import android.location.Location;
 

@@ -1,4 +1,4 @@
-package com.cs595.uwm.chatbylocation.Singleton;
+package com.cs595.uwm.chatbylocation.service;
 
 /**
  * Created by Jason on 3/15/2017.
@@ -12,11 +12,7 @@ import com.google.firebase.auth.FirebaseAuth;
 public class UserRegistrationInfo {
     private static UserRegistrationInfo regInfo;
 
-    private String chatName;
-
-
     private UserRegistrationInfo() {
-        chatName = "";
     }
 
     public static UserRegistrationInfo getInstance() {
@@ -27,36 +23,14 @@ public class UserRegistrationInfo {
     }
 
     /**
-     * Gets the chat name (not real name) of the user
-     * //TODO: Retrieve from database
-     * @return chat name
-     */
-    public String getChatName() {
-        return chatName;
-    }
-
-    /**
      * Sets the chat name (not real name) of the user
-     * //TODO: Store value in database
      * @param name new chat name
      * @return true if chat name was set, false otherwise
      *
      */
     public boolean setChatName(String name) {
-        boolean isSet = false;
-        if(isUniqueName() && name != "") {
-            chatName = name;
-            isSet = true;
-        }
-        return isSet;
-    }
-
-    /**
-     * Checks if chat name is unique
-     * //TODO: implement method checking against database chatnames
-     * @return true if chat name does not yet exist, false otherwise
-     */
-    private boolean isUniqueName() {
+        if(name.equals("") || !Database.getUsernameUnique(name)) return false;
+        Database.setUserUsername(name);
         return true;
     }
 

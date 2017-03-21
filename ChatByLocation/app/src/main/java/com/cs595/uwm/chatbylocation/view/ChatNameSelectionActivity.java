@@ -1,4 +1,4 @@
-package com.cs595.uwm.chatbylocation.Activity;
+package com.cs595.uwm.chatbylocation.view;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -7,11 +7,8 @@ import android.view.View;
 import android.widget.EditText;
 
 import com.cs595.uwm.chatbylocation.R;
-import com.cs595.uwm.chatbylocation.Singleton.Database;
-import com.cs595.uwm.chatbylocation.Singleton.UserRegistrationInfo;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
+import com.cs595.uwm.chatbylocation.service.Database;
+import com.cs595.uwm.chatbylocation.service.UserRegistrationInfo;
 
 /**
  * Created by Jason on 3/15/2017.

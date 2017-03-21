@@ -4,6 +4,11 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
+        android:id="@+id/leave_room"
+        android:enabled="true"
+        android:title="Leave Room"
+        android:visible="true" />
+    <item
         android:title="@string/sign_out"
         app:showAsAction="never"
         android:id="@+id/menu_sign_out"/>

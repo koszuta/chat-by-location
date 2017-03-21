@@ -1,13 +1,10 @@
-package com.cs595.uwm.chatbylocation.Activity;
+package com.cs595.uwm.chatbylocation.view;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
 import android.content.DialogInterface;
-import android.content.Intent;
-import android.location.Location;
 import android.os.Bundle;
-import android.provider.ContactsContract;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.CheckBox;
@@ -17,10 +14,8 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 
 import com.cs595.uwm.chatbylocation.R;
-import com.cs595.uwm.chatbylocation.Singleton.Database;
+import com.cs595.uwm.chatbylocation.service.Database;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 
 /**
  * Created by Nathan on 3/15/17.
@@ -99,10 +94,6 @@ public class CreateRoomDialog extends DialogFragment {
                 String roomID = Database.createRoom(FirebaseAuth.getInstance().getCurrentUser().getUid(),
                         name, longg, lat, radius, password);
 
-                //todo: move this to the join room button
-                Database.addUserToRoom(roomID);
-                Intent intent = new Intent(SelectActivity.getContext(), ChatActivity.class);
-                startActivity(intent);
 
             }
         });

@@ -1,8 +1,7 @@
-package com.cs595.uwm.chatbylocation.Activity;
+package com.cs595.uwm.chatbylocation.view;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
 import android.support.v4.content.res.ResourcesCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -20,10 +19,10 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.cs595.uwm.chatbylocation.Model.ChatMessage;
+import com.cs595.uwm.chatbylocation.model.ChatMessage;
 import com.cs595.uwm.chatbylocation.R;
-import com.cs595.uwm.chatbylocation.Singleton.Database;
-import com.cs595.uwm.chatbylocation.Singleton.UserRegistrationInfo;
+import com.cs595.uwm.chatbylocation.service.Database;
+import com.cs595.uwm.chatbylocation.service.UserRegistrationInfo;
 import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.database.FirebaseListAdapter;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -70,7 +69,7 @@ public class ChatActivity extends AppCompatActivity {
                 EditText input = (EditText) findViewById(R.id.textInput);
 
                 Database.sendChatMessage(new ChatMessage(input.getText().toString(),
-                        UserRegistrationInfo.getInstance().getChatName(), getIcon()), roomID);
+                        Database.getUserUsername(), getIcon()), roomID);
 
                 input.setText("");
 
@@ -109,8 +108,13 @@ public class ChatActivity extends AppCompatActivity {
                     }
                 });
                 //return to sign in
-                Intent intent = new Intent(this, MainActivity.class);
-                startActivity(intent);
+                Intent mainIntent = new Intent(this, MainActivity.class);
+                startActivity(mainIntent);
+                break;
+            case R.id.leave_room:
+//                Database.removeUserFromRoom();
+//                Intent selectIntent = new Intent(this, MainActivity.class);
+//                startActivity(selectIntent);
                 break;
             default:
                 break;

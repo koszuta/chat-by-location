@@ -12,23 +12,23 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".Activity.MainActivity">
+        <activity android:name=".view.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".Activity.SelectActivity"
+        <activity android:name=".view.SelectActivity"
             android:label="@string/selectActivityLabel">
 
         </activity>
-        <activity android:name=".Activity.ChatActivity"
+        <activity android:name=".view.ChatActivity"
             android:label="@string/chatActivityLabel"
-            android:parentActivityName=".Activity.SelectActivity">
+            android:parentActivityName=".view.SelectActivity">
 
         </activity>
-        <activity android:name=".Activity.ChatNameSelectionActivity"
+        <activity android:name=".view.ChatNameSelectionActivity"
             android:label="Select Chat Name">
 
         </activity>
