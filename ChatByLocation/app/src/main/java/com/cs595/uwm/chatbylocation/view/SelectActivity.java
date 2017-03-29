@@ -111,6 +111,10 @@ public class SelectActivity extends AppCompatActivity {
                     }
                 });
                 break;
+            case R.id.menu_settings:
+                Intent settingsIntent = new Intent(this, SettingsActivity.class);
+                startActivity(settingsIntent);
+                break;
             case R.id.menu_bypass:
                 Intent intent = new Intent(this, ChatActivity.class);
                 startActivity(intent);

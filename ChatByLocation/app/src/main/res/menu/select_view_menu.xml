@@ -13,4 +13,9 @@
         app:showAsAction="ifRoom"
         android:id="@+id/menu_bypass"/>
 
+    <item
+        android:title="Preferences"
+        app:showAsAction="never"
+        android:id="@+id/menu_settings"/>
+
 </menu>
