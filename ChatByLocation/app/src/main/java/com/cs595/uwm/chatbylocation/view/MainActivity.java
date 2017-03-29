@@ -1,6 +1,9 @@
 package com.cs595.uwm.chatbylocation.view;
 
+import android.content.Context;
 import android.content.Intent;
+import android.support.multidex.MultiDex;
+import android.support.multidex.MultiDexApplication;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -13,6 +16,11 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
 public class MainActivity extends AppCompatActivity {
+    @Override
+    protected void attachBaseContext(Context baseContext) {
+        super.attachBaseContext(baseContext);
+        MultiDex.install(this);
+    }
 
     private static final int SIGN_IN_REQUEST_CODE = 1;
 
