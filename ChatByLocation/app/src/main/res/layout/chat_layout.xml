@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context=".view.ChatActivity"
+
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+
+    android:id="@+id/chatLayout">
+
+    <ListView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_above="@+id/bottomLayout"
+
+        android:divider="@color/listDivider"
+        android:dividerHeight="1dp"
+
+        android:stackFromBottom="true"
+        android:transcriptMode="alwaysScroll"
+        android:id="@+id/messageList"/>
+
+    <LinearLayout
+        android:id="@+id/bottomLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentStart="true"
+
+        android:background="@color/bottomLayout"
+
+        android:backgroundTint="@color/colorAccent"
+
+        android:orientation="horizontal"
+        android:padding="5dp">
+
+        <EditText
+            android:id="@+id/textInput"
+
+            android:layout_width="0dp"
+            android:layout_height="24dp"
+
+            android:layout_gravity="center_vertical"
+            android:layout_marginEnd="4dp"
+
+            android:layout_weight="1"
+            android:background="@color/inputBg"
+            android:hint="@string/inputHint"
+
+            android:inputType="text"
+            android:maxLength="140"
+            android:paddingEnd="4dp"
+
+            android:paddingStart="8dp"
+            android:textColorHint="@color/inputHint"
+
+            android:textCursorDrawable="@color/colorPrimary" />
+
+        <Button
+            android:id="@+id/sendButton"
+
+            style="@style/colorThemeButton"
+            android:layout_width="45dp"
+
+            android:layout_height="20dp"
+
+            android:layout_gravity="center_vertical"
+
+            android:onClick="sendMessageButton"
+            android:text="@string/sendButton" />
+
+    </LinearLayout>
+
+</RelativeLayout>

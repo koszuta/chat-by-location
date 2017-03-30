@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+
+    android:id="@+id/createRoomDialogLayout">
+
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true"
+
+        android:hint="Name"
+
+        android:id="@+id/roomName"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/roomName"
+
+        android:text="Radius: "
+        android:id="@+id/radiusText"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/roomName"
+        android:layout_toEndOf="@id/radiusText"
+
+        android:text="0"
+        android:id="@+id/radiusValue"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/roomName"
+        android:layout_toEndOf="@id/radiusValue"
+
+        android:text="m"
+        android:id="@+id/meterText"/>
+
+    <SeekBar
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/radiusText"
+
+        android:max="1000"
+
+        android:id="@+id/roomRadius"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_below="@id/roomRadius"
+
+        android:text="Private? "
+        android:id="@+id/privateText"/>
+
+    <CheckBox
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/roomRadius"
+        android:layout_toEndOf="@id/privateText"
+
+        android:id="@+id/roomIsPrivate"/>
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/roomRadius"
+        android:layout_toEndOf="@id/roomIsPrivate"
+
+        android:hint="Password"
+
+        android:enabled="false"
+
+        android:inputType="textVisiblePassword"
+        android:id="@+id/roomPassword"/>
+
+</RelativeLayout>

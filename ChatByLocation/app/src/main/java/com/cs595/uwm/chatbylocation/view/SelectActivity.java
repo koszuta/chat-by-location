@@ -1,19 +1,22 @@
-package com.cs595.uwm.chatdemo2;
+package com.cs595.uwm.chatbylocation.view;
 
 import android.app.DialogFragment;
 import android.content.Context;
 import android.content.Intent;
-import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.cs595.uwm.chatbylocation.objModel.RoomIdentity;
+import com.cs595.uwm.chatbylocation.R;
+import com.cs595.uwm.chatbylocation.service.Database;
 import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.database.FirebaseListAdapter;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -37,13 +40,20 @@ public class SelectActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.select_layout);
 
+//        if(Database.getUserCurrentRoomID() != null){
+//            Intent intent = new Intent(SelectActivity.getContext(), ChatActivity.class);
+//            startActivity(intent);
+//        }
+
         displayRoomList();
 
         context = getApplicationContext();
     }
 
     public void joinRoomClick(View view) {
-
+        Database.addUserToRoom(String.valueOf(view.getTag()));
+        Intent intent = new Intent(SelectActivity.getContext(), ChatActivity.class);
+        startActivity(intent);
     }
 
     public void createRoomClick(View view) {
@@ -54,19 +64,22 @@ public class SelectActivity extends AppCompatActivity {
     private void displayRoomList() {
         ListView listOfRooms = (ListView) findViewById(R.id.roomList);
 
-        FirebaseListAdapter<RoomIdentity> adapter = new FirebaseListAdapter<RoomIdentity>(this,
+        final FirebaseListAdapter<RoomIdentity> adapter = new FirebaseListAdapter<RoomIdentity>(this,
                 RoomIdentity.class,
                 R.layout.room_list_item,
                 FirebaseDatabase.getInstance().getReference().child("roomIdentity")) {
             @Override
-            protected void populateView(View view, RoomIdentity roomID, int position) {
+            protected void populateView(View view, RoomIdentity roomIdentity, int position) {
                 TextView roomName = (TextView) view.findViewById(R.id.roomName);
                 TextView roomCoords = (TextView) view.findViewById(R.id.roomCoords);
                 TextView roomRadius = (TextView) view.findViewById(R.id.roomRadius);
 
-                roomName.setText(roomID.getName());
-                roomCoords.setText(roomID.getLongg() + ", " + roomID.getLat());
-                roomRadius.setText("Radius: " + roomID.getRad() + "m");
+                roomName.setText(roomIdentity.getName());
+                roomCoords.setText(roomIdentity.getLongg() + ", " + roomIdentity.getLat());
+                roomRadius.setText("Radius: " + roomIdentity.getRad() + "m");
+
+                Button joinButton = (Button) view.findViewById(R.id.joinButton);
+                joinButton.setTag(getRef(position).getKey());
 
             }
         };
@@ -98,13 +111,13 @@ public class SelectActivity extends AppCompatActivity {
                     }
                 });
                 break;
-            case R.id.menu_join_room:
-                Intent intent = new Intent(this, SelectActivity.class);
-                startActivity(intent);
+            case R.id.menu_settings:
+                Intent settingsIntent = new Intent(this, SettingsActivity.class);
+                startActivity(settingsIntent);
                 break;
             case R.id.menu_bypass:
-                Intent bypassIntent = new Intent(this, ChatActivity.class);
-                startActivity(bypassIntent);
+                Intent intent = new Intent(this, ChatActivity.class);
+                startActivity(intent);
                 break;
             default:
                 break;
