@@ -85,9 +85,13 @@ public class SelectActivity extends AppCompatActivity {
                     }
                 });
                 break;
-            case R.id.menu_bypass:
-                Intent intent = new Intent(this, ChatActivity.class);
+            case R.id.menu_join_room:
+                Intent intent = new Intent(this, SelectActivity.class);
                 startActivity(intent);
+                break;
+            case R.id.menu_bypass:
+                Intent bypassIntent = new Intent(this, ChatActivity.class);
+                startActivity(bypassIntent);
                 break;
             default:
                 break;

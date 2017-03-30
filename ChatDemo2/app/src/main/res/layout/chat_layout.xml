@@ -20,7 +20,6 @@
         android:divider="@color/listDivider"
         android:dividerHeight="1dp"
 
-        android:background="@color/background"
 
         android:stackFromBottom="true"
         android:transcriptMode="alwaysScroll"
