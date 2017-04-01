@@ -114,6 +114,10 @@ public class ChatActivity extends AppCompatActivity {
                 Intent mainIntent = new Intent(this, MainActivity.class);
                 startActivity(mainIntent);
                 break;
+            case R.id.menu_settings:
+                Intent n = new Intent(this, SettingsActivity.class);
+                startActivity(n);
+                break;
             case R.id.leave_room:
 //                Database.removeUserFromRoom();
 //                Intent selectIntent = new Intent(this, MainActivity.class);
