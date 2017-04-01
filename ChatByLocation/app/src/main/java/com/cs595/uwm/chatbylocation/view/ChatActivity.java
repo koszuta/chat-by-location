@@ -21,6 +21,7 @@ import android.widget.Toast;
 
 import com.cs595.uwm.chatbylocation.objModel.ChatMessage;
 import com.cs595.uwm.chatbylocation.R;
+import com.cs595.uwm.chatbylocation.objModel.RoomIdentity;
 import com.cs595.uwm.chatbylocation.service.Database;
 import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.database.FirebaseListAdapter;
@@ -51,11 +52,14 @@ public class ChatActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.chat_layout);
 
+        // TODO: Nathan: Change to correct current room name method
+        setTitle(Database.getUserCurrentRoomID());
+
         displayChatMessages();
     }
 
-    public void userIconClick(View view) {
-
+    public void messageClick(View view) {
+        System.out.println("CLICK");
     }
 
     public void sendMessageButton(View view) {

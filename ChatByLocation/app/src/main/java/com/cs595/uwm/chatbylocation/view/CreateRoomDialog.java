@@ -45,6 +45,7 @@ public class CreateRoomDialog extends DialogFragment {
 
         // Seekbar listener; updates radius text and sets minimum and increment
         roomRadius.setMax((MAX_RADIUS - MIN_RADIUS) / RADIUS_INCREMENT);
+
         roomRadius.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
@@ -64,12 +65,8 @@ public class CreateRoomDialog extends DialogFragment {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 EditText roomPassword = (EditText) dialogView.findViewById(R.id.roomPassword);
-                if (isChecked) {
-                    roomPassword.setEnabled(true);
-                }
-                else {
-                    roomPassword.setEnabled(false);
-                }
+
+                roomPassword.setEnabled(isChecked);
             }
         });
 
@@ -105,8 +102,6 @@ public class CreateRoomDialog extends DialogFragment {
                 dialog.cancel();
             }
         });
-
-        //AlertDialog dialog = builder.create();
 
         return builder.create();
     }
