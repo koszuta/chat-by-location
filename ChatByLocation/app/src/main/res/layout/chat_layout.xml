@@ -34,8 +34,6 @@
 
         android:background="@color/bottomLayout"
 
-        android:backgroundTint="@color/colorAccent"
-
         android:orientation="horizontal"
         android:padding="5dp">
 
@@ -49,7 +47,7 @@
             android:layout_marginEnd="4dp"
 
             android:layout_weight="1"
-            android:background="@color/inputBg"
+            android:background="@color/inputBackground"
             android:hint="@string/inputHint"
 
             android:inputType="text"
@@ -64,12 +62,12 @@
         <Button
             android:id="@+id/sendButton"
 
-            style="@style/colorThemeButton"
             android:layout_width="45dp"
-
             android:layout_height="20dp"
 
             android:layout_gravity="center_vertical"
+
+            android:background="@color/sendButtonBackground"
 
             android:onClick="sendMessageButton"
             android:text="@string/sendButton" />
