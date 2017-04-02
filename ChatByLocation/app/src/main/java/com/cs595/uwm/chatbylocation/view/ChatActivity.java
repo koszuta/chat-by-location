@@ -1,5 +1,6 @@
 package com.cs595.uwm.chatbylocation.view;
 
+import android.app.DialogFragment;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -52,17 +53,32 @@ public class ChatActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.chat_layout);
 
-        // TODO: Nathan: Change to correct current room name method
+        // Nathan TODO: Change to correct current room name method
         setTitle(Database.getUserCurrentRoomID());
 
         displayChatMessages();
     }
 
     public void messageClick(View view) {
-        System.out.println("CLICK");
+        DialogFragment dialog = new MessageDetailsDialog();
+        dialog.show(getFragmentManager(), "message details");
     }
 
-    public void sendMessageButton(View view) {
+    // Nathan TODO: Add user to 'muted' blacklist
+    public void muteUserClick(View view) {
+
+    }
+
+    // Nathan TODO: Remove user from current room and put on blacklist
+    public void banUserClick(View view) {
+
+    }
+
+    public void userImageClick(View view) {
+
+    }
+
+    public void sendMessageClick(View view) {
 
         ValueEventListener roomChangeListener = new ValueEventListener(){
             @Override
@@ -238,5 +254,4 @@ public class ChatActivity extends AppCompatActivity {
 
         return icon;
     }
-
 }

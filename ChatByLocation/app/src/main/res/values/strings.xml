@@ -13,6 +13,12 @@
     <string name="chatnameHelp">Please select a unique chat name:</string>
     <string name="title_activity_settings">Settings</string>
 
+    <string name="cancel">@android:string/cancel</string>
+    <string name="create">Create</string>
+
+    <string name="mute">Mute</string>
+    <string name="ban">Ban</string>
+
     <!-- Strings related to Settings -->
 
     <!-- Example General settings -->

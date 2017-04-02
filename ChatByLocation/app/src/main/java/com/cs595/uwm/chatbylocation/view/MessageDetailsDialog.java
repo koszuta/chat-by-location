@@ -7,9 +7,11 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
@@ -32,24 +34,18 @@ public class MessageDetailsDialog extends DialogFragment {
         final View dialogView = inflater.inflate(R.layout.message_details_dialog_layout, null);
         builder.setView(dialogView);
 
+        final Button banButton = (Button) dialogView.findViewById(R.id.banUser);
+        final ImageView userImage = (ImageView) dialogView.findViewById(R.id.userImage);
 
+        // Nathan TODO: Set ImageView to selected user's image
+        // userImage.setImageResource(R.drawable.chat_logo_no_back);
 
-
-        // "Create" button action
-        builder.setPositiveButton("POSITIVE", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-
-            }
-        });
-
-        // "Cancel" button action
-        builder.setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.cancel();
-            }
-        });
+        // Nathan TODO: Make 'Ban' button visible when user is admin of current room
+        /*
+        if (user == admin) {
+            banButton.setVisibility(Button.VISIBLE);
+        }
+        //*/
 
         return builder.create();
     }
