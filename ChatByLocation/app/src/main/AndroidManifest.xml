@@ -14,7 +14,6 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-
         <activity android:name=".view.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -24,14 +23,14 @@
         </activity>
         <activity
             android:name=".view.SelectActivity"
-            android:label="@string/selectActivityLabel"></activity>
+            android:label="@string/selectActivityLabel" />
         <activity
             android:name=".view.ChatActivity"
             android:label="@string/chatActivityLabel"
-            android:parentActivityName=".view.SelectActivity"></activity>
+            android:parentActivityName=".view.SelectActivity" />
         <activity
             android:name=".view.ChatNameSelectionActivity"
-            android:label="Select Chat Name"></activity>
+            android:label="Select Chat Name" />
 
         <dialog
             android:name=".Activity.CreateRoomDialog"
@@ -39,8 +38,11 @@
 
         <activity
             android:name=".view.SettingsActivity"
-            android:label="@string/title_activity_settings">
-        </activity>
+            android:label="@string/title_activity_settings"></activity>
+        <activity
+            android:name=".view.RoomUserListActivity"
+            android:label="@string/title_activity_room_user_list"
+            android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>
 
 </manifest>
