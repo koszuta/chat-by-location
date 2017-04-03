@@ -16,10 +16,23 @@
         <item name="android:colorButtonNormal">@color/colorAccent</item>
     </style>
 
+    <style name="PopupMenuStyle" parent="Theme.AppCompat.Light">
+        <item name="android:background">@color/background</item>
+    </style>
+
     <style name="colorThemeButton" parent="Widget.AppCompat.Button.Borderless.Colored">
         <item name="android:textColor">@color/colorPrimaryDark</item>
         <item name="android:colorBackground">@color/colorAccent</item>
         <item name="android:background">@drawable/default_button</item>
     </style>
+
+    <style name="AppTheme.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+
+    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+
+    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 
 </resources>

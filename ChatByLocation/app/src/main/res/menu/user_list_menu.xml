@@ -1,16 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
-        android:title="Current User List"
-        app:showAsAction="never"
-        android:id="@+id/room_users"/>
-    <item
-        android:id="@+id/leave_room"
+        android:id="@+id/return_to_room"
         android:enabled="true"
-        android:title="Leave Room"
+        android:title="Return to Room"
         android:visible="true" />
     <item
         android:title="Preferences"
@@ -20,6 +15,5 @@
         android:title="@string/sign_out"
         app:showAsAction="never"
         android:id="@+id/menu_sign_out"/>
-
 
 </menu>

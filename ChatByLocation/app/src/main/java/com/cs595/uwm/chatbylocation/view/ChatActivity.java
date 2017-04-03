@@ -139,6 +139,9 @@ public class ChatActivity extends AppCompatActivity {
 //                Intent selectIntent = new Intent(this, MainActivity.class);
 //                startActivity(selectIntent);
                 break;
+            case R.id.room_users:
+                Intent userIntent = new Intent(this, RoomUserListActivity.class);
+                startActivity(userIntent);
             default:
                 break;
         }
