@@ -52,6 +52,7 @@ public class ChatActivity extends AppCompatActivity {
         setContentView(R.layout.chat_layout);
 
         displayChatMessages();
+        Database.listenToRoomChange();
     }
 
     public void userIconClick(View view) {
@@ -67,7 +68,7 @@ public class ChatActivity extends AppCompatActivity {
 
                 EditText input = (EditText) findViewById(R.id.textInput);
 
-                Database.sendChatMessage(new ChatMessage(input.getText().toString(),
+                if(roomID != null) Database.sendChatMessage(new ChatMessage(input.getText().toString(),
                         Database.getUserUsername(), getIcon()), roomID);
 
                 input.setText("");
@@ -107,17 +108,14 @@ public class ChatActivity extends AppCompatActivity {
                     }
                 });
                 //return to sign in
-                Intent mainIntent = new Intent(this, MainActivity.class);
-                startActivity(mainIntent);
+                startActivity(new Intent(this, MainActivity.class));
                 break;
             case R.id.menu_settings:
-                Intent n = new Intent(this, SettingsActivity.class);
-                startActivity(n);
+                startActivity( new Intent(this, SettingsActivity.class));
                 break;
             case R.id.leave_room:
-//                Database.removeUserFromRoom();
-//                Intent selectIntent = new Intent(this, MainActivity.class);
-//                startActivity(selectIntent);
+                Database.setUserRoom(null);
+                startActivity( new Intent(this, SelectActivity.class));
                 break;
             default:
                 break;
@@ -130,7 +128,8 @@ public class ChatActivity extends AppCompatActivity {
         ValueEventListener roomChangeListener = new ValueEventListener(){
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                String roomID = String.valueOf(dataSnapshot.getValue());
+                final String roomID = String.valueOf(dataSnapshot.getValue());
+                System.out.println("room change listener sees roomid = " + roomID);
 
                 FirebaseListAdapter<ChatMessage> chatMessageListener = new FirebaseListAdapter<ChatMessage>(
                         ChatActivity.this,
@@ -139,6 +138,7 @@ public class ChatActivity extends AppCompatActivity {
                         FirebaseDatabase.getInstance().getReference().child("roomMessages").child(roomID)) {
                     @Override
                     protected void populateView(View view, ChatMessage chatMessage, int position) {
+                        System.out.println("populate view");
                         // Get reference to the views of message.xml
                         ImageView userIcon = (ImageView) view.findViewById(R.id.userIcon);
                         userIcon.setImageResource(chatMessage.getMessageIcon());
@@ -167,7 +167,13 @@ public class ChatActivity extends AppCompatActivity {
                 };
 
                 ListView listOfMessages = (ListView) findViewById(R.id.messageList);
-                listOfMessages.setAdapter(chatMessageListener);
+                if(roomID.equals("")){
+                    chatMessageListener.cleanup();
+                    listOfMessages.setAdapter(null);
+                    System.out.println("roomid is empty");
+                } else {
+                    listOfMessages.setAdapter(chatMessageListener);
+                }
 
             }
 

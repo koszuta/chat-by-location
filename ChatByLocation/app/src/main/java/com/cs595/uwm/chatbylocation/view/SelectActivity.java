@@ -51,7 +51,7 @@ public class SelectActivity extends AppCompatActivity {
     }
 
     public void joinRoomClick(View view) {
-        Database.addUserToRoom(String.valueOf(view.getTag()));
+        Database.setUserRoom(String.valueOf(view.getTag()));
         Intent intent = new Intent(SelectActivity.getContext(), ChatActivity.class);
         startActivity(intent);
     }

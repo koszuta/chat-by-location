@@ -11,6 +11,11 @@ import com.cs595.uwm.chatbylocation.service.Database;
 import com.firebase.ui.auth.AuthUI;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -61,4 +66,6 @@ public class MainActivity extends AppCompatActivity {
                 new Intent(this, ChatNameSelectionActivity.class) :
                 new Intent(this, SelectActivity.class));
     }
+
+
 }

@@ -12,6 +12,7 @@ db {
 		userID {
 			userName
 			userPref*
+			previousRoomID
 			currentRoomID
 			mutedUsers {
 				userID

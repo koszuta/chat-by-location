@@ -22,58 +22,28 @@ import java.util.Map;
 
 public class Database {
 
+    private static String currentRoomID;
+
     public static void createUser(){
         String userID = getUserID();
 
-        DatabaseReference userRef = FirebaseDatabase.getInstance().getReference().child("users").child(userID);
-        userRef.child("currentRoomID").setValue(null);
+        FirebaseDatabase.getInstance().getReference().child("users")
+                .child(userID).child("currentRoomID").setValue("");
+        System.out.println("created user");
 
     }
 
-    public static void addUserToRoom(String roomID){
+    public static void setUserRoom(String roomID){ // roomid = null removes from room
         String userID = getUserID();
 
-        DatabaseReference userRef = FirebaseDatabase.getInstance().getReference().child("users").child(userID);
-        userRef.child("currentRoomID").setValue(roomID);
+        if(roomID == null){
+            FirebaseDatabase.getInstance().getReference().child("users").child(userID)
+                    .child("removeFrom").setValue(currentRoomID);
+        } else {
+            FirebaseDatabase.getInstance().getReference().child("users").child(userID)
+                    .child("currentRoomID").setValue(roomID);
+        }
 
-        DatabaseReference roomUsersRef = FirebaseDatabase.getInstance().getReference().child("roomUsers").child(roomID);
-        roomUsersRef.child("users").child(userID).setValue(true);
-
-    }
-
-    public static void removeUserFromRoom(){
-        String userID = getUserID();
-
-        DatabaseReference roomUsersRef = FirebaseDatabase.getInstance().getReference().child("roomUsers").child(getUserCurrentRoomID());
-        roomUsersRef.child("users").child(userID).setValue(null);
-
-        DatabaseReference userRef = FirebaseDatabase.getInstance().getReference().child("users").child(userID);
-        userRef.child("currentRoomID").setValue(null);
-
-        //todo: if this user is the owner, transfer ownership
-
-    }
-
-    public static String getUserCurrentRoomID(){
-        //todo: this won't work
-
-        String userID = getUserID();
-
-        final String[] roomID = new String[1];
-        DatabaseReference userRef = FirebaseDatabase.getInstance().getReference().child("users").child(userID);
-        userRef.addListenerForSingleValueEvent(
-                new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot snapshot) {
-                        roomID[0] = String.valueOf(snapshot.child("currentRoomID").getValue());
-                    }
-
-                    @Override
-                    public void onCancelled(DatabaseError error) {
-                    }
-                });
-
-        return roomID[0];
     }
 
     public static String getUserUsername(){
@@ -117,7 +87,60 @@ public class Database {
     }
 
     private static String getUserID(){
-        return FirebaseAuth.getInstance().getCurrentUser().getUid();
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if(user != null) return user.getUid();
+        return null;
+    }
+
+    public static void listenToRoomChange(){
+
+        ValueEventListener roomIDListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                String roomID = String.valueOf(dataSnapshot.getValue());
+                currentRoomID = roomID;
+                System.out.println("setting current room to " + currentRoomID);
+
+                if(roomID == null || roomID.equals("")) return;
+
+                System.out.println("Adding user to room " + roomID);
+                FirebaseDatabase.getInstance().getReference().child("roomUsers").child(roomID)
+                        .child("users").child(getUserID()).setValue(true);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        };
+
+        ValueEventListener removeFromListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                String removeFrom = String.valueOf(dataSnapshot.getValue());
+
+                if(removeFrom == null || removeFrom.equals("")) return;
+
+                System.out.println("Removing from room " + removeFrom);
+                FirebaseDatabase.getInstance().getReference().child("roomUsers").child(removeFrom)
+                        .child("users").child(getUserID()).setValue(null);
+                FirebaseDatabase.getInstance().getReference().child("users").child(getUserID())
+                        .child("currentRoomID").setValue("");
+                FirebaseDatabase.getInstance().getReference().child("users").child(getUserID())
+                        .child("removeFrom").setValue("");
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        };
+
+        DatabaseReference userRef = FirebaseDatabase.getInstance().getReference().child("users").child(getUserID());
+        userRef.child("currentRoomID").addValueEventListener(roomIDListener);
+        userRef.child("removeFrom").addValueEventListener(removeFromListener);
+
     }
 
 }

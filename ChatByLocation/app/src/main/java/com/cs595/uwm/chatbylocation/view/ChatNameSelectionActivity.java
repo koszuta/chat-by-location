@@ -28,11 +28,12 @@ public class ChatNameSelectionActivity extends AppCompatActivity {
     public void registerChatName(View v) {
         EditText input = (EditText) findViewById(R.id.chatname);
         String name = input.getText().toString();
+        System.out.println("register chat name@");
 
-        if (name.equals("") || !Database.getUsernameUnique(name)) {
-            //TODO: display error message
-
-        } else {
+//        if (name.equals("") || !Database.getUsernameUnique(name)) {
+//            //TODO: display error message
+//
+//        } else {
 
             Database.createUser();
 
@@ -50,7 +51,7 @@ public class ChatNameSelectionActivity extends AppCompatActivity {
                         }
                     });
 
-        }
+//        }
 
     }
 }
