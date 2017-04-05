@@ -1,6 +1,9 @@
 package com.cs595.uwm.chatbylocation.view;
 
+import android.content.Context;
 import android.content.Intent;
+import android.support.multidex.MultiDex;
+import android.support.multidex.MultiDexApplication;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -18,6 +21,11 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 public class MainActivity extends AppCompatActivity {
+    @Override
+    protected void attachBaseContext(Context baseContext) {
+        super.attachBaseContext(baseContext);
+        MultiDex.install(this);
+    }
 
     private static final int SIGN_IN_REQUEST_CODE = 1;
 
@@ -26,7 +34,8 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         //must call before setContentView to hide activity's app title in actionbar
-        getSupportActionBar().setDisplayOptions(0, ActionBar.DISPLAY_SHOW_TITLE);
+        //getSupportActionBar().setDisplayOptions(0, ActionBar.DISPLAY_SHOW_TITLE);
+        getSupportActionBar().hide();
 
         setContentView(R.layout.activity_main);
     }

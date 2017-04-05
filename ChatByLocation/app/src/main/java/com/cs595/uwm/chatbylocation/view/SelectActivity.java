@@ -29,12 +29,6 @@ import com.google.firebase.database.FirebaseDatabase;
 
 public class SelectActivity extends AppCompatActivity {
 
-    private static Context context;
-
-    public static Context getContext() {
-        return context;
-    }
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -46,14 +40,11 @@ public class SelectActivity extends AppCompatActivity {
 //        }
 
         displayRoomList();
-
-        context = getApplicationContext();
     }
 
     public void joinRoomClick(View view) {
         Database.setUserRoom(String.valueOf(view.getTag()));
-        Intent intent = new Intent(SelectActivity.getContext(), ChatActivity.class);
-        startActivity(intent);
+        startActivity(new Intent(getApplicationContext(), ChatActivity.class));
     }
 
     public void createRoomClick(View view) {

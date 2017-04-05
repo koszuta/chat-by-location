@@ -1,5 +1,6 @@
 package com.cs595.uwm.chatbylocation.view;
 
+import android.app.DialogFragment;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -21,6 +22,7 @@ import android.widget.Toast;
 
 import com.cs595.uwm.chatbylocation.objModel.ChatMessage;
 import com.cs595.uwm.chatbylocation.R;
+import com.cs595.uwm.chatbylocation.objModel.RoomIdentity;
 import com.cs595.uwm.chatbylocation.service.Database;
 import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.database.FirebaseListAdapter;
@@ -51,15 +53,33 @@ public class ChatActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.chat_layout);
 
+        // Nathan TODO: Change to correct current room name method
+        setTitle("room");
+
         displayChatMessages();
         Database.listenToRoomChange();
     }
 
-    public void userIconClick(View view) {
+    public void messageClick(View view) {
+        DialogFragment dialog = new MessageDetailsDialog();
+        dialog.show(getFragmentManager(), "message details");
+    }
+
+    // Nathan TODO: Add user to 'muted' blacklist
+    public void muteUserClick(View view) {
 
     }
 
-    public void sendMessageButton(View view) {
+    // Nathan TODO: Remove user from current room and put on blacklist
+    public void banUserClick(View view) {
+
+    }
+
+    public void userImageClick(View view) {
+
+    }
+
+    public void sendMessageClick(View view) {
 
         ValueEventListener roomChangeListener = new ValueEventListener(){
             @Override
@@ -117,6 +137,9 @@ public class ChatActivity extends AppCompatActivity {
                 Database.setUserRoom(null);
                 startActivity( new Intent(this, SelectActivity.class));
                 break;
+            case R.id.room_users:
+                Intent userIntent = new Intent(this, RoomUserListActivity.class);
+                startActivity(userIntent);
             default:
                 break;
         }
@@ -240,5 +263,4 @@ public class ChatActivity extends AppCompatActivity {
 
         return icon;
     }
-
 }

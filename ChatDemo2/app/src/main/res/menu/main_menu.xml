@@ -7,5 +7,9 @@
         android:title="@string/sign_out"
         app:showAsAction="never"
         android:id="@+id/menu_sign_out"/>
+    <item
+        android:title="View Rooms"
+        app:showAsAction="never"
+        android:id="@+id/menu_join_room"/>
 
 </menu>

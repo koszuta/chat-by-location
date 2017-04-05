@@ -2,21 +2,37 @@
 
     <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
-        <!-- Customize your theme here. -->
-        <item name="colorPrimary">#FFFFEB3B</item>
-        <item name="colorPrimaryDark">#000000</item>
-        <item name="colorAccent">#ff0000</item>
-        <item name="android:colorBackground">#FFFFEB3B</item>
+        <!-- Customize your theme here.
+        <item name="colorPrimaryLight">#81D4FA</item> -->
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+
+        <item name="android:colorBackground">@color/colorAccent</item>
         <item name="android:buttonStyle">@style/colorThemeButton</item>
         <item name="android:textColor">@color/tw__composer_black</item>
-        <item name="android:windowBackground">@color/colorPrimary</item>
+        <item name="android:windowBackground">@color/background</item>
         <item name="colorButtonNormal">@color/colorAccent</item>
         <item name="android:colorButtonNormal">@color/colorAccent</item>
     </style>
 
+    <style name="PopupMenuStyle" parent="Theme.AppCompat.Light">
+        <item name="android:background">@color/background</item>
+    </style>
+
     <style name="colorThemeButton" parent="Widget.AppCompat.Button.Borderless.Colored">
-        <item name="android:textColor">#ffffff</item>
+        <item name="android:textColor">@color/colorPrimaryDark</item>
+        <item name="android:colorBackground">@color/colorAccent</item>
         <item name="android:background">@drawable/default_button</item>
     </style>
+
+    <style name="AppTheme.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+
+    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+
+    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 
 </resources>

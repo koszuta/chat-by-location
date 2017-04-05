@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ImageView
+        android:id="@+id/userImage"
+
+        android:clickable="true"
+        android:onClick="userImageClick"
+
+        app:srcCompat="@color/colorAccent"
+
+        android:layout_width="120dp"
+        android:layout_height="120dp"
+        android:layout_margin="10dp"
+
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent" />
+
+    <TextView
+        android:id="@+id/userName"
+        android:text="Username"
+        android:textSize="22sp"
+        android:textAlignment="center"
+
+        android:background="#EAEAEA"
+
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="20dp"
+        android:padding="4dp"
+
+        app:layout_constraintTop_toBottomOf="@+id/userImage"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent" />
+
+    <Button
+        android:id="@+id/blockUser"
+        android:text="@string/mute"
+        android:textAllCaps="false"
+
+        android:onClick="muteUserClick"
+
+        style="@style/colorThemeButton"
+        android:background="@color/transparent"
+
+        android:layout_width="50dp"
+        android:layout_height="36dp"
+
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/userName" />
+
+    <Button
+        android:id="@+id/banUser"
+        android:text="@string/ban"
+        android:textAllCaps="false"
+
+        android:onClick="banUserClick"
+
+        style="@style/colorThemeButton"
+        android:background="@color/transparent"
+        android:visibility="visible"
+
+        android:layout_width="45dp"
+        android:layout_height="36dp"
+
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/userName" />
+
+    <TextView
+        android:id="@+id/space"
+        android:layout_marginTop="10dp"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintTop_toBottomOf="@+id/userName" />
+
+</android.support.constraint.ConstraintLayout>
