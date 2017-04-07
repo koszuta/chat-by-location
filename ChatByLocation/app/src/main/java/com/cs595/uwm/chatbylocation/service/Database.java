@@ -17,22 +17,22 @@ public class Database {
 
     private static String currentRoomID;
 
-    public static String getCurrentRoomID(){
+    public static String getCurrentRoomID() {
         return currentRoomID;
     }
 
-    public static void createUser(){
+    public static void createUser() {
 
         getCurrentUserReference().child("currentRoomID").setValue("");
         trace("created user");
 
     }
 
-    public static void setUserRoom(String roomID){ // roomid = null removes from room
+    public static void setUserRoom(String roomID) { // roomid = null removes from room
 
         trace("setUserRoom:" + roomID);
 
-        if(roomID == null){
+        if (roomID == null) {
             getCurrentUserReference().child("removeFrom").setValue(currentRoomID);
         } else {
             getCurrentUserReference().child("currentRoomID").setValue(roomID);
@@ -40,7 +40,7 @@ public class Database {
 
     }
 
-    public static String getUserUsername(){
+    public static String getUserUsername() {
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if (user != null) return user.getDisplayName();
         return null;
@@ -48,7 +48,7 @@ public class Database {
     }
 
     public static String createRoom(String ownerID, String name, String longg, String lat,
-                                  int rad, String password){
+                                    int rad, String password) {
 
         DatabaseReference roomIDRef = getRoomIdentityReference();
         String roomID = roomIDRef.push().getKey();
@@ -65,11 +65,11 @@ public class Database {
 
     }
 
-    public static void sendChatMessage(ChatMessage chatMessage, String roomID){
+    public static void sendChatMessage(ChatMessage chatMessage, String roomID) {
         getRoomMessagesReference().child(roomID).push().setValue(chatMessage);
     }
 
-    public static void listenToRoomChange(){
+    public static void listenToRoomChange() {
 
         ValueEventListener roomIDListener = new ValueEventListener() {
             @Override
@@ -78,14 +78,13 @@ public class Database {
                 trace("roomIDListener sees roomID: " + roomID);
                 currentRoomID = roomID;
 
-                if(roomID == null || roomID.equals("")) return;
+                if (roomID == null || roomID.equals("")) return;
 
                 getRoomUsersReference().child(roomID).child(getUserID()).setValue(true);
             }
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-
             }
         };
 
@@ -95,19 +94,17 @@ public class Database {
                 String removeFrom = String.valueOf(dataSnapshot.getValue());
                 trace("removeFromListener sees removeFrom: " + removeFrom);
 
-                if(removeFrom == null || removeFrom.equals("")) return;
-
-                getRoomUsersReference().child(removeFrom).child(getUserID()).setValue(null);
-                getCurrentUserReference().child("currentRoomID").setValue("");
-                getCurrentUserReference().child("removeFrom").setValue("");
-                trace("removeFromListener has removed the user from their room");
-
+                if (!(removeFrom == null || removeFrom.equals(""))) {
+                    getRoomUsersReference().child(removeFrom).child(getUserID()).setValue(null);
+                    getCurrentUserReference().child("currentRoomID").setValue("");
+                    getCurrentUserReference().child("removeFrom").setValue("");
+                    trace("removeFromListener has removed the user from their room");
+                }
 
             }
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-
             }
         };
 
@@ -117,31 +114,31 @@ public class Database {
 
     }
 
-    public static String getUserID(){
+    public static String getUserID() {
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        if(user != null) return user.getUid();
+        if (user != null) return user.getUid();
         return null;
     }
 
-    public static DatabaseReference getCurrentUserReference(){
+    public static DatabaseReference getCurrentUserReference() {
         String userID = getUserID();
-        if(userID == null) userID = "-";
+        if (userID == null) userID = "-";
         return FirebaseDatabase.getInstance().getReference().child("users").child(userID);
     }
 
-    public static DatabaseReference getRoomUsersReference(){
+    public static DatabaseReference getRoomUsersReference() {
         return FirebaseDatabase.getInstance().getReference().child("roomUsers");
     }
 
-    public static DatabaseReference getRoomIdentityReference(){
+    public static DatabaseReference getRoomIdentityReference() {
         return FirebaseDatabase.getInstance().getReference().child("roomIdentity");
     }
 
-    public static DatabaseReference getRoomMessagesReference(){
+    public static DatabaseReference getRoomMessagesReference() {
         return FirebaseDatabase.getInstance().getReference().child("roomMessages");
     }
 
-    public static void trace(String message){
+    public static void trace(String message) {
         System.out.println("Database >> " + message); //todo android logger
     }
 }
