@@ -16,6 +16,7 @@ import com.google.firebase.database.ValueEventListener;
 public class Database {
 
     private static String currentRoomID;
+    private static boolean listening = false;
 
     public static String getCurrentRoomID() {
         return currentRoomID;
@@ -70,6 +71,7 @@ public class Database {
     }
 
     public static void listenToRoomChange() {
+        if(listening) return;
 
         ValueEventListener roomIDListener = new ValueEventListener() {
             @Override
@@ -98,7 +100,8 @@ public class Database {
                     getRoomUsersReference().child(removeFrom).child(getUserID()).setValue(null);
                     getCurrentUserReference().child("currentRoomID").setValue("");
                     getCurrentUserReference().child("removeFrom").setValue("");
-                    trace("removeFromListener has removed the user from their room");
+                    trace("removeFromListener has removed the user from their room, len: "
+                            + removeFrom.length());
                 }
 
             }
@@ -111,6 +114,9 @@ public class Database {
         DatabaseReference userRef = getCurrentUserReference();
         userRef.child("currentRoomID").addValueEventListener(roomIDListener);
         userRef.child("removeFrom").addValueEventListener(removeFromListener);
+        trace("assigned listeners to user.currentRoomID and user.removeFrom");
+
+        listening = true;
 
     }
 

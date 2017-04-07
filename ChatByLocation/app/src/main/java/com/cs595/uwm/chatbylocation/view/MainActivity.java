@@ -42,19 +42,15 @@ public class MainActivity extends AppCompatActivity {
         getSupportActionBar().hide();
 
         setContentView(R.layout.activity_main);
-//        AuthUI.getInstance()
-//                .signOut(this).addOnCompleteListener(new OnCompleteListener<Void>() {
+
+//        AuthUI.getInstance().signOut(this).addOnCompleteListener(new OnCompleteListener<Void>() {
 //            @Override
 //            public void onComplete(@NonNull Task<Void> task) {
-//                Toast.makeText(MainActivity.this,
-//                        "You have been signed out.",
-//                        Toast.LENGTH_LONG)
-//                        .show();
-//
-//                // Close activity
+//                Toast.makeText(MainActivity.this, "boop", Toast.LENGTH_LONG).show();
 //                finish();
 //            }
 //        });
+
     }
 
     public void signIn(View v) {
