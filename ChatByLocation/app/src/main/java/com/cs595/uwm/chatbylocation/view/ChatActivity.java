@@ -81,29 +81,13 @@ public class ChatActivity extends AppCompatActivity {
 
     public void sendMessageClick(View view) {
 
-        ValueEventListener roomChangeListener = new ValueEventListener(){
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                String roomID = String.valueOf(dataSnapshot.getValue());
+        EditText input = (EditText) findViewById(R.id.textInput);
 
-                EditText input = (EditText) findViewById(R.id.textInput);
+        String roomID = Database.getCurrentRoomID();
+        if (roomID != null) Database.sendChatMessage(new ChatMessage(input.getText().toString(),
+                Database.getUserUsername(), getIcon()), roomID);
 
-                if(roomID != null) Database.sendChatMessage(new ChatMessage(input.getText().toString(),
-                        Database.getUserUsername(), getIcon()), roomID);
-
-                input.setText("");
-
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-            }
-
-        };
-
-        DatabaseReference userRoomRef = FirebaseDatabase.getInstance().getReference().child("users")
-                .child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child("currentRoomID");
-        userRoomRef.addValueEventListener(roomChangeListener);
+        input.setText("");
 
     }
 
@@ -131,11 +115,11 @@ public class ChatActivity extends AppCompatActivity {
                 startActivity(new Intent(this, MainActivity.class));
                 break;
             case R.id.menu_settings:
-                startActivity( new Intent(this, SettingsActivity.class));
+                startActivity(new Intent(this, SettingsActivity.class));
                 break;
             case R.id.leave_room:
                 Database.setUserRoom(null);
-                startActivity( new Intent(this, SelectActivity.class));
+                startActivity(new Intent(this, SelectActivity.class));
                 break;
             case R.id.room_users:
                 Intent userIntent = new Intent(this, RoomUserListActivity.class);
@@ -148,11 +132,11 @@ public class ChatActivity extends AppCompatActivity {
 
     private void displayChatMessages() {
 
-        ValueEventListener roomChangeListener = new ValueEventListener(){
+        ValueEventListener roomIDListener = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 final String roomID = String.valueOf(dataSnapshot.getValue());
-                System.out.println("room change listener sees roomid = " + roomID);
+                trace("roomIDListener sees roomid = " + roomID);
 
                 FirebaseListAdapter<ChatMessage> chatMessageListener = new FirebaseListAdapter<ChatMessage>(
                         ChatActivity.this,
@@ -161,7 +145,6 @@ public class ChatActivity extends AppCompatActivity {
                         FirebaseDatabase.getInstance().getReference().child("roomMessages").child(roomID)) {
                     @Override
                     protected void populateView(View view, ChatMessage chatMessage, int position) {
-                        System.out.println("populate view");
                         // Get reference to the views of message.xml
                         ImageView userIcon = (ImageView) view.findViewById(R.id.userIcon);
                         userIcon.setImageResource(chatMessage.getMessageIcon());
@@ -190,12 +173,14 @@ public class ChatActivity extends AppCompatActivity {
                 };
 
                 ListView listOfMessages = (ListView) findViewById(R.id.messageList);
-                if(roomID.equals("")){
+                if (roomID.equals("")) {
                     chatMessageListener.cleanup();
                     listOfMessages.setAdapter(null);
-                    System.out.println("roomid is empty");
+                    trace("roomIDListener removing adapter");
                 } else {
                     listOfMessages.setAdapter(chatMessageListener);
+                    trace("roomIDListener setting adapter");
+
                 }
 
             }
@@ -206,10 +191,7 @@ public class ChatActivity extends AppCompatActivity {
 
         };
 
-        DatabaseReference userRoomRef = FirebaseDatabase.getInstance().getReference().child("users")
-                .child(FirebaseAuth.getInstance().getCurrentUser().getUid()).child("currentRoomID");
-        userRoomRef.addValueEventListener(roomChangeListener);
-
+        Database.getCurrentUserReference().child("currentRoomID").addValueEventListener(roomIDListener);
 
     }
 
@@ -219,11 +201,9 @@ public class ChatActivity extends AppCompatActivity {
         long timeDiff = System.currentTimeMillis() - timeMillis;
         if (timeDiff >= ONE_YEAR_IN_MILLIS) {
             format = "M/D/YYYY " + format;
-        }
-        else if (timeDiff >= ONE_WEEK_IN_MILLIS) {
+        } else if (timeDiff >= ONE_WEEK_IN_MILLIS) {
             format = "D MMM " + format;
-        }
-        else if (timeDiff >= ONE_DAY_IN_MILLIS) {
+        } else if (timeDiff >= ONE_DAY_IN_MILLIS) {
             format = "EEE " + format;
         }
 
@@ -240,7 +220,7 @@ public class ChatActivity extends AppCompatActivity {
 
     private int getIcon() {
         int icon = 0;
-        switch(new Random().nextInt(5)) {
+        switch (new Random().nextInt(5)) {
             case 0:
                 icon = R.drawable.ic_bear;
                 break;
@@ -262,5 +242,10 @@ public class ChatActivity extends AppCompatActivity {
         }
 
         return icon;
+    }
+
+    private static void trace(String message){
+        System.out.println("ChatActivity >> " + message); //todo android logger
+
     }
 }

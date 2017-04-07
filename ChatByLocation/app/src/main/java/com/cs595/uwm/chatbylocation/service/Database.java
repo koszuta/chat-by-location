@@ -1,20 +1,13 @@
 package com.cs595.uwm.chatbylocation.service;
 
 import com.cs595.uwm.chatbylocation.objModel.ChatMessage;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.auth.UserInfo;
-import com.google.firebase.auth.UserProfileChangeRequest;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Created by Lowell on 3/21/2017.
@@ -24,24 +17,25 @@ public class Database {
 
     private static String currentRoomID;
 
-    public static void createUser(){
-        String userID = getUserID();
+    public static String getCurrentRoomID(){
+        return currentRoomID;
+    }
 
-        FirebaseDatabase.getInstance().getReference().child("users")
-                .child(userID).child("currentRoomID").setValue("");
-        System.out.println("created user");
+    public static void createUser(){
+
+        getCurrentUserReference().child("currentRoomID").setValue("");
+        trace("created user");
 
     }
 
     public static void setUserRoom(String roomID){ // roomid = null removes from room
-        String userID = getUserID();
+
+        trace("setUserRoom:" + roomID);
 
         if(roomID == null){
-            FirebaseDatabase.getInstance().getReference().child("users").child(userID)
-                    .child("removeFrom").setValue(currentRoomID);
+            getCurrentUserReference().child("removeFrom").setValue(currentRoomID);
         } else {
-            FirebaseDatabase.getInstance().getReference().child("users").child(userID)
-                    .child("currentRoomID").setValue(roomID);
+            getCurrentUserReference().child("currentRoomID").setValue(roomID);
         }
 
     }
@@ -53,19 +47,10 @@ public class Database {
 
     }
 
-    public static boolean getUsernameUnique(final String username){
-
-        //todo
-
-        return true;
-    }
-
     public static String createRoom(String ownerID, String name, String longg, String lat,
                                   int rad, String password){
 
-        DatabaseReference dbRef = FirebaseDatabase.getInstance().getReference();
-        DatabaseReference roomIDRef = dbRef.child("roomIdentity");
-
+        DatabaseReference roomIDRef = getRoomIdentityReference();
         String roomID = roomIDRef.push().getKey();
 
         DatabaseReference roomIDInst = roomIDRef.child(roomID);
@@ -81,15 +66,7 @@ public class Database {
     }
 
     public static void sendChatMessage(ChatMessage chatMessage, String roomID){
-        FirebaseDatabase.getInstance().getReference().child("roomMessages").child(roomID)
-                .push().setValue(chatMessage);
-
-    }
-
-    private static String getUserID(){
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        if(user != null) return user.getUid();
-        return null;
+        getRoomMessagesReference().child(roomID).push().setValue(chatMessage);
     }
 
     public static void listenToRoomChange(){
@@ -98,14 +75,12 @@ public class Database {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 String roomID = String.valueOf(dataSnapshot.getValue());
+                trace("roomIDListener sees roomID: " + roomID);
                 currentRoomID = roomID;
-                System.out.println("setting current room to " + currentRoomID);
 
                 if(roomID == null || roomID.equals("")) return;
 
-                System.out.println("Adding user to room " + roomID);
-                FirebaseDatabase.getInstance().getReference().child("roomUsers").child(roomID)
-                        .child("users").child(getUserID()).setValue(true);
+                getRoomUsersReference().child(roomID).child(getUserID()).setValue(true);
             }
 
             @Override
@@ -118,16 +93,15 @@ public class Database {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 String removeFrom = String.valueOf(dataSnapshot.getValue());
+                trace("removeFromListener sees removeFrom: " + removeFrom);
 
                 if(removeFrom == null || removeFrom.equals("")) return;
 
-                System.out.println("Removing from room " + removeFrom);
-                FirebaseDatabase.getInstance().getReference().child("roomUsers").child(removeFrom)
-                        .child("users").child(getUserID()).setValue(null);
-                FirebaseDatabase.getInstance().getReference().child("users").child(getUserID())
-                        .child("currentRoomID").setValue("");
-                FirebaseDatabase.getInstance().getReference().child("users").child(getUserID())
-                        .child("removeFrom").setValue("");
+                getRoomUsersReference().child(removeFrom).child(getUserID()).setValue(null);
+                getCurrentUserReference().child("currentRoomID").setValue("");
+                getCurrentUserReference().child("removeFrom").setValue("");
+                trace("removeFromListener has removed the user from their room");
+
 
             }
 
@@ -137,10 +111,37 @@ public class Database {
             }
         };
 
-        DatabaseReference userRef = FirebaseDatabase.getInstance().getReference().child("users").child(getUserID());
+        DatabaseReference userRef = getCurrentUserReference();
         userRef.child("currentRoomID").addValueEventListener(roomIDListener);
         userRef.child("removeFrom").addValueEventListener(removeFromListener);
 
     }
 
+    public static String getUserID(){
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if(user != null) return user.getUid();
+        return null;
+    }
+
+    public static DatabaseReference getCurrentUserReference(){
+        String userID = getUserID();
+        if(userID == null) userID = "-";
+        return FirebaseDatabase.getInstance().getReference().child("users").child(userID);
+    }
+
+    public static DatabaseReference getRoomUsersReference(){
+        return FirebaseDatabase.getInstance().getReference().child("roomUsers");
+    }
+
+    public static DatabaseReference getRoomIdentityReference(){
+        return FirebaseDatabase.getInstance().getReference().child("roomIdentity");
+    }
+
+    public static DatabaseReference getRoomMessagesReference(){
+        return FirebaseDatabase.getInstance().getReference().child("roomMessages");
+    }
+
+    public static void trace(String message){
+        System.out.println("Database >> " + message); //todo android logger
+    }
 }
