@@ -1,5 +1,7 @@
 package com.cs595.uwm.chatbylocation.view;
 
+
+
 import android.app.DialogFragment;
 import android.content.Intent;
 import android.os.Bundle;

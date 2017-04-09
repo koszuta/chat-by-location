@@ -1,0 +1,16 @@
+//NOTE: This file has been modified from its original version to change the build versions
+project.ext {
+    submodules = ['database', 'auth', 'storage']
+    group = 'com.firebaseui'
+    version = '1.2.0'
+    pomdesc = 'Firebase UI Android'
+
+    compileSdk = 25
+    targetSdk = 25
+    minSdk = 19
+
+    buildTools = '25.0.0'
+
+    firebaseVersion = '10.0.1'
+    supportLibraryVersion = '25.2.0'
+}
