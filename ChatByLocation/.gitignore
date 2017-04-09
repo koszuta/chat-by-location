@@ -11,3 +11,7 @@
 .externalNativeBuild
 /app/build
 /app/google-services.json
+/auth/build
+/database/build
+/library/build
+/storage/build

@@ -7,6 +7,8 @@
 
     <color name="transparent">#0000</color>
 
+    <color name="black">#000000</color>
+
     <color name="messageBg">#FAFAFA</color>
     <color name="background">#FAFAFA</color>
     <color name="listDivider">#DADADA</color>
