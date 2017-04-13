@@ -7,11 +7,13 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.cs595.uwm.chatbylocation.R;
 import com.cs595.uwm.chatbylocation.service.Database;
@@ -24,17 +26,30 @@ import com.google.firebase.auth.FirebaseAuth;
 public class CreateRoomDialog extends DialogFragment {
 
     private static final int MIN_RADIUS = 100;
-    private static final int MAX_RADIUS = 1000;
+    private static final int MAX_RADIUS = 5000;
     private static final int RADIUS_INCREMENT = 10;
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 
         // Get layout and set to dialog
         LayoutInflater inflater = LayoutInflater.from(getActivity());
         final View dialogView = inflater.inflate(R.layout.create_room_dialog_layout, null);
         builder.setView(dialogView);
+
+        // "Create" button with null clickListener (created later)
+        builder.setPositiveButton(R.string.create, null);
+
+        // "Cancel" button action
+        builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        });
+
+        final AlertDialog dialog = builder.create();
 
         // Get layout components for later use
         final EditText roomName = (EditText) dialogView.findViewById(R.id.roomName);
@@ -51,7 +66,7 @@ public class CreateRoomDialog extends DialogFragment {
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 int radius = MIN_RADIUS + seekBar.getProgress() * RADIUS_INCREMENT;
 
-                radiusValue.setText(Integer.toString(radius));
+                radiusValue.setText("Radius: " + Integer.toString(radius) + " m");
             }
 
             @Override
@@ -64,45 +79,53 @@ public class CreateRoomDialog extends DialogFragment {
         roomIsPrivate.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                EditText roomPassword = (EditText) dialogView.findViewById(R.id.roomPassword);
-
                 roomPassword.setEnabled(isChecked);
             }
         });
 
-        // "Create" button action
-        builder.setPositiveButton(R.string.create, new DialogInterface.OnClickListener() {
+        // Create a custom button listener
+        // Allows checks on input before closing dialog
+        dialog.setOnShowListener(new DialogInterface.OnShowListener() {
             @Override
-            public void onClick(DialogInterface dialog, int which) {
-                String name = roomName.getText().toString();
+            public void onShow(final DialogInterface dialog) {
 
-                int radius = MIN_RADIUS + roomRadius.getProgress() * RADIUS_INCREMENT;
+                Button positiveButton = ((AlertDialog) dialog).getButton(AlertDialog.BUTTON_POSITIVE);
+                positiveButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        String name = roomName.getText().toString();
+                        System.out.println('<' + name + '>');
+                        if ("".equals(name)) {
+                            Toast.makeText(getActivity(), "Please enter a name", Toast.LENGTH_LONG).show();
+                            return;
+                        }
 
-                String password = null;
-                if (roomIsPrivate.isChecked()) {
-                    password = roomPassword.getText().toString();
-                }
+                        int radius = MIN_RADIUS + roomRadius.getProgress() * RADIUS_INCREMENT;
 
-                // TODO: Graham: Get current device location
-                //These can change to whatever kinds of values location actually uses:
-                String longg = "50";
-                String lat = "50";
+                        String password = null;
+                        if (roomIsPrivate.isChecked()) {
+                            password = roomPassword.getText().toString();
+                            System.out.println('<' + password + '>');
+                            if ("".equals(password)) {
+                                Toast.makeText(getActivity(), "Please enter a password", Toast.LENGTH_LONG).show();
+                                return;
+                            }
+                        }
 
-                Database.createRoom(FirebaseAuth.getInstance().getCurrentUser().getUid(),
-                        name, longg, lat, radius, password);
+                        // TODO: Graham: Get current device location
+                        //These can change to whatever kinds of values location actually uses:
+                        String longg = "50";
+                        String lat = "50";
 
+                        Database.createRoom(FirebaseAuth.getInstance().getCurrentUser().getUid(),
+                                name, longg, lat, radius, password);
 
+                        dialog.dismiss();
+                    }
+                });
             }
         });
 
-        // "Cancel" button action
-        builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.cancel();
-            }
-        });
-
-        return builder.create();
+        return dialog;
     }
 }
