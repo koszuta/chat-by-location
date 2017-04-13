@@ -9,6 +9,18 @@
 
     android:id="@+id/chatLayout">
 
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/toBottomButton"
+        android:src="@drawable/ic_arrow_downward_24dp"
+        android:onClick="toBottomClick"
+
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_margin="10dp"
+
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true"/>
+
     <ListView
         android:layout_width="match_parent"
         android:layout_height="match_parent"

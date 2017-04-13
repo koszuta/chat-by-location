@@ -38,6 +38,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Random;
 
 /**
@@ -79,6 +80,11 @@ public class ChatActivity extends AppCompatActivity {
 
     public void userImageClick(View view) {
 
+    }
+
+    public void toBottomClick(View view) {
+        ListView list = (ListView) findViewById(R.id.messageList);
+        list.smoothScrollToPosition(list.getCount());
     }
 
     public void sendMessageClick(View view) {
