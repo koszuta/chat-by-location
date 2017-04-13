@@ -102,6 +102,11 @@ public class ChatActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
+            case android.R.id.home:
+                // TODO: Leave chatroom or just show list of rooms?
+                Intent intent = new Intent(this, SelectActivity.class);
+                startActivity(intent);
+                break;
             case R.id.menu_sign_out:
                 AuthUI.getInstance()
                         .signOut(this).addOnCompleteListener(new OnCompleteListener<Void>() {
