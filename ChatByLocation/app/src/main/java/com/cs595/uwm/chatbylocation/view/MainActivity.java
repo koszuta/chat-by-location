@@ -25,11 +25,6 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 public class MainActivity extends AppCompatActivity {
-    @Override
-    protected void attachBaseContext(Context baseContext) {
-        super.attachBaseContext(baseContext);
-        MultiDex.install(this);
-    }
 
     private static final int SIGN_IN_REQUEST_CODE = 1;
 
