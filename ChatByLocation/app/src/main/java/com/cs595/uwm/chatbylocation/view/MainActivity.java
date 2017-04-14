@@ -44,7 +44,6 @@ public class MainActivity extends AppCompatActivity {
 //            }
 //        });
 
-        // TODO: Move somewhere better?
         Database.initListeners();
     }
 

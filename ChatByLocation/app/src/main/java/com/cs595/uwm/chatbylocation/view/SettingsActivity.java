@@ -5,6 +5,7 @@ import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.graphics.Color;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
@@ -196,7 +197,10 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                 @Override
                 public boolean onPreferenceChange(Preference preference, Object newValue) {
                     String color = ColorPickerPreference.convertToRGB(Integer.valueOf(String.valueOf(newValue)));
+                    int colorInt = Color.parseColor(color);
+
                     preference.setSummary(color);
+                    Database.setTextColor(colorInt);
 
                     return true;
                 }

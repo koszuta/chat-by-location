@@ -12,10 +12,8 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Created by Lowell on 3/21/2017.
@@ -24,8 +22,24 @@ import java.util.Set;
 public class Database {
 
     private static String currentRoomID;
-    private static Map<String, String> roomNames = new HashMap<>();
     private static boolean listening = false;
+
+    // TODO: Move this somewhere better
+    private static Map<String, String> roomNames = new HashMap<>();
+    private static int textColor = 0;
+
+    public static String getCurrentRoomName() {
+        return (currentRoomID == null) ? null : roomNames.get(currentRoomID);
+    }
+
+    public static int getTextColor() {
+        return textColor;
+    }
+
+    public static void setTextColor(int color) {
+        textColor = color;
+    }
+    
 
     public static void initListeners() {
         if(listening) return;
@@ -107,14 +121,6 @@ public class Database {
 
     public static String getCurrentRoomID() {
         return currentRoomID;
-    }
-
-    public static String getCurrentRoomName() {
-        System.out.println(currentRoomID);
-        if (currentRoomID == null) {
-            return null;
-        }
-        return roomNames.get(currentRoomID);
     }
 
     public static void createUser() {
