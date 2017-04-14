@@ -53,7 +53,6 @@ public class ChatActivity extends AppCompatActivity {
         setContentView(R.layout.chat_layout);
 
         displayChatMessages();
-        Database.listenToRoomChange();
 
         setTitle(Database.getCurrentRoomName());
     }

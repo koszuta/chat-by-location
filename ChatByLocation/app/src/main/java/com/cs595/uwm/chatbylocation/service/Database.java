@@ -28,14 +28,59 @@ public class Database {
     private static boolean listening = false;
 
     public static void initListeners() {
+        if(listening) return;
+
+        DatabaseReference userRef = getCurrentUserReference();
+
+        userRef.child("currentRoomID")
+                .addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        String roomID = String.valueOf(dataSnapshot.getValue());
+                        trace("roomIDListener sees roomID: " + roomID);
+                        currentRoomID = roomID;
+
+                        if (roomID == null || roomID.equals("")) return;
+
+                        getRoomUsersReference().child(roomID).child(getUserID()).setValue(true);
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+                    }
+                });
+
+        userRef.child("removeFrom")
+                .addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        String removeFrom = String.valueOf(dataSnapshot.getValue());
+                        trace("removeFromListener sees removeFrom: " + removeFrom);
+
+                        if (!(removeFrom == null || removeFrom.equals(""))) {
+                            getRoomUsersReference().child(removeFrom).child(getUserID()).setValue(null);
+                            getCurrentUserReference().child("currentRoomID").setValue("");
+                            getCurrentUserReference().child("removeFrom").setValue("");
+                            trace("removeFromListener has removed the user from their room, len: "
+                                    + removeFrom.length());
+                        }
+
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {}
+                });
+
+        trace("assigned listeners to user.currentRoomID and user.removeFrom");
+
         FirebaseDatabase.getInstance().getReference()
                 .child("roomIdentity")
                 .addChildEventListener(new ChildEventListener() {
                     @Override
                     public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                         String id = dataSnapshot.getKey();
-                        String name = (String) dataSnapshot.child("name").getValue();
-                        System.out.println("\'id\' " + id + ", \'name\' " + name);
+                        String name = String.valueOf(dataSnapshot.child("name").getValue());
+                        //System.out.println("\'id\' " + id + ", \'name\' " + name);
 
                         roomNames.put(id, name);
                     }
@@ -55,6 +100,9 @@ public class Database {
                     public void onCancelled(DatabaseError databaseError) {}
                 });
 
+        trace("Assigned listener to list of rooms");
+
+        listening = true;
     }
 
     public static String getCurrentRoomID() {
@@ -115,56 +163,6 @@ public class Database {
 
     public static void sendChatMessage(ChatMessage chatMessage, String roomID) {
         getRoomMessagesReference().child(roomID).push().setValue(chatMessage);
-    }
-
-    public static void listenToRoomChange() {
-        if(listening) return;
-
-        ValueEventListener roomIDListener = new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                String roomID = String.valueOf(dataSnapshot.getValue());
-                trace("roomIDListener sees roomID: " + roomID);
-                currentRoomID = roomID;
-
-                if (roomID == null || roomID.equals("")) return;
-
-                getRoomUsersReference().child(roomID).child(getUserID()).setValue(true);
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-            }
-        };
-
-        ValueEventListener removeFromListener = new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                String removeFrom = String.valueOf(dataSnapshot.getValue());
-                trace("removeFromListener sees removeFrom: " + removeFrom);
-
-                if (!(removeFrom == null || removeFrom.equals(""))) {
-                    getRoomUsersReference().child(removeFrom).child(getUserID()).setValue(null);
-                    getCurrentUserReference().child("currentRoomID").setValue("");
-                    getCurrentUserReference().child("removeFrom").setValue("");
-                    trace("removeFromListener has removed the user from their room, len: "
-                            + removeFrom.length());
-                }
-
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-            }
-        };
-
-        DatabaseReference userRef = getCurrentUserReference();
-        userRef.child("currentRoomID").addValueEventListener(roomIDListener);
-        userRef.child("removeFrom").addValueEventListener(removeFromListener);
-        trace("assigned listeners to user.currentRoomID and user.removeFrom");
-
-        listening = true;
-
     }
 
     public static String getUserID() {
