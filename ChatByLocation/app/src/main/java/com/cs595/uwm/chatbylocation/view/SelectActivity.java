@@ -39,6 +39,9 @@ public class SelectActivity extends AppCompatActivity {
 //            startActivity(intent);
 //        }
 
+        // TODO: Move this somewhere better
+        Database.initListeners();
+
         displayRoomList();
     }
 

@@ -1,13 +1,21 @@
 package com.cs595.uwm.chatbylocation.service;
 
+import android.support.annotation.NonNull;
+
 import com.cs595.uwm.chatbylocation.objModel.ChatMessage;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Created by Lowell on 3/21/2017.
@@ -16,10 +24,49 @@ import com.google.firebase.database.ValueEventListener;
 public class Database {
 
     private static String currentRoomID;
+    private static Map<String, String> roomNames = new HashMap<>();
     private static boolean listening = false;
+
+    public static void initListeners() {
+        FirebaseDatabase.getInstance().getReference()
+                .child("roomIdentity")
+                .addChildEventListener(new ChildEventListener() {
+                    @Override
+                    public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                        String id = dataSnapshot.getKey();
+                        String name = (String) dataSnapshot.child("name").getValue();
+                        System.out.println("\'id\' " + id + ", \'name\' " + name);
+
+                        roomNames.put(id, name);
+                    }
+
+                    @Override
+                    public void onChildRemoved(DataSnapshot dataSnapshot) {
+                        roomNames.remove(dataSnapshot.getKey());
+                    }
+
+                    @Override
+                    public void onChildChanged(DataSnapshot dataSnapshot, String s) {}
+
+                    @Override
+                    public void onChildMoved(DataSnapshot dataSnapshot, String s) {}
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {}
+                });
+
+    }
 
     public static String getCurrentRoomID() {
         return currentRoomID;
+    }
+
+    public static String getCurrentRoomName() {
+        System.out.println(currentRoomID);
+        if (currentRoomID == null) {
+            return null;
+        }
+        return roomNames.get(currentRoomID);
     }
 
     public static void createUser() {
