@@ -10,17 +10,21 @@ import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.preference.EditTextPreference;
 import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
-import android.support.v7.app.ActionBar;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
 import android.preference.RingtonePreference;
+import android.support.v7.app.ActionBar;
 import android.text.TextUtils;
 import android.view.MenuItem;
 
 import com.cs595.uwm.chatbylocation.R;
+import com.cs595.uwm.chatbylocation.service.Database;
+
+import net.margaritov.preference.colorpicker.ColorPickerPreference;
 
 import java.util.List;
 
@@ -175,12 +179,28 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             addPreferencesFromResource(R.xml.pref_general);
             setHasOptionsMenu(true);
 
+            // Set 'Display Name' summary to Username
+            EditTextPreference namePref = (EditTextPreference) findPreference("example_text");
+            namePref.setSummary(Database.getUserUsername());
+
             // Bind the summaries of EditText/List/Dialog/Ringtone preferences
             // to their values. When their values change, their summaries are
             // updated to reflect the new value, per the Android Design
             // guidelines.
-            bindPreferenceSummaryToValue(findPreference("example_text"));
+            //bindPreferenceSummaryToValue(findPreference("example_text"));
             bindPreferenceSummaryToValue(findPreference("example_list"));
+
+            // Add PrefChange listener to text color picker
+            ColorPickerPreference colorPref = (ColorPickerPreference) findPreference("color1");
+            colorPref.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+                @Override
+                public boolean onPreferenceChange(Preference preference, Object newValue) {
+                    String color = ColorPickerPreference.convertToRGB(Integer.valueOf(String.valueOf(newValue)));
+                    preference.setSummary(color);
+
+                    return true;
+                }
+            });
         }
 
         @Override
