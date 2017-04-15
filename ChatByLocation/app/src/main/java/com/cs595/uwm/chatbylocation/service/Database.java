@@ -44,10 +44,10 @@ public class Database {
     public static void setTextColor(int color) {
         textColor = color;
     }
-    
+
 
     public static void initListeners() {
-        if(listening) return;
+        if (listening) return;
 
         DatabaseReference userRef = getCurrentUserReference();
 
@@ -87,7 +87,8 @@ public class Database {
                     }
 
                     @Override
-                    public void onCancelled(DatabaseError databaseError) {}
+                    public void onCancelled(DatabaseError databaseError) {
+                    }
                 });
 
         trace("assigned listeners to user.currentRoomID and user.removeFrom");
@@ -107,13 +108,16 @@ public class Database {
             }
 
             @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String s) {}
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+            }
 
             @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String s) {}
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+            }
 
             @Override
-            public void onCancelled(DatabaseError databaseError) {}
+            public void onCancelled(DatabaseError databaseError) {
+            }
         });
 
         trace("Assigned listener to list of rooms");
