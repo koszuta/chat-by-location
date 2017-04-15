@@ -49,6 +49,7 @@ public class SelectActivity extends AppCompatActivity {
         startActivity(new Intent(getApplicationContext(), ChatActivity.class));
     }
 
+
     public void createRoomClick(View view) {
         DialogFragment dialog = new CreateRoomDialog();
         dialog.show(getFragmentManager(), "create room");

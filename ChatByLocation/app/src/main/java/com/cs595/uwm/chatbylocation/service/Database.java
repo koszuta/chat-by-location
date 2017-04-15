@@ -80,8 +80,7 @@ public class Database {
                             getRoomUsersReference().child(removeFrom).child(getUserID()).setValue(null);
                             getCurrentUserReference().child("currentRoomID").setValue("");
                             getCurrentUserReference().child("removeFrom").setValue("");
-                            trace("removeFromListener has removed the user from their room, len: "
-                                    + removeFrom.length());
+                            trace("removeFromListener has removed the user from their room");
                         }
 
                     }
