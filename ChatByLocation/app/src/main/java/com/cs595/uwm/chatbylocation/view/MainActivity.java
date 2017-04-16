@@ -67,8 +67,13 @@ public class MainActivity extends AppCompatActivity {
 
         if(requestCode == SIGN_IN_REQUEST_CODE) {
             if(resultCode == RESULT_OK) {
-
-                startNextCorrectActivity();
+                //sign out if name is null due to firebase code bug - see https://github.com/firebase/FirebaseUI-Android/issues/409
+               if(Database.getUserUsername() == null) {
+                   FirebaseAuth.getInstance().signOut();
+                   startActivity(new Intent(this, MainActivity.class));
+               }
+               else
+                   startNextCorrectActivity();
 
             } else {
                 //remain in this activity
