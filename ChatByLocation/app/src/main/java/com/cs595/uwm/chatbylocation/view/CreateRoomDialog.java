@@ -161,9 +161,9 @@ public class CreateRoomDialog extends DialogFragment {
                                     Toast.LENGTH_SHORT).show();
                         }
                         else if(permissionCheckFine ==  PackageManager.PERMISSION_GRANTED) {
+
                             getLocationData();
                             finishRoomCreation();
-
                         }
                         else {
                             ActivityCompat.requestPermissions(getActivity(),

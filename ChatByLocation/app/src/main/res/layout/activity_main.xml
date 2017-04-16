@@ -33,7 +33,7 @@
         android:layout_marginTop="8dp"
 
         android:onClick="signIn"
-        android:text="Sing In / Register"
+        android:text="Sign In / Register"
 
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"

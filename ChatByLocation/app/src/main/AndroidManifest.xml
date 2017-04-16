@@ -5,6 +5,7 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
     <uses-feature android:name="android.hardware.location.gps" />
+    <uses-feature android:name="android.hardware.location.network" />
 
     <application
         android:allowBackup="true"
@@ -13,7 +14,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".view.MainActivity">
+        <activity android:name=".view.MainActivity"
+            android:screenOrientation="portrait" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -22,13 +24,16 @@
         </activity>
         <activity
             android:name=".view.SelectActivity"
+            android:screenOrientation="portrait"
             android:label="@string/selectActivityLabel" />
         <activity
             android:name=".view.ChatActivity"
+            android:screenOrientation="portrait"
             android:label="@string/chatActivityLabel"
             android:parentActivityName=".view.SelectActivity" />
         <activity
             android:name=".view.ChatNameSelectionActivity"
+            android:screenOrientation="portrait"
             android:label="Select Chat Name" />
 
         <dialog
@@ -37,9 +42,11 @@
 
         <activity
             android:name=".view.SettingsActivity"
+            android:screenOrientation="portrait"
             android:label="@string/title_activity_settings" />
         <activity
             android:name=".view.RoomUserListActivity"
+            android:screenOrientation="portrait"
             android:label="@string/title_activity_room_user_list"
             android:theme="@style/AppTheme.NoActionBar" />
     </application>
