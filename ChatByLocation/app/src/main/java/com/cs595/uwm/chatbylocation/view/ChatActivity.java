@@ -3,6 +3,7 @@ package com.cs595.uwm.chatbylocation.view;
 
 
 import android.app.DialogFragment;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -16,6 +17,7 @@ import android.text.style.StyleSpan;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -23,6 +25,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.cs595.uwm.chatbylocation.R;
+import com.cs595.uwm.chatbylocation.controllers.MuteController;
 import com.cs595.uwm.chatbylocation.objModel.ChatMessage;
 import com.cs595.uwm.chatbylocation.service.Database;
 import com.firebase.ui.auth.AuthUI;
@@ -46,25 +49,53 @@ public class ChatActivity extends AppCompatActivity {
     public static final long ONE_DAY_IN_MILLIS = 24 * 60 * 60 * 1000;
     public static final long ONE_WEEK_IN_MILLIS = 7 * ONE_DAY_IN_MILLIS;
     public static final long ONE_YEAR_IN_MILLIS = 365 * ONE_DAY_IN_MILLIS;
+    public static final String NAME_ARGUMENT = "usernameForBundle";
+    public static final String ICON_ARGUMENT = "iconForBundle";
+
+    DialogFragment messageDialog;
+    ListView messageListView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.chat_layout);
+        //construct objects
+        messageListView = (ListView) this.findViewById(R.id.messageList);
+        messageListView.setItemsCanFocus(false);
+        messageDialog = new MessageDetailsDialog();
 
         displayChatMessages();
 
         setTitle(Database.getCurrentRoomName());
-    }
 
-    public void messageClick(View view) {
-        DialogFragment dialog = new MessageDetailsDialog();
-        dialog.show(getFragmentManager(), "message details");
+        messageListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                ChatMessage message = (ChatMessage)parent.getItemAtPosition(position);
+                String messageUser = message.getMessageUser();
+
+                messageDialog = new MessageDetailsDialog();
+                Bundle args = new Bundle();
+                args.putString(NAME_ARGUMENT, messageUser);
+                args.putInt(ICON_ARGUMENT, message.getMessageIcon());
+                messageDialog.setArguments(args);
+                messageDialog.show(getFragmentManager(), "message details");
+            }
+        });
     }
 
     // Nathan TODO: Add user to 'muted' blacklist
-    public void muteUserClick(View view) {
+    public void onMuteClick(View v) {
+        String name = messageDialog.getArguments().getString(NAME_ARGUMENT);
+        Context context = v.getContext();
 
+        if(MuteController.isMuted(v.getContext(), name)) {
+            MuteController.removeUserFromMuteList(context, name);
+        }
+        else {
+            MuteController.addUserToMuteList(context, name);
+        }
+        MuteController.printMuteList(context);
     }
 
     // Nathan TODO: Remove user from current room and put on blacklist
@@ -164,8 +195,13 @@ public class ChatActivity extends AppCompatActivity {
                         String username = chatMessage.getMessageUser();
                         if (username == null) username = "no name";
 
-                        SpannableString ss = new SpannableString(timestamp + ' ' + username + ": " + chatMessage.getMessageText());
-
+                        SpannableString ss;
+                        if(MuteController.isMuted(view.getContext(), username)) {
+                            ss = new SpannableString(timestamp + ' ' + username + ": " + "--message muted--");
+                        }
+                        else {
+                            ss = new SpannableString(timestamp + ' ' + username + ": " + chatMessage.getMessageText());
+                        }
                         StyleSpan bold = new StyleSpan(android.graphics.Typeface.BOLD);
                         RelativeSizeSpan timeSize = new RelativeSizeSpan(0.8f);
                         ForegroundColorSpan timeColor = new ForegroundColorSpan(ResourcesCompat.getColor(getResources(), R.color.timestamp, null));

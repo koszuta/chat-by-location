@@ -43,13 +43,14 @@
 
     <ToggleButton
         android:id="@+id/mute_button_user"
+        style="@style/colorThemeButton"
         android:layout_width="87dp"
         android:layout_height="53dp"
         android:layout_marginRight="0dp"
         android:layout_marginTop="0dp"
         android:onClick="muteUserInUserList"
-        android:textOff="Mute"
-        android:textOn="Unmute"
+        android:textOff="@string/mute"
+        android:textOn="@string/unmute"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 

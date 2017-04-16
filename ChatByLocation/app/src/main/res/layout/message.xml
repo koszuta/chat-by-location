@@ -4,11 +4,12 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
 
-    android:clickable="true"
-    android:onClick="messageClick"
     android:id="@+id/messageLayout">
 
     <ImageView
+        android:focusable="false"
+        android:focusableInTouchMode="false"
+        android:clickable="false"
         android:src="@drawable/ic_koala"
 
         android:layout_width="35dp"
@@ -24,6 +25,9 @@
         android:id="@+id/userIcon"/>
 
     <TextView
+        android:focusable="false"
+        android:focusableInTouchMode="false"
+        android:clickable="false"
         android:text="@string/dummyMessage"
 
         android:layout_width="match_parent"

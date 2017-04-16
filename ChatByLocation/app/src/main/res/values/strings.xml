@@ -16,8 +16,9 @@
     <string name="cancel">@android:string/cancel</string>
     <string name="create">Create</string>
 
-    <string name="mute">Mute</string>
-    <string name="ban">Ban</string>
+    <string name="mute">MUTE</string>
+    <string name="unmute">UNMUTE</string>
+    <string name="ban">BAN</string>
 
     <!-- Strings related to Settings -->
 
