@@ -130,6 +130,7 @@ public class SelectActivity extends AppCompatActivity {
                         finish();
                     }
                 });
+                startActivity(new Intent(this, MainActivity.class));
                 break;
 
             case R.id.menu_bypass:
