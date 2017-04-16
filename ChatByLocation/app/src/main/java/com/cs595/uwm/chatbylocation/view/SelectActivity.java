@@ -10,6 +10,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -21,6 +22,7 @@ import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.database.FirebaseListAdapter;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
 /**
@@ -45,8 +47,21 @@ public class SelectActivity extends AppCompatActivity {
     }
 
     public void joinRoomClick(View view) {
-        Database.setUserRoom(String.valueOf(view.getTag()));
-        startActivity(new Intent(getApplicationContext(), ChatActivity.class));
+        String roomId = String.valueOf(view.getTag());
+        System.out.println("roomId = " + roomId);
+
+        DatabaseReference passwordRef = Database.getRoomIdentityReference().child(roomId).child("password");
+        if (Database.getRoomPassword(roomId) != null) {
+            DialogFragment dialog = new PasswordCheckDialog();
+            Bundle args = new Bundle();
+            args.putString("roomId", roomId);
+            dialog.setArguments(args);
+            dialog.show(getFragmentManager(), "check password");
+        }
+        else {
+            Database.setUserRoom(roomId);
+            startActivity(new Intent(this, ChatActivity.class));
+        }
     }
 
 
@@ -64,9 +79,14 @@ public class SelectActivity extends AppCompatActivity {
                 FirebaseDatabase.getInstance().getReference().child("roomIdentity")) {
             @Override
             protected void populateView(View view, RoomIdentity roomIdentity, int position) {
-                TextView roomName = (TextView) view.findViewById(R.id.roomName);
-                TextView roomCoords = (TextView) view.findViewById(R.id.roomCoords);
-                TextView roomRadius = (TextView) view.findViewById(R.id.roomRadius);
+                final TextView roomName = (TextView) view.findViewById(R.id.roomName);
+                final TextView roomCoords = (TextView) view.findViewById(R.id.roomCoords);
+                final TextView roomRadius = (TextView) view.findViewById(R.id.roomRadius);
+                final ImageView roomIsPrivate = (ImageView) view.findViewById(R.id.roomIsPrivate);
+
+                if (roomIdentity.getPassword() != null) {
+                    roomIsPrivate.setVisibility(View.VISIBLE);
+                }
 
                 roomName.setText(roomIdentity.getName());
                 roomCoords.setText(roomIdentity.getLongg() + ", " + roomIdentity.getLat());
@@ -74,7 +94,6 @@ public class SelectActivity extends AppCompatActivity {
 
                 Button joinButton = (Button) view.findViewById(R.id.joinButton);
                 joinButton.setTag(getRef(position).getKey());
-
             }
         };
 

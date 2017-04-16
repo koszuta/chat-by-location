@@ -27,6 +27,7 @@ public class Database {
 
     // TODO: Move this somewhere better
     private static Map<String, String> roomNames = new HashMap<>();
+    private static Map<String, String> roomPasswords = new HashMap<>();
     private static int textColor = Color.parseColor("#000000");
 
     public static String getCurrentRoomName() {
@@ -35,6 +36,10 @@ public class Database {
 
     public static String getRoomName(String roomId) {
         return roomNames.get(roomId);
+    }
+
+    public static String getRoomPassword(String roomId) {
+        return roomPasswords.get(roomId);
     }
 
     public static int getTextColor() {
@@ -95,15 +100,23 @@ public class Database {
         getRoomIdentityReference().addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                String id = dataSnapshot.getKey();
+                String roomId = dataSnapshot.getKey();
                 String name = String.valueOf(dataSnapshot.child("name").getValue());
+                Object pw = dataSnapshot.child("password").getValue();
+                String password = (pw == null) ? null : pw.toString();
 
-                roomNames.put(id, name);
+                System.out.println("Password is null for " + name + " = " + !dataSnapshot.hasChild("password"));
+                System.out.println("Password for " + name + " = " + password);
+
+                roomNames.put(roomId, name);
+                roomPasswords.put(roomId, password);
             }
 
             @Override
             public void onChildRemoved(DataSnapshot dataSnapshot) {
-                roomNames.remove(dataSnapshot.getKey());
+                String roomId = dataSnapshot.getKey();
+                roomNames.remove(roomId);
+                roomPasswords.remove(roomId);
             }
 
             @Override
