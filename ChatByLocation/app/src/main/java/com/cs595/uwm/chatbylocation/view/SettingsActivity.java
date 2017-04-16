@@ -41,6 +41,29 @@ import java.util.List;
  * API Guide</a> for more information on developing a Settings UI.
  */
 public class SettingsActivity extends AppCompatPreferenceActivity {
+
+    /*
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                String caller = getIntent().getStringExtra("caller");
+                System.out.println("Caller = " + caller);
+                if (caller == null) break;
+                try {
+                    Class cls = Class.forName(caller);
+                    startActivity(new Intent(this, cls));
+                } catch (ClassNotFoundException e) {
+                    e.printStackTrace();
+                }
+                break;
+            default:
+                break;
+        }
+        return true;
+    }
+    //*/
+
     /**
      * A preference value change listener that updates the preference's summary
      * to reflect its new value.

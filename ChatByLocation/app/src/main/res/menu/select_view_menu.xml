@@ -4,11 +4,6 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
-        android:title="@string/sign_out"
-        app:showAsAction="never"
-        android:id="@+id/menu_sign_out"/>
-
-    <item
         android:visible="false"
 
         android:title="To map"
@@ -19,5 +14,10 @@
         android:title="Preferences"
         app:showAsAction="never"
         android:id="@+id/menu_settings"/>
+
+    <item
+        android:title="@string/sign_out"
+        app:showAsAction="never"
+        android:id="@+id/menu_sign_out"/>
 
 </menu>

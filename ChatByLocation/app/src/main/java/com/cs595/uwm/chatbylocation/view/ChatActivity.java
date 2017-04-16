@@ -133,11 +133,13 @@ public class ChatActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
+
             case android.R.id.home:
                 // TODO: Leave chatroom or just show list of rooms?
                 Intent intent = new Intent(this, SelectActivity.class);
                 startActivity(intent);
                 break;
+
             case R.id.menu_sign_out:
                 AuthUI.getInstance()
                         .signOut(this).addOnCompleteListener(new OnCompleteListener<Void>() {
@@ -152,16 +154,22 @@ public class ChatActivity extends AppCompatActivity {
                 //return to sign in
                 startActivity(new Intent(this, MainActivity.class));
                 break;
+
             case R.id.menu_settings:
-                startActivity(new Intent(this, SettingsActivity.class));
+                Intent settingsIntent = new Intent(this, SettingsActivity.class);
+                settingsIntent.putExtra("caller", ChatActivity.class.getName());
+                startActivity(settingsIntent);
                 break;
+
             case R.id.leave_room:
                 Database.setUserRoom(null);
                 startActivity(new Intent(this, SelectActivity.class));
                 break;
+
             case R.id.room_users:
                 Intent userIntent = new Intent(this, RoomUserListActivity.class);
                 startActivity(userIntent);
+
             default:
                 break;
         }
@@ -183,17 +191,26 @@ public class ChatActivity extends AppCompatActivity {
                         FirebaseDatabase.getInstance().getReference().child("roomMessages").child(roomID)) {
                     @Override
                     protected void populateView(View view, ChatMessage chatMessage, int position) {
+                        String username = chatMessage.getMessageUser();
+
+                        final TextView messageText = (TextView) view.findViewById(R.id.messageText);
+                        /*
+                        if (MuteController.isMuted(username)) {
+                            // view.setVisibility(View.GONE);
+                            messageText.setText("This user is muted");
+                            return;
+                        }
+                        //*/
+
+                        if (username == null) username = "no name";
+
                         // Get reference to the views of message.xml
                         ImageView userIcon = (ImageView) view.findViewById(R.id.userIcon);
                         userIcon.setImageResource(chatMessage.getMessageIcon());
 
-                        TextView messageText = (TextView) view.findViewById(R.id.messageText);
-
                         // Set their text
                         String timestamp = formatTimestamp(chatMessage.getMessageTime());
                         if (timestamp == null) timestamp = "";
-                        String username = chatMessage.getMessageUser();
-                        if (username == null) username = "no name";
 
                         SpannableString ss;
                         if(MuteController.isMuted(view.getContext(), username)) {

@@ -109,6 +109,13 @@ public class SelectActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
+
+            case R.id.menu_settings:
+                Intent settingsIntent = new Intent(this, SettingsActivity.class);
+                settingsIntent.putExtra("caller", SelectActivity.class.getName());
+                startActivity(settingsIntent);
+                break;
+
             case R.id.menu_sign_out:
                 AuthUI.getInstance()
                         .signOut(this).addOnCompleteListener(new OnCompleteListener<Void>() {
@@ -124,14 +131,12 @@ public class SelectActivity extends AppCompatActivity {
                     }
                 });
                 break;
-            case R.id.menu_settings:
-                Intent settingsIntent = new Intent(this, SettingsActivity.class);
-                startActivity(settingsIntent);
-                break;
+
             case R.id.menu_bypass:
                 Intent intent = new Intent(this, ChatActivity.class);
                 startActivity(intent);
                 break;
+
             default:
                 break;
         }
