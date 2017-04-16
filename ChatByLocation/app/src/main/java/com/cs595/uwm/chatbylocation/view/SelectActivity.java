@@ -41,6 +41,8 @@ public class SelectActivity extends AppCompatActivity {
 //            startActivity(intent);
 //        }
 
+
+        Database.initListeners();
         displayRoomList();
     }
 
@@ -61,6 +63,7 @@ public class SelectActivity extends AppCompatActivity {
             startActivity(new Intent(this, ChatActivity.class));
         }
     }
+
 
     public void createRoomClick(View view) {
         DialogFragment dialog = new CreateRoomDialog();
