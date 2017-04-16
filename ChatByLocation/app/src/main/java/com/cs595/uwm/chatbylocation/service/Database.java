@@ -24,6 +24,7 @@ import java.util.Map;
 public class Database {
 
     private static String currentRoomID;
+    private static int textSize = 14;
     private static boolean listening = false;
 
     // TODO: Move this somewhere better
@@ -49,6 +50,14 @@ public class Database {
 
     public static void setTextColor(int color) {
         textColor = color;
+    }
+
+    public static int getTextSize() {
+        return textSize;
+    }
+
+    public static void setTextSize(int size) {
+        textSize = size;
     }
 
 

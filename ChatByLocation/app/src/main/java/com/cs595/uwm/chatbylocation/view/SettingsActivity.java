@@ -228,6 +228,20 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                     return true;
                 }
             });
+
+
+            ListPreference textSize = (ListPreference) findPreference("msg_font_size");
+            textSize.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+                @Override
+                public boolean onPreferenceChange(Preference preference, Object newValue) {
+                    String sizeString = String.valueOf(newValue);
+                    int sizeInt = Integer.valueOf(String.valueOf(newValue));
+                    preference.setSummary(sizeString);
+                    Database.setTextColor(sizeInt);
+
+                    return true;
+                }
+            });
         }
 
         @Override
