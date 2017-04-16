@@ -39,6 +39,8 @@ public class SelectActivity extends AppCompatActivity {
 //            startActivity(intent);
 //        }
 
+
+        Database.initListeners();
         displayRoomList();
     }
 
@@ -46,6 +48,7 @@ public class SelectActivity extends AppCompatActivity {
         Database.setUserRoom(String.valueOf(view.getTag()));
         startActivity(new Intent(getApplicationContext(), ChatActivity.class));
     }
+
 
     public void createRoomClick(View view) {
         DialogFragment dialog = new CreateRoomDialog();

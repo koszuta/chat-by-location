@@ -1,5 +1,6 @@
 package com.cs595.uwm.chatbylocation.service;
 
+import android.graphics.Color;
 import android.support.annotation.NonNull;
 
 import com.cs595.uwm.chatbylocation.objModel.ChatMessage;
@@ -26,10 +27,14 @@ public class Database {
 
     // TODO: Move this somewhere better
     private static Map<String, String> roomNames = new HashMap<>();
-    private static int textColor = 0;
+    private static int textColor = Color.parseColor("#000000");
 
     public static String getCurrentRoomName() {
         return (currentRoomID == null) ? null : roomNames.get(currentRoomID);
+    }
+
+    public static String getRoomName(String roomId) {
+        return roomNames.get(roomId);
     }
 
     public static int getTextColor() {
@@ -39,10 +44,10 @@ public class Database {
     public static void setTextColor(int color) {
         textColor = color;
     }
-    
+
 
     public static void initListeners() {
-        if(listening) return;
+        if (listening) return;
 
         DatabaseReference userRef = getCurrentUserReference();
 
@@ -75,44 +80,44 @@ public class Database {
                             getRoomUsersReference().child(removeFrom).child(getUserID()).setValue(null);
                             getCurrentUserReference().child("currentRoomID").setValue("");
                             getCurrentUserReference().child("removeFrom").setValue("");
-                            trace("removeFromListener has removed the user from their room, len: "
-                                    + removeFrom.length());
+                            trace("removeFromListener has removed the user from their room");
                         }
 
                     }
 
                     @Override
-                    public void onCancelled(DatabaseError databaseError) {}
+                    public void onCancelled(DatabaseError databaseError) {
+                    }
                 });
 
         trace("assigned listeners to user.currentRoomID and user.removeFrom");
 
-        FirebaseDatabase.getInstance().getReference()
-                .child("roomIdentity")
-                .addChildEventListener(new ChildEventListener() {
-                    @Override
-                    public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                        String id = dataSnapshot.getKey();
-                        String name = String.valueOf(dataSnapshot.child("name").getValue());
-                        //System.out.println("\'id\' " + id + ", \'name\' " + name);
+        getRoomIdentityReference().addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                String id = dataSnapshot.getKey();
+                String name = String.valueOf(dataSnapshot.child("name").getValue());
 
-                        roomNames.put(id, name);
-                    }
+                roomNames.put(id, name);
+            }
 
-                    @Override
-                    public void onChildRemoved(DataSnapshot dataSnapshot) {
-                        roomNames.remove(dataSnapshot.getKey());
-                    }
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+                roomNames.remove(dataSnapshot.getKey());
+            }
 
-                    @Override
-                    public void onChildChanged(DataSnapshot dataSnapshot, String s) {}
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+            }
 
-                    @Override
-                    public void onChildMoved(DataSnapshot dataSnapshot, String s) {}
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+            }
 
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {}
-                });
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+            }
+        });
 
         trace("Assigned listener to list of rooms");
 

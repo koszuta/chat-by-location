@@ -44,7 +44,6 @@ public class MainActivity extends AppCompatActivity {
 //            }
 //        });
 
-        Database.initListeners();
     }
 
     public void signIn(View v) {
