@@ -6,6 +6,7 @@ import android.support.annotation.NonNull;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
@@ -21,6 +22,10 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+
+import java.io.FileOutputStream;
+
+import static com.cs595.uwm.chatbylocation.controllers.MuteController.MUTE_FILENAME;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -43,6 +48,16 @@ public class MainActivity extends AppCompatActivity {
 //                finish();
 //            }
 //        });
+        try {
+            FileOutputStream oStream = this.openFileOutput(MUTE_FILENAME, Context.MODE_PRIVATE);
+            String newline = "\n";
+            oStream.write(newline.getBytes());
+            oStream.close();
+        }
+        catch (Exception e) {
+            Log.d("MainActivity","Error initializing mute file");
+        }
+
 
     }
 
@@ -66,8 +81,13 @@ public class MainActivity extends AppCompatActivity {
 
         if(requestCode == SIGN_IN_REQUEST_CODE) {
             if(resultCode == RESULT_OK) {
-
-                startNextCorrectActivity();
+                //sign out if name is null due to firebase code bug - see https://github.com/firebase/FirebaseUI-Android/issues/409
+               if(Database.getUserUsername() == null) {
+                   FirebaseAuth.getInstance().signOut();
+                   startActivity(new Intent(this, MainActivity.class));
+               }
+               else
+                   startNextCorrectActivity();
 
             } else {
                 //remain in this activity

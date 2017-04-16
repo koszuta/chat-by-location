@@ -1,5 +1,6 @@
 package com.cs595.uwm.chatbylocation.view;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -21,7 +22,9 @@ import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import com.cs595.uwm.chatbylocation.R;
+import com.cs595.uwm.chatbylocation.controllers.MuteController;
 import com.cs595.uwm.chatbylocation.objModel.UserIdentity;
+import com.cs595.uwm.chatbylocation.service.Database;
 import com.firebase.ui.auth.AuthUI;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -114,8 +117,16 @@ public class RoomUserListActivity extends AppCompatActivity {
         return true;
     }
 
-    public void muteUserInUserList(View v) {
+    public void onMuteClick(View v) {
+        String name = Database.getUserUsername();
+        Context context = v.getContext();
 
+        if(MuteController.isMuted(v.getContext(), name)) {
+            MuteController.removeUserFromMuteList(context, name);
+        }
+        else {
+            MuteController.addUserToMuteList(context, name);
+        }
     }
 
 
