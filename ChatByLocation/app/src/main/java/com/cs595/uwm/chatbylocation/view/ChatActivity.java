@@ -83,8 +83,6 @@ public class ChatActivity extends AppCompatActivity {
             }
         });
     }
-
-    // Nathan TODO: Add user to 'muted' blacklist
     public void onMuteClick(View v) {
         String name = messageDialog.getArguments().getString(NAME_ARGUMENT);
         Context context = v.getContext();
@@ -95,7 +93,7 @@ public class ChatActivity extends AppCompatActivity {
         else {
             MuteController.addUserToMuteList(context, name);
         }
-        MuteController.printMuteList(context);
+        displayChatMessages();
     }
 
     // Nathan TODO: Remove user from current room and put on blacklist
