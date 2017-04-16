@@ -3,6 +3,7 @@ package com.cs595.uwm.chatbylocation.view;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -26,12 +27,18 @@ import com.cs595.uwm.chatbylocation.controllers.MuteController;
 import com.cs595.uwm.chatbylocation.objModel.UserIdentity;
 import com.cs595.uwm.chatbylocation.service.Database;
 import com.firebase.ui.auth.AuthUI;
+import com.google.android.gms.fitness.data.Value;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 
 public class RoomUserListActivity extends AppCompatActivity {
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,29 +57,45 @@ public class RoomUserListActivity extends AppCompatActivity {
     private void displayUsers() {
 
         ListView lV = (ListView) findViewById(R.id.user_list_view);
-        ArrayList<UserIdentity> users = new ArrayList<UserIdentity>();
-        users.add(new UserIdentity("Mock User 1", 0));
+        final ArrayList<UserIdentity> users = new ArrayList<>();
+        //users.add(new UserIdentity("Mock User 1", 0));
         //TODO: order alphabetically by user name
 
-        ArrayAdapter<UserIdentity> itemsAdapter =
-                new ArrayAdapter<UserIdentity>(this, R.layout.user_list_item, users) {
-                    @Override
-                    public View getView(int position, View convertView, ViewGroup parent) {
+        ArrayAdapter<UserIdentity> itemsAdapter = new ArrayAdapter<UserIdentity>(this, R.layout.user_list_item, users) {
+            @Override
+            public View getView(int position, View convertView, ViewGroup parent) {
 
-                        UserIdentity user = getItem(position);
-                        //create new view if not yet created
-                        if (convertView == null) {
-                            convertView = LayoutInflater.from(getContext()).inflate(R.layout.user_list_item, parent, false);
-                        }
+                UserIdentity user = getItem(position);
+                //create new view if not yet created
+                if (convertView == null) {
+                    convertView = LayoutInflater.from(getContext()).inflate(R.layout.user_list_item, parent, false);
+                }
 
-                        TextView userName = (TextView) convertView.findViewById(R.id.user_name_in_list);
-                        userName.setText(user.getName());
-                        ImageView iV = (ImageView) convertView.findViewById(R.id.icon_in_user_list);
-                        iV.setImageResource(R.drawable.ic_dragon);
-                        return convertView;
-                    }
+                TextView userName = (TextView) convertView.findViewById(R.id.user_name_in_list);
+                userName.setText(user.getName());
+                ImageView iV = (ImageView) convertView.findViewById(R.id.icon_in_user_list);
+                iV.setImageResource(R.drawable.ic_dragon);
+                return convertView;
+            }
 
-                };
+        };
+
+        ValueEventListener usersListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                UserIdentity user = dataSnapshot.getValue(UserIdentity.class);
+                System.out.println(">> add user " + user.getName());
+                users.add(user);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        };
+
+        Database.getRoomUsersReference().child(Database.getCurrentRoomID())
+                .addListenerForSingleValueEvent(usersListener);
         lV.setAdapter(itemsAdapter);
     }
 
@@ -106,7 +129,7 @@ public class RoomUserListActivity extends AppCompatActivity {
                 break;
             case R.id.return_to_room:
                 Intent roomIntent = new Intent(this, ChatActivity.class);
-               startActivity(roomIntent);
+                startActivity(roomIntent);
                 break;
             case R.id.room_users:
                 Intent userIntent = new Intent(this, RoomUserListActivity.class);
@@ -121,10 +144,9 @@ public class RoomUserListActivity extends AppCompatActivity {
         String name = Database.getUserUsername();
         Context context = v.getContext();
 
-        if(MuteController.isMuted(v.getContext(), name)) {
+        if (MuteController.isMuted(v.getContext(), name)) {
             MuteController.removeUserFromMuteList(context, name);
-        }
-        else {
+        } else {
             MuteController.addUserToMuteList(context, name);
         }
     }

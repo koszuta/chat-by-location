@@ -4,6 +4,7 @@ import android.graphics.Color;
 import android.support.annotation.NonNull;
 
 import com.cs595.uwm.chatbylocation.objModel.ChatMessage;
+import com.google.android.gms.fitness.data.Value;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.ChildEventListener;
@@ -67,6 +68,7 @@ public class Database {
                         if (roomID == null || roomID.equals("")) return;
 
                         getRoomUsersReference().child(roomID).child(getUserID()).setValue(true);
+
                     }
 
                     @Override
@@ -158,6 +160,10 @@ public class Database {
             getCurrentUserReference().child("currentRoomID").setValue(roomID);
         }
 
+    }
+
+    public static void setUsersListener(ValueEventListener usersListener){
+        getRoomUsersReference().child(currentRoomID).addListenerForSingleValueEvent(usersListener);
     }
 
     public static String getUserUsername() {
