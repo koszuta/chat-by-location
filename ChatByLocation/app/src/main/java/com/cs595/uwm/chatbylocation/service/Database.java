@@ -11,6 +11,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.HashMap;
@@ -213,7 +214,71 @@ public class Database {
         return FirebaseDatabase.getInstance().getReference().child("roomMessages");
     }
 
+
+
     public static void trace(String message) {
         System.out.println("Database >> " + message); //todo android logger
     }
+
+    public static void addUsernameToRegistrationList(String username) {
+        FirebaseDatabase.getInstance().getReference().child("registration").push().setValue(username);
+    }
+
+    public static void setRegisterUsernameListener() {
+        Query registrationNamesQuery = FirebaseDatabase.getInstance().getReference().child("registration").orderByValue();
+        registrationNamesQuery.keepSynced(true);
+        registrationNamesQuery.addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                Registration.getUsernames().add(dataSnapshot.getValue().toString());
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+            }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    public static void removeExtraUsernameFromRegistration(String username) {
+        Query removeNameQuery = getOneInstanceOfRegistrationUsername(username);
+        removeNameQuery.addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                dataSnapshot.getRef().removeValue();
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {}
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {}
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) { }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {}
+        });
+    }
+
+    private static Query getOneInstanceOfRegistrationUsername(String username) {
+        return FirebaseDatabase.getInstance().getReference().orderByValue().equalTo(username).limitToFirst(1);
+    }
+
 }

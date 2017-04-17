@@ -12,6 +12,7 @@ import android.widget.Toast;
 
 import com.cs595.uwm.chatbylocation.R;
 import com.cs595.uwm.chatbylocation.service.Database;
+import com.cs595.uwm.chatbylocation.service.Registration;
 import com.firebase.ui.auth.AuthUI;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -23,7 +24,9 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.io.File;
 import java.io.FileOutputStream;
+import java.util.ArrayList;
 
 import static com.cs595.uwm.chatbylocation.controllers.MuteController.MUTE_FILENAME;
 
@@ -41,6 +44,9 @@ public class MainActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_main);
 
+        Registration.setUsernames(new ArrayList<String>());
+        Database.setRegisterUsernameListener();
+
 //        AuthUI.getInstance().signOut(this).addOnCompleteListener(new OnCompleteListener<Void>() {
 //            @Override
 //            public void onComplete(@NonNull Task<Void> task) {
@@ -49,58 +55,25 @@ public class MainActivity extends AppCompatActivity {
 //            }
 //        });
         try {
-            FileOutputStream oStream = this.openFileOutput(MUTE_FILENAME, Context.MODE_PRIVATE);
-            String newline = "\n";
-            oStream.write(newline.getBytes());
-            oStream.close();
+            File file = new File(this.getCacheDir().toString() + MUTE_FILENAME);
+            if(!file.exists()) {
+                FileOutputStream oStream = this.openFileOutput(MUTE_FILENAME, Context.MODE_PRIVATE);
+                String newline = "\n";
+                oStream.write(newline.getBytes());
+                oStream.close();
+            }
         }
         catch (Exception e) {
             Log.d("MainActivity","Error initializing mute file");
         }
-
-
     }
 
     public void signIn(View v) {
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        if(user == null) {
-            // Start sign in/sign up activity
-            startActivityForResult(
-                    AuthUI.getInstance().createSignInIntentBuilder().setTheme(R.style.AppTheme).build(),
-                    SIGN_IN_REQUEST_CODE
-            );
-
-        } else {
-            startNextCorrectActivity();
-        }
+        startActivity(new Intent(this, SignInActivity.class));
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        if(requestCode == SIGN_IN_REQUEST_CODE) {
-            if(resultCode == RESULT_OK) {
-                //sign out if name is null due to firebase code bug - see https://github.com/firebase/FirebaseUI-Android/issues/409
-               if(Database.getUserUsername() == null) {
-                   FirebaseAuth.getInstance().signOut();
-                   startActivity(new Intent(this, MainActivity.class));
-               }
-               else
-                   startNextCorrectActivity();
-
-            } else {
-                //remain in this activity
-                //TODO: display sign in error
-            }
-        }
+    public void register(View v) {
+        startActivity(new Intent(this, RegisterActivity.class));
     }
-
-    public void startNextCorrectActivity(){
-        startActivity(Database.getUserUsername() == null ?
-                new Intent(this, ChatNameSelectionActivity.class) :
-                new Intent(this, SelectActivity.class));
-    }
-
 
 }
