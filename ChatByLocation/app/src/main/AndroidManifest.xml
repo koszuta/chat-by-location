@@ -49,6 +49,14 @@
             android:screenOrientation="portrait"
             android:label="@string/title_activity_room_user_list"
             android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".view.RegisterActivity"
+            android:screenOrientation="portrait"
+            android:label="Create Account" />
+        <activity
+            android:name=".view.SignInActivity"
+            android:screenOrientation="portrait"
+            android:label="Log In to Existing Account" />
     </application>
 
 </manifest>
