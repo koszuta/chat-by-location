@@ -49,6 +49,12 @@ public class RegisterActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
         activityContext = this;
+
+        final EditText nameView = (EditText)findViewById(R.id.reg_name);
+        final EditText emailView = (EditText)findViewById(R.id.reg_email);
+
+        nameView.setText(Registration.getLastUsedName());
+        emailView.setText(Registration.getLastEmail());
     }
 
     public void onRegisterButtonClick(final View v) {
@@ -76,7 +82,8 @@ public class RegisterActivity extends AppCompatActivity {
         final String password = passwordView.getText().toString();
         final String confirm = confirmView.getText().toString();
 
-
+        Registration.setLastEmail(email);
+        Registration.setLastUsedName(name);
 
 
         //require all fields filled in

@@ -11,7 +11,11 @@ import java.util.ArrayList;
 public class Registration {
 
 
-    public static ArrayList<String> usernames;
+    private static String lastEmail = "";
+
+    private static String lastUsedName = "";
+
+    private static ArrayList<String> usernames;
 
     public static ArrayList<String> getUsernames() {
         return usernames;
@@ -31,4 +35,20 @@ public class Registration {
 
         return counter;
     }
+
+    public static String getLastEmail() {
+        return lastEmail;
+    }
+
+    public static void setLastEmail(String lastEmail) {
+        Registration.lastEmail = lastEmail;
+    }
+    public static String getLastUsedName() {
+        return lastUsedName;
+    }
+
+    public static void setLastUsedName(String lastName) {
+        Registration.lastUsedName = lastName;
+    }
+
 }

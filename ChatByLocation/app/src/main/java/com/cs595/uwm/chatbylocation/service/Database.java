@@ -269,7 +269,7 @@ public class Database {
             }
         });
     }
-
+    //TODO: this method isnt working
     public static void removeExtraUsernameFromRegistration(String username) {
         Query removeNameQuery = getOneInstanceOfRegistrationUsername(username);
         removeNameQuery.addChildEventListener(new ChildEventListener() {

@@ -10,6 +10,7 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.cs595.uwm.chatbylocation.R;
+import com.cs595.uwm.chatbylocation.service.Registration;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
@@ -29,6 +30,9 @@ public class SignInActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_signin);
+
+        final EditText emailView = (EditText)findViewById(R.id.sign_email);
+        emailView.setText(Registration.getLastEmail());
     }
 
     public void onSignInClick(final View v){
