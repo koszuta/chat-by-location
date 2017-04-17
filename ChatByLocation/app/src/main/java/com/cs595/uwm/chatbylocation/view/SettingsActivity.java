@@ -42,7 +42,7 @@ import java.util.List;
  */
 public class SettingsActivity extends AppCompatPreferenceActivity {
 
-    /*
+    //*
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
@@ -224,6 +224,20 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
 
                     preference.setSummary(color);
                     Database.setTextColor(colorInt);
+
+                    return true;
+                }
+            });
+
+
+            ListPreference textSize = (ListPreference) findPreference("msg_font_size");
+            textSize.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+                @Override
+                public boolean onPreferenceChange(Preference preference, Object newValue) {
+                    String sizeString = String.valueOf(newValue);
+                    int sizeInt = Integer.valueOf(String.valueOf(newValue));
+                    preference.setSummary(sizeString);
+                    Database.setTextColor(sizeInt);
 
                     return true;
                 }

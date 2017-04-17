@@ -4,6 +4,7 @@ import android.graphics.Color;
 import android.support.annotation.NonNull;
 
 import com.cs595.uwm.chatbylocation.objModel.ChatMessage;
+import com.google.android.gms.fitness.data.Value;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.ChildEventListener;
@@ -24,6 +25,7 @@ import java.util.Map;
 public class Database {
 
     private static String currentRoomID;
+    private static int textSize = 14;
     private static boolean listening = false;
 
     // TODO: Move this somewhere better
@@ -51,6 +53,14 @@ public class Database {
         textColor = color;
     }
 
+    public static int getTextSize() {
+        return textSize;
+    }
+
+    public static void setTextSize(int size) {
+        textSize = size;
+    }
+
 
     public static void initListeners() {
         if (listening) return;
@@ -68,6 +78,7 @@ public class Database {
                         if (roomID == null || roomID.equals("")) return;
 
                         getRoomUsersReference().child(roomID).child(getUserID()).setValue(true);
+
                     }
 
                     @Override
@@ -159,6 +170,10 @@ public class Database {
             getCurrentUserReference().child("currentRoomID").setValue(roomID);
         }
 
+    }
+
+    public static void setUsersListener(ValueEventListener usersListener){
+        getRoomUsersReference().child(currentRoomID).addListenerForSingleValueEvent(usersListener);
     }
 
     public static String getUserUsername() {
