@@ -42,17 +42,37 @@ import java.util.List;
  */
 public class SettingsActivity extends AppCompatPreferenceActivity {
 
-    //*
+    private static boolean inFragment = false;
+    private static String caller;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setupActionBar();
+
+        if (caller == null) {
+            System.out.println("Setting caller");
+            caller = getIntent().getStringExtra("caller");
+        }
+    }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
-                String caller = getIntent().getStringExtra("caller");
+                if (inFragment) {
+                    startActivity(new Intent(this, SettingsActivity.class));
+                    inFragment = false;
+                    break;
+                }
+
                 System.out.println("Caller = " + caller);
                 if (caller == null) break;
+
                 try {
                     Class cls = Class.forName(caller);
                     startActivity(new Intent(this, cls));
+                    caller = null;
                 } catch (ClassNotFoundException e) {
                     e.printStackTrace();
                 }
@@ -62,7 +82,6 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
         }
         return true;
     }
-    //*/
 
     /**
      * A preference value change listener that updates the preference's summary
@@ -146,12 +165,6 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                         .getString(preference.getKey(), ""));
     }
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setupActionBar();
-    }
-
     /**
      * Set up the {@link android.app.ActionBar}, if the API is available.
      */
@@ -202,6 +215,8 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             super.onCreate(savedInstanceState);
             addPreferencesFromResource(R.xml.pref_general);
             setHasOptionsMenu(true);
+
+            inFragment = true;
 
             // Set 'Display Name' summary to Username
             EditTextPreference namePref = (EditTextPreference) findPreference("example_text");
@@ -267,6 +282,8 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             addPreferencesFromResource(R.xml.pref_notification);
             setHasOptionsMenu(true);
 
+            inFragment = true;
+
             // Bind the summaries of EditText/List/Dialog/Ringtone preferences
             // to their values. When their values change, their summaries are
             // updated to reflect the new value, per the Android Design
@@ -296,6 +313,8 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             super.onCreate(savedInstanceState);
             addPreferencesFromResource(R.xml.pref_data_sync);
             setHasOptionsMenu(true);
+
+            inFragment = true;
 
             // Bind the summaries of EditText/List/Dialog/Ringtone preferences
             // to their values. When their values change, their summaries are
