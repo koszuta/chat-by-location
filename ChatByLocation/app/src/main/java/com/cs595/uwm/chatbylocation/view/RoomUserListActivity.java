@@ -36,6 +36,8 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 
 public class RoomUserListActivity extends AppCompatActivity {
 
@@ -83,9 +85,17 @@ public class RoomUserListActivity extends AppCompatActivity {
         ValueEventListener usersListener = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                UserIdentity user = dataSnapshot.getValue(UserIdentity.class);
-                System.out.println(">> add user " + user.getName());
-                users.add(user);
+                //UserIdentity user = dataSnapshot.getValue(UserIdentity.class);
+                trace("ds key " + dataSnapshot.getKey());
+                trace("ds val " + dataSnapshot.getValue());
+                HashMap<String, Object> roomUsers = (HashMap<String, Object>) dataSnapshot.getValue();
+                Iterator<String> iterator = roomUsers.keySet().iterator();
+                while (iterator.hasNext()){
+                    String userID = iterator.next();
+                    users.add(new UserIdentity(userID, 0));
+                }
+                //users.add(new UserIdentity((String) dataSnapshot.getValue(), 0));
+
             }
 
             @Override
@@ -151,5 +161,8 @@ public class RoomUserListActivity extends AppCompatActivity {
         }
     }
 
+    private static void trace(String message){
+        System.out.println("RoomUserListActivity >> " + message);
+    }
 
 }
