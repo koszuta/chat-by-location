@@ -1,24 +1,19 @@
 package com.cs595.uwm.chatbylocation.view;
 
-import android.app.DialogFragment;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.SystemClock;
 import android.support.annotation.NonNull;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.EditText;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.cs595.uwm.chatbylocation.R;
+import com.cs595.uwm.chatbylocation.objModel.UserIdentity;
 import com.cs595.uwm.chatbylocation.service.Database;
 import com.cs595.uwm.chatbylocation.service.Registration;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -27,10 +22,6 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-
-import static com.facebook.FacebookSdk.getApplicationContext;
 
 /**
  * Created by Jason on 4/16/2017.
@@ -40,7 +31,7 @@ public class RegisterActivity extends AppCompatActivity {
     Context activityContext;
     Toast currentToast;
     boolean isViewClicked = false;
-    final long MIN_CLICK_INTERVAL=1000;
+    final long MIN_CLICK_INTERVAL = 1000;
     long mLastClickTime = 0;
 
 
@@ -50,8 +41,8 @@ public class RegisterActivity extends AppCompatActivity {
         setContentView(R.layout.activity_register);
         activityContext = this;
 
-        final EditText nameView = (EditText)findViewById(R.id.reg_name);
-        final EditText emailView = (EditText)findViewById(R.id.reg_email);
+        final EditText nameView = (EditText) findViewById(R.id.reg_name);
+        final EditText emailView = (EditText) findViewById(R.id.reg_email);
 
         nameView.setText(Registration.getLastUsedName());
         emailView.setText(Registration.getLastEmail());
@@ -60,22 +51,22 @@ public class RegisterActivity extends AppCompatActivity {
     public void onRegisterButtonClick(final View v) {
         //avoid multiple register onclicks! http://stackoverflow.com/questions/32819477/how-to-prevent-rapid-double-click-on-a-button
         v.setEnabled(false);
-        long currentClickTime= SystemClock.uptimeMillis();
-        long elapsedTime=currentClickTime-mLastClickTime;
-        mLastClickTime=currentClickTime;
-        if(elapsedTime<=MIN_CLICK_INTERVAL)
+        long currentClickTime = SystemClock.uptimeMillis();
+        long elapsedTime = currentClickTime - mLastClickTime;
+        mLastClickTime = currentClickTime;
+        if (elapsedTime <= MIN_CLICK_INTERVAL)
             return;
-        if(!isViewClicked){
+        if (!isViewClicked) {
             isViewClicked = true;
             startTimer();
         } else {
             return;
         }
 
-        final EditText nameView = (EditText)findViewById(R.id.reg_name);
-        final EditText emailView = (EditText)findViewById(R.id.reg_email);
-        final EditText passwordView = (EditText)findViewById(R.id.reg_password);
-        final EditText confirmView = (EditText)findViewById(R.id.reg_reenter);
+        final EditText nameView = (EditText) findViewById(R.id.reg_name);
+        final EditText emailView = (EditText) findViewById(R.id.reg_email);
+        final EditText passwordView = (EditText) findViewById(R.id.reg_password);
+        final EditText confirmView = (EditText) findViewById(R.id.reg_reenter);
 
         final String name = nameView.getText().toString();
         final String email = emailView.getText().toString();
@@ -87,7 +78,7 @@ public class RegisterActivity extends AppCompatActivity {
 
 
         //require all fields filled in
-        if(name.equals("") || email.equals("") || password.equals("") || confirm.equals("")) {
+        if (name.equals("") || email.equals("") || password.equals("") || confirm.equals("")) {
             updateToast("Please fill in all registration fields in order to sign up.");
 
         }
@@ -97,17 +88,17 @@ public class RegisterActivity extends AppCompatActivity {
 
         }
         //matching passwords
-        else if(!password.equals(confirm)) {
+        else if (!password.equals(confirm)) {
             updateToast("Matching passwords are needed to sign up");
 
-        }
-        else if(!isUniqueUsername(name)) {
+        } else if (!isUniqueUsername(name)) {
             updateToast("That username is already taken. Please try a different name");
 
         }
         //all good! register user
         else {
-            FirebaseAuth.getInstance().createUserWithEmailAndPassword(email,password)
+            trace("Registering user...");
+            FirebaseAuth.getInstance().createUserWithEmailAndPassword(email, password)
                     .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                         @Override
                         public void onComplete(@NonNull Task<AuthResult> task) {
@@ -115,14 +106,16 @@ public class RegisterActivity extends AppCompatActivity {
 
                             if (!task.isSuccessful()) {
                                 updateToast("Registration Failed. The account may already exist, or an unknown error occurred.");
-                                //remove extra username in registration database due to error
-                                Database.removeExtraUsernameFromRegistration(name);
 
-                            }
-                            else {
+                            } else {
+                                trace("making new user");
                                 FirebaseUser newUser = task.getResult().getUser();
+                                trace("building profile update");
                                 UserProfileChangeRequest profile = new UserProfileChangeRequest.Builder().setDisplayName(name).build();
+                                trace("update profile");
                                 newUser.updateProfile(profile);
+                                trace("update firebase db");
+                                Database.createUser(name);
                                 FirebaseAuth.getInstance().signOut();
                                 updateToast("Thank you for registering! Please sign in again to use Chat By Location");
                                 startActivity(new Intent(v.getContext(), MainActivity.class));
@@ -135,9 +128,14 @@ public class RegisterActivity extends AppCompatActivity {
     }
 
     private boolean isUniqueUsername(String username) {
-        Database.addUsernameToRegistrationList(username);
-        Log.d("Registration", String.valueOf(Registration.getUsernames().size()));
-        return Registration.getNameCount(username) <= 1;
+        for (UserIdentity user : Database.getUsers()) {
+            if (user.getUsername().equals(username)) {
+                Log.d("Register Activity >> ", "Username is NOT unique: " + username);
+                return false;
+            }
+        }
+        Log.d("Register Activity >> ", "Username is unique: " + username);
+        return true;
     }
 
     private void updateToast(String text) {
@@ -159,6 +157,10 @@ public class RegisterActivity extends AppCompatActivity {
             }
         }, 1000);
 
+    }
+
+    private void trace(String message){
+        Log.d("Register Activity >>", message);
     }
 
 }

@@ -1,10 +1,9 @@
 package com.cs595.uwm.chatbylocation.service;
 
 import android.graphics.Color;
-import android.support.annotation.NonNull;
 
 import com.cs595.uwm.chatbylocation.objModel.ChatMessage;
-import com.google.android.gms.fitness.data.Value;
+import com.cs595.uwm.chatbylocation.objModel.UserIdentity;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.ChildEventListener;
@@ -15,7 +14,9 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 /**
@@ -32,6 +33,7 @@ public class Database {
     private static Map<String, String> roomNames = new HashMap<>();
     private static Map<String, String> roomPasswords = new HashMap<>();
     private static int textColor = Color.parseColor("#000000");
+    private static ArrayList<UserIdentity> users;
 
     public static String getCurrentRoomName() {
         return (currentRoomID == null) ? null : roomNames.get(currentRoomID);
@@ -61,6 +63,13 @@ public class Database {
         textSize = size;
     }
 
+    public static ArrayList<UserIdentity> getUsers() {
+        return users;
+    }
+
+    public static void setUsers(ArrayList<UserIdentity> users) {
+        Database.users = users;
+    }
 
     public static void initListeners() {
         if (listening) return;
@@ -172,9 +181,10 @@ public class Database {
         return currentRoomID;
     }
 
-    public static void createUser() {
+    public static void createUser(String username) {
 
         getCurrentUserReference().child("currentRoomID").setValue("");
+        //getCurrentUserReference().child("username").setValue(username);
         trace("created user");
 
     }
@@ -232,8 +242,9 @@ public class Database {
 
     public static DatabaseReference getCurrentUserReference() {
         String userID = getUserID();
-        if (userID == null) userID = "-";
-        return FirebaseDatabase.getInstance().getReference().child("users").child(userID);
+        trace("userID = " + userID);
+        if (userID == null) return null;
+        return getUsersReference().child(userID);
     }
 
     public static DatabaseReference getRoomUsersReference() {
@@ -248,23 +259,17 @@ public class Database {
         return FirebaseDatabase.getInstance().getReference().child("roomMessages");
     }
 
-
-
-    public static void trace(String message) {
-        System.out.println("Database >> " + message); //todo android logger
+    public static DatabaseReference getUsersReference(){
+        return FirebaseDatabase.getInstance().getReference().child("users");
     }
 
-    public static void addUsernameToRegistrationList(String username) {
-        FirebaseDatabase.getInstance().getReference().child("registration").push().setValue(username);
-    }
-
-    public static void setRegisterUsernameListener() {
-        Query registrationNamesQuery = FirebaseDatabase.getInstance().getReference().child("registration").orderByValue();
-        registrationNamesQuery.keepSynced(true);
-        registrationNamesQuery.addChildEventListener(new ChildEventListener() {
+    public static void initUsersListener() {
+        getRoomUsersReference().addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                Registration.getUsernames().add(dataSnapshot.getValue().toString());
+                UserIdentity user = dataSnapshot.getValue(UserIdentity.class);
+                trace("adding user to local users list: " + user.getUsername());
+                Database.getUsers().add(user);
             }
 
             @Override
@@ -274,6 +279,13 @@ public class Database {
 
             @Override
             public void onChildRemoved(DataSnapshot dataSnapshot) {
+                UserIdentity user = dataSnapshot.getValue(UserIdentity.class);
+                trace("removing user from local users list: " + user.getUsername());
+                Iterator<UserIdentity> usersIt = Database.getUsers().iterator();
+                while (usersIt.hasNext()){
+                    UserIdentity u = usersIt.next();
+                    if(u.equals(user)) usersIt.remove();
+                }
 
             }
 
@@ -288,33 +300,10 @@ public class Database {
             }
         });
     }
-    //TODO: this method isnt working
-    public static void removeExtraUsernameFromRegistration(String username) {
-        /*
-        Query removeNameQuery = getOneInstanceOfRegistrationUsername(username);
-        removeNameQuery.addChildEventListener(new ChildEventListener() {
-            @Override
-            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                dataSnapshot.getRef().removeValue();
-            }
 
-            @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String s) {}
-
-            @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) {}
-
-            @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String s) { }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {}
-        });
-        */
+    public static void trace(String message) {
+        System.out.println("Database >> " + message); //todo android logger
     }
 
-    private static Query getOneInstanceOfRegistrationUsername(String username) {
-        return FirebaseDatabase.getInstance().getReference().orderByValue().equalTo(username).limitToFirst(1);
-    }
 
 }
