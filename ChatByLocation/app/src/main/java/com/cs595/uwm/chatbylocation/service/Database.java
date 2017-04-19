@@ -113,38 +113,57 @@ public class Database {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 String roomId = dataSnapshot.getKey();
+                trace("Child " + roomId + " added to \'roomIdentity\'");
+
+                // Add room name to list
                 String name = String.valueOf(dataSnapshot.child("name").getValue());
+                roomNames.put(roomId, name);
+
+                // Add room password to list
                 Object pw = dataSnapshot.child("password").getValue();
                 String password = (pw == null) ? null : pw.toString();
-
-                System.out.println("Password is null for " + name + " = " + !dataSnapshot.hasChild("password"));
-                System.out.println("Password for " + name + " = " + password);
-
-                roomNames.put(roomId, name);
                 roomPasswords.put(roomId, password);
             }
 
             @Override
             public void onChildRemoved(DataSnapshot dataSnapshot) {
                 String roomId = dataSnapshot.getKey();
+                trace("Child " + roomId + " removed from \'roomIdentity\'");
+
+                // Remove room name and password when deleted
                 roomNames.remove(roomId);
                 roomPasswords.remove(roomId);
             }
 
             @Override
             public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+                String roomId = dataSnapshot.getKey();
+                trace("Child " + roomId + " data changed in \'roomIdentity\'");
+
+                // Update room name
+                String name = String.valueOf(dataSnapshot.child("name").getValue());
+                roomNames.put(roomId, name);
+
+                // Update room password
+                Object pw = dataSnapshot.child("password").getValue();
+                String password = (pw == null) ? null : pw.toString();
+                roomPasswords.put(roomId, password);
             }
 
             @Override
             public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+                String roomId = dataSnapshot.getKey();
+                trace("Child " + roomId + " moved in \'roomIdentity\'");
             }
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
+                trace("Child event canceled in \'roomIdentity\'");
+                System.err.println(databaseError.getMessage());
             }
         });
 
-        trace("Assigned listener to list of rooms");
+        trace("Assigned listener to \'roomIdentity\'");
 
         listening = true;
     }
