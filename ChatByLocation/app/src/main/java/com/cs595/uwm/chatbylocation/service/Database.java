@@ -98,19 +98,23 @@ public class Database {
 
                         String userId = getUserID();
                         if (!(removeFrom == null || removeFrom.equals(""))) {
+                            // Remove user from roomUsers list
                             if (userId != null) {
                                 getRoomUsersReference().child(removeFrom).child(userId).removeValue();
+                                getCurrentUserReference().child("currentRoomID").setValue("");
                             }
-                            getCurrentUserReference().child("currentRoomID").setValue("");
+                            
                             getCurrentUserReference().child("removeFrom").setValue("");
-                            trace("removeFromListener has removed the user from their room");
 
-                            if (shouldSignOut) {
-                                FirebaseAuth.getInstance().signOut();
-                                shouldSignOut = false;
-                            }
+                            trace("removeFromListener has removed the user from their room");
                         }
 
+                        // Sign out user
+                        if (shouldSignOut) {
+                            shouldSignOut = false;
+                            FirebaseAuth.getInstance().signOut();
+                            trace("User signed out");
+                        }
                     }
 
                     @Override
@@ -141,7 +145,7 @@ public class Database {
                 String roomId = dataSnapshot.getKey();
                 trace("Child " + roomId + " removed from \'roomIdentity\'");
 
-                // Remove room name and password when deleted
+                // Remove room name and password when room is deleted
                 roomNames.remove(roomId);
                 roomPasswords.remove(roomId);
             }
@@ -190,11 +194,6 @@ public class Database {
 
     }
 
-    public static void signOutUser() {
-        shouldSignOut = true;
-        setUserRoom(null);
-    }
-
     public static void setUserRoom(String roomID) { // roomid = null removes from room
 
         trace("setUserRoom: " + roomID);
@@ -205,6 +204,11 @@ public class Database {
             getCurrentUserReference().child("currentRoomID").setValue(roomID);
         }
 
+    }
+
+    public static void signOutUser() {
+        shouldSignOut = true;
+        setUserRoom(null);
     }
 
     public static void setUsersListener(ValueEventListener usersListener){
