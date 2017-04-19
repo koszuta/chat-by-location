@@ -139,6 +139,7 @@ public class ChatActivity extends AppCompatActivity {
                 break;
 
             case R.id.menu_sign_out:
+                Database.setUserRoom("");
                 AuthUI.getInstance()
                         .signOut(this).addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override

@@ -119,6 +119,7 @@ public class RoomUserListActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menu_sign_out:
+                Database.setUserRoom("");
                 AuthUI.getInstance()
                         .signOut(this).addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override

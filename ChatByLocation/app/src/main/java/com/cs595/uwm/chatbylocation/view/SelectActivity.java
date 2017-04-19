@@ -73,10 +73,11 @@ public class SelectActivity extends AppCompatActivity {
     private void displayRoomList() {
         ListView listOfRooms = (ListView) findViewById(R.id.roomList);
 
-        final FirebaseListAdapter<RoomIdentity> adapter = new FirebaseListAdapter<RoomIdentity>(this,
+        final FirebaseListAdapter<RoomIdentity> adapter = new FirebaseListAdapter<RoomIdentity>(
+                this,
                 RoomIdentity.class,
                 R.layout.room_list_item,
-                FirebaseDatabase.getInstance().getReference().child("roomIdentity")) {
+                Database.getRoomIdentityReference()) {
             @Override
             protected void populateView(View view, RoomIdentity roomIdentity, int position) {
                 final TextView roomName = (TextView) view.findViewById(R.id.roomName);
@@ -117,6 +118,7 @@ public class SelectActivity extends AppCompatActivity {
                 break;
 
             case R.id.menu_sign_out:
+                Database.setUserRoom("");
                 AuthUI.getInstance()
                         .signOut(this).addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override
