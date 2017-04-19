@@ -1,10 +1,8 @@
 package com.cs595.uwm.chatbylocation.service;
 
 import android.graphics.Color;
-import android.support.annotation.NonNull;
 
 import com.cs595.uwm.chatbylocation.objModel.ChatMessage;
-import com.google.android.gms.fitness.data.Value;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.ChildEventListener;
@@ -27,6 +25,8 @@ public class Database {
     private static String currentRoomID;
     private static int textSize = 14;
     private static boolean listening = false;
+
+    private static boolean shouldSignOut = false;
 
     // TODO: Move this somewhere better
     private static Map<String, String> roomNames = new HashMap<>();
@@ -77,7 +77,10 @@ public class Database {
 
                         if (roomID == null || roomID.equals("")) return;
 
-                        getRoomUsersReference().child(roomID).child(getUserID()).setValue(true);
+                        String userId = getUserID();
+                        if (userId != null) {
+                            getRoomUsersReference().child(roomID).child(userId).setValue(true);
+                        }
 
                     }
 
@@ -93,11 +96,19 @@ public class Database {
                         String removeFrom = String.valueOf(dataSnapshot.getValue());
                         trace("removeFromListener sees removeFrom: " + removeFrom);
 
+                        String userId = getUserID();
                         if (!(removeFrom == null || removeFrom.equals(""))) {
-                            getRoomUsersReference().child(removeFrom).child(getUserID()).setValue(null);
+                            if (userId != null) {
+                                getRoomUsersReference().child(removeFrom).child(userId).removeValue();
+                            }
                             getCurrentUserReference().child("currentRoomID").setValue("");
                             getCurrentUserReference().child("removeFrom").setValue("");
                             trace("removeFromListener has removed the user from their room");
+
+                            if (shouldSignOut) {
+                                FirebaseAuth.getInstance().signOut();
+                                shouldSignOut = false;
+                            }
                         }
 
                     }
@@ -179,9 +190,14 @@ public class Database {
 
     }
 
+    public static void signOutUser() {
+        shouldSignOut = true;
+        setUserRoom(null);
+    }
+
     public static void setUserRoom(String roomID) { // roomid = null removes from room
 
-        trace("setUserRoom:" + roomID);
+        trace("setUserRoom: " + roomID);
 
         if (roomID == null) {
             getCurrentUserReference().child("removeFrom").setValue(currentRoomID);
