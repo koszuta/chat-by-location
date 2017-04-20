@@ -25,6 +25,24 @@
     <!-- Example General settings -->
     <string name="pref_header_general">General</string>
 
+    <string name="pref_user_icon">Profile icon</string>
+    <string-array name="user_icon_display">
+        <item>Custom image</item>
+        <item>Bear</item>
+        <item>Dragon</item>
+        <item>Elephant</item>
+        <item>Hippo</item>
+        <item>Koala</item>
+    </string-array>
+    <array name="user_icon_values">
+        <item>custom</item>
+        <item>bear</item>
+        <item>dragon</item>
+        <item>elephant</item>
+        <item>hippo</item>
+        <item>koala</item>
+    </array>
+
     <string name="pref_title_social_recommendations">Enable social recommendations</string>
     <string name="pref_description_social_recommendations">Recommendations for people to contact
         based on your message history

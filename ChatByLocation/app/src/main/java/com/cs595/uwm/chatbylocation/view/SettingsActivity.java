@@ -19,12 +19,14 @@ import android.preference.PreferenceActivity;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
 import android.preference.RingtonePreference;
+import android.provider.MediaStore;
 import android.support.v7.app.ActionBar;
 import android.text.TextUtils;
 import android.view.MenuItem;
 
 import com.cs595.uwm.chatbylocation.R;
 import com.cs595.uwm.chatbylocation.service.Database;
+import com.google.firebase.auth.UserProfileChangeRequest;
 
 import net.margaritov.preference.colorpicker.ColorPickerPreference;
 
@@ -42,6 +44,8 @@ import java.util.List;
  * API Guide</a> for more information on developing a Settings UI.
  */
 public class SettingsActivity extends AppCompatPreferenceActivity {
+
+    public static final int REQUEST_IMAGE_CAPTURE = 42;
 
     private static boolean inFragment = false;
     private static String caller;
@@ -218,11 +222,15 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             setHasOptionsMenu(true);
 
             SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
+            final ListPreference iconPref = (ListPreference) findPreference("user_icon");
             ColorPickerPreference colorPref = (ColorPickerPreference) findPreference("color1");
 
             // Set summary to correct preference values
             int color = prefs.getInt("color1", Color.BLACK);
             colorPref.setSummary(ColorPickerPreference.convertToRGB(color));
+
+            String icon = prefs.getString("user_icon", "default");
+            iconPref.setIcon(getIcon(icon));
 
             inFragment = true;
 
@@ -236,6 +244,25 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             // guidelines.
             //bindPreferenceSummaryToValue(findPreference("example_text"));
             bindPreferenceSummaryToValue(findPreference("example_list"));
+
+            iconPref.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+                @Override
+                public boolean onPreferenceChange(Preference preference, Object newValue) {
+                    String icon = String.valueOf(newValue);
+                    if ("custom".equals(icon)) {
+                        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                        if (takePictureIntent.resolveActivity(getActivity().getPackageManager()) != null) {
+                            //startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
+                            //UserProfileChangeRequest.Builder changeRequest = new UserProfileChangeRequest.Builder();
+                        }
+                    }
+                    else {
+                        iconPref.setIcon(getIcon(icon));
+                    }
+                    
+                    return true;
+                }
+            });
 
             // Add PrefChange listener to text color picker
             colorPref.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
@@ -271,6 +298,34 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             }
             return super.onOptionsItemSelected(item);
         }
+    }
+
+    private static int getIcon(String iconName) {
+        int icon = R.drawable.ic_default_icon;
+        if (iconName == null) return icon;
+        switch (iconName) {
+            case "custom":
+
+                break;
+            case "bear":
+                icon = R.drawable.ic_bear;
+                break;
+            case "dragon":
+                icon = R.drawable.ic_dragon;
+                break;
+            case "elephant":
+                icon = R.drawable.ic_elephant;
+                break;
+            case "hippo":
+                icon = R.drawable.ic_hippo;
+                break;
+            case "koala":
+                icon = R.drawable.ic_koala;
+                break;
+            default:
+                break;
+        }
+        return icon;
     }
 
     /**
