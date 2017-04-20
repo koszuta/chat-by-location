@@ -9,13 +9,13 @@ import java.util.Date;
 public class ChatMessage {
     private String messageText;
     private String messageUser;
-    private int    messageIcon;
+    private int    messageColor;
     private long messageTime;
 
-    public ChatMessage(String messageText, String messageUser, int messageIcon) {
+    public ChatMessage(String messageText, String messageUser, int messageColor) {
         this.messageText = messageText;
         this.messageUser = messageUser;
-        this.messageIcon = messageIcon;
+        this.messageColor = messageColor;
 
         // Initialize to current time
         messageTime = new Date().getTime();
@@ -41,10 +41,10 @@ public class ChatMessage {
         this.messageUser = messageUser;
     }
 
-    public int getMessageIcon() { return messageIcon; }
+    public int getMessageColor() { return messageColor; }
 
-    public void setMessageIcon(int messageIcon) {
-        this.messageIcon = messageIcon;
+    public void setMessageColor(int messageColor) {
+        this.messageColor = messageColor;
     }
 
     public long getMessageTime() {

@@ -5,8 +5,10 @@ package com.cs595.uwm.chatbylocation.view;
 import android.app.DialogFragment;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
+import android.preference.PreferenceManager;
 import android.support.v4.content.res.ResourcesCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Spannable;
@@ -22,16 +24,12 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.cs595.uwm.chatbylocation.R;
 import com.cs595.uwm.chatbylocation.controllers.MuteController;
 import com.cs595.uwm.chatbylocation.objModel.ChatMessage;
 import com.cs595.uwm.chatbylocation.service.Database;
-import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.database.FirebaseListAdapter;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.FirebaseDatabase;
@@ -52,21 +50,18 @@ public class ChatActivity extends AppCompatActivity {
     public static final String NAME_ARGUMENT = "usernameForBundle";
     public static final String ICON_ARGUMENT = "iconForBundle";
 
-    DialogFragment messageDialog;
-    ListView messageListView;
+    private DialogFragment messageDialog;
+    private ListView messageListView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.chat_layout);
+
         //construct objects
         messageListView = (ListView) this.findViewById(R.id.messageList);
         messageListView.setItemsCanFocus(false);
         messageDialog = new MessageDetailsDialog();
-
-        displayChatMessages();
-
-        setTitle(Database.getCurrentRoomName());
 
         messageListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -77,21 +72,23 @@ public class ChatActivity extends AppCompatActivity {
                 messageDialog = new MessageDetailsDialog();
                 Bundle args = new Bundle();
                 args.putString(NAME_ARGUMENT, messageUser);
-                args.putInt(ICON_ARGUMENT, message.getMessageIcon());
+                args.putInt(ICON_ARGUMENT, R.drawable.ic_koala);
                 messageDialog.setArguments(args);
                 messageDialog.show(getFragmentManager(), "message details");
             }
         });
-    }
-    public void onMuteClick(View v) {
-        String name = messageDialog.getArguments().getString(NAME_ARGUMENT);
-        Context context = v.getContext();
 
-        if(MuteController.isMuted(v.getContext(), name)) {
-            MuteController.removeUserFromMuteList(context, name);
+        setTitle(Database.getCurrentRoomName());
+        displayChatMessages();
+    }
+    public void onMuteClick(View view) {
+        String name = messageDialog.getArguments().getString(NAME_ARGUMENT);
+
+        if(MuteController.isMuted(view.getContext(), name)) {
+            MuteController.removeUserFromMuteList(view.getContext(), name);
         }
         else {
-            MuteController.addUserToMuteList(context, name);
+            MuteController.addUserToMuteList(view.getContext(), name);
         }
         displayChatMessages();
     }
@@ -111,15 +108,20 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     public void sendMessageClick(View view) {
-
-        EditText input = (EditText) findViewById(R.id.textInput);
+        final EditText textInput = (EditText) findViewById(R.id.textInput);
 
         String roomID = Database.getCurrentRoomID();
-        if (roomID != null) Database.sendChatMessage(new ChatMessage(input.getText().toString(),
-                Database.getUserUsername(), getIcon()), roomID);
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        if (roomID != null) {
+            Database.sendChatMessage(
+                    new ChatMessage(
+                            String.valueOf(textInput.getText()),
+                            Database.getUserUsername(),
+                            prefs.getInt("color1", Color.BLACK)),
+                    roomID);
+        }
 
-        input.setText("");
-
+        textInput.setText("");
     }
 
     @Override
@@ -171,49 +173,41 @@ public class ChatActivity extends AppCompatActivity {
                         ChatActivity.this,
                         ChatMessage.class,
                         R.layout.message,
-                        FirebaseDatabase.getInstance().getReference().child("roomMessages").child(roomID)) {
+                        Database.getRoomMessagesReference().child(roomID)) {
                     @Override
                     protected void populateView(View view, ChatMessage chatMessage, int position) {
                         String username = chatMessage.getMessageUser();
-
-                        final TextView messageText = (TextView) view.findViewById(R.id.messageText);
-                        /*
-                        if (MuteController.isMuted(username)) {
-                            // view.setVisibility(View.GONE);
-                            messageText.setText("This user is muted");
-                            return;
-                        }
-                        //*/
-
                         if (username == null) username = "no name";
 
                         // Get reference to the views of message.xml
-                        ImageView userIcon = (ImageView) view.findViewById(R.id.userIcon);
-                        userIcon.setImageResource(chatMessage.getMessageIcon());
+                        final TextView messageText = (TextView) view.findViewById(R.id.messageText);
+                        final ImageView userIcon = (ImageView) view.findViewById(R.id.userIcon);
+
+                        // Nathan TODO: Replace with image from user in userlist
+                        userIcon.setImageResource(R.drawable.ic_koala);
 
                         // Set their text
                         String timestamp = formatTimestamp(chatMessage.getMessageTime());
                         if (timestamp == null) timestamp = "";
 
-                        SpannableString ss;
+                        SpannableString ss = new SpannableString(timestamp + ' ' + username + ": " + chatMessage.getMessageText());
                         if(MuteController.isMuted(view.getContext(), username)) {
-                            ss = new SpannableString(timestamp + ' ' + username + ": " + "--message muted--");
+                            ss = new SpannableString("\t\t-- This user is muted --");
+                            userIcon.setVisibility(View.GONE);
                         }
                         else {
-                            ss = new SpannableString(timestamp + ' ' + username + ": " + chatMessage.getMessageText());
+                            StyleSpan bold = new StyleSpan(android.graphics.Typeface.BOLD);
+                            RelativeSizeSpan timeSize = new RelativeSizeSpan(0.8f);
+                            ForegroundColorSpan timeColor = new ForegroundColorSpan(ResourcesCompat.getColor(getResources(), R.color.timestamp, null));
+
+                            int timeLength = timestamp.length() + 1;
+                            ss.setSpan(timeSize, 0, timeLength, Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
+                            ss.setSpan(timeColor, 0, timeLength, Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
+                            ss.setSpan(bold, timeLength, timeLength + username.length(), Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
+
+                            ForegroundColorSpan textColor = new ForegroundColorSpan(chatMessage.getMessageColor());
+                            ss.setSpan(textColor, timeLength + username.length() + 1, ss.length(), Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
                         }
-                        StyleSpan bold = new StyleSpan(android.graphics.Typeface.BOLD);
-                        RelativeSizeSpan timeSize = new RelativeSizeSpan(0.8f);
-                        ForegroundColorSpan timeColor = new ForegroundColorSpan(ResourcesCompat.getColor(getResources(), R.color.timestamp, null));
-
-                        int timeLength = timestamp.length() + 1;
-                        ss.setSpan(timeSize, 0, timeLength, Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
-                        ss.setSpan(timeColor, 0, timeLength, Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
-                        ss.setSpan(bold, timeLength, timeLength + username.length(), Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
-
-                        // Nathan TODO: Change to message color rather than user color
-                        //ForegroundColorSpan textColor = new ForegroundColorSpan(Database.getTextColor());
-                        //ss.setSpan(textColor, timeLength + username.length() + 1, ss.length(),Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
 
                         messageText.setText(ss);
                     }
