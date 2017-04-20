@@ -23,6 +23,8 @@ import java.util.Map;
 public class Database {
 
     private static String currentRoomID;
+    private static String removeFromRoom;
+
     private static int textSize = 14;
     private static boolean listening = false;
 
@@ -82,6 +84,12 @@ public class Database {
                             getRoomUsersReference().child(roomID).child(userId).setValue(true);
                         }
 
+                        // Sign out user
+                        if (shouldSignOut && "".equals(currentRoomID) && "".equals(removeFromRoom)) {
+                            shouldSignOut = false;
+                            FirebaseAuth.getInstance().signOut();
+                            trace("User signed out");
+                        }
                     }
 
                     @Override
@@ -110,7 +118,7 @@ public class Database {
                         }
 
                         // Sign out user
-                        if (shouldSignOut) {
+                        if (shouldSignOut && "".equals(currentRoomID) && "".equals(removeFromRoom)) {
                             shouldSignOut = false;
                             FirebaseAuth.getInstance().signOut();
                             trace("User signed out");
