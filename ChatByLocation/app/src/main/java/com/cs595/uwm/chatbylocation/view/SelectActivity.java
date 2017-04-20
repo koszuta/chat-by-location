@@ -117,19 +117,8 @@ public class SelectActivity extends AppCompatActivity {
                 break;
 
             case R.id.menu_sign_out:
-                AuthUI.getInstance()
-                        .signOut(this).addOnCompleteListener(new OnCompleteListener<Void>() {
-                    @Override
-                    public void onComplete(@NonNull Task<Void> task) {
-                        Toast.makeText(SelectActivity.this,
-                                "You have been signed out.",
-                                Toast.LENGTH_LONG)
-                                .show();
-
-                        // Close activity
-                        finish();
-                    }
-                });
+                Database.signOutUser();
+                //return to sign in
                 startActivity(new Intent(this, MainActivity.class));
                 break;
 

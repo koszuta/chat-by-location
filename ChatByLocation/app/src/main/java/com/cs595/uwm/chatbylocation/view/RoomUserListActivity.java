@@ -119,19 +119,9 @@ public class RoomUserListActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menu_sign_out:
-                AuthUI.getInstance()
-                        .signOut(this).addOnCompleteListener(new OnCompleteListener<Void>() {
-                    @Override
-                    public void onComplete(@NonNull Task<Void> task) {
-                        Toast.makeText(RoomUserListActivity.this,
-                                "You have been signed out.",
-                                Toast.LENGTH_LONG)
-                                .show();
-                    }
-                });
+                Database.signOutUser();
                 //return to sign in
-                Intent mainIntent = new Intent(this, MainActivity.class);
-                startActivity(mainIntent);
+                startActivity(new Intent(this, MainActivity.class));
                 break;
             case R.id.menu_settings:
                 Intent n = new Intent(this, SettingsActivity.class);

@@ -1,10 +1,8 @@
 package com.cs595.uwm.chatbylocation.service;
 
 import android.graphics.Color;
-import android.support.annotation.NonNull;
 
 import com.cs595.uwm.chatbylocation.objModel.ChatMessage;
-import com.google.android.gms.fitness.data.Value;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.ChildEventListener;
@@ -25,8 +23,12 @@ import java.util.Map;
 public class Database {
 
     private static String currentRoomID;
+    private static String removeFromRoom;
+
     private static int textSize = 14;
     private static boolean listening = false;
+
+    private static boolean shouldSignOut = false;
 
     // TODO: Move this somewhere better
     private static Map<String, String> roomNames = new HashMap<>();
@@ -77,8 +79,17 @@ public class Database {
 
                         if (roomID == null || roomID.equals("")) return;
 
-                        getRoomUsersReference().child(roomID).child(getUserID()).setValue(true);
+                        String userId = getUserID();
+                        if (userId != null) {
+                            getRoomUsersReference().child(roomID).child(userId).setValue(true);
+                        }
 
+                        // Sign out user
+                        if (shouldSignOut && "".equals(currentRoomID) && "".equals(removeFromRoom)) {
+                            shouldSignOut = false;
+                            FirebaseAuth.getInstance().signOut();
+                            trace("User signed out");
+                        }
                     }
 
                     @Override
@@ -93,13 +104,25 @@ public class Database {
                         String removeFrom = String.valueOf(dataSnapshot.getValue());
                         trace("removeFromListener sees removeFrom: " + removeFrom);
 
+                        String userId = getUserID();
                         if (!(removeFrom == null || removeFrom.equals(""))) {
-                            getRoomUsersReference().child(removeFrom).child(getUserID()).setValue(null);
-                            getCurrentUserReference().child("currentRoomID").setValue("");
+                            // Remove user from roomUsers list
+                            if (userId != null) {
+                                getRoomUsersReference().child(removeFrom).child(userId).removeValue();
+                                getCurrentUserReference().child("currentRoomID").setValue("");
+                            }
+                            
                             getCurrentUserReference().child("removeFrom").setValue("");
+
                             trace("removeFromListener has removed the user from their room");
                         }
 
+                        // Sign out user
+                        if (shouldSignOut && "".equals(currentRoomID) && "".equals(removeFromRoom)) {
+                            shouldSignOut = false;
+                            FirebaseAuth.getInstance().signOut();
+                            trace("User signed out");
+                        }
                     }
 
                     @Override
@@ -130,7 +153,7 @@ public class Database {
                 String roomId = dataSnapshot.getKey();
                 trace("Child " + roomId + " removed from \'roomIdentity\'");
 
-                // Remove room name and password when deleted
+                // Remove room name and password when room is deleted
                 roomNames.remove(roomId);
                 roomPasswords.remove(roomId);
             }
@@ -181,7 +204,7 @@ public class Database {
 
     public static void setUserRoom(String roomID) { // roomid = null removes from room
 
-        trace("setUserRoom:" + roomID);
+        trace("setUserRoom: " + roomID);
 
         if (roomID == null) {
             getCurrentUserReference().child("removeFrom").setValue(currentRoomID);
@@ -189,6 +212,11 @@ public class Database {
             getCurrentUserReference().child("currentRoomID").setValue(roomID);
         }
 
+    }
+
+    public static void signOutUser() {
+        shouldSignOut = true;
+        setUserRoom(null);
     }
 
     public static void setUsersListener(ValueEventListener usersListener){
