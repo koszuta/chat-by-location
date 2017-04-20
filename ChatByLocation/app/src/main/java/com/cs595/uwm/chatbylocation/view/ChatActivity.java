@@ -133,9 +133,8 @@ public class ChatActivity extends AppCompatActivity {
         switch (item.getItemId()) {
 
             case android.R.id.home:
-                // TODO: Leave chatroom or just show list of rooms?
-                Intent intent = new Intent(this, SelectActivity.class);
-                startActivity(intent);
+                Database.setUserRoom(null);
+                startActivity(new Intent(this, SelectActivity.class));
                 break;
 
             case R.id.menu_sign_out:
@@ -157,11 +156,6 @@ public class ChatActivity extends AppCompatActivity {
                 Intent settingsIntent = new Intent(this, SettingsActivity.class);
                 settingsIntent.putExtra("caller", ChatActivity.class.getName());
                 startActivity(settingsIntent);
-                break;
-
-            case R.id.leave_room:
-                Database.setUserRoom(null);
-                startActivity(new Intent(this, SelectActivity.class));
                 break;
 
             case R.id.room_users:

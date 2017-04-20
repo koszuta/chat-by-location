@@ -7,15 +7,12 @@
         android:title="Current User List"
         app:showAsAction="never"
         android:id="@+id/room_users"/>
-    <item
-        android:id="@+id/leave_room"
-        android:enabled="true"
-        android:title="Leave Room"
-        android:visible="true" />
+
     <item
         android:title="Preferences"
         app:showAsAction="never"
         android:id="@+id/menu_settings"/>
+
     <item
         android:title="@string/sign_out"
         app:showAsAction="never"
