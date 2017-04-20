@@ -33,7 +33,6 @@ public class Database {
     // TODO: Move this somewhere better
     private static Map<String, String> roomNames = new HashMap<>();
     private static Map<String, String> roomPasswords = new HashMap<>();
-    private static int textColor = Color.parseColor("#000000");
 
     public static String getCurrentRoomName() {
         return (currentRoomID == null) ? null : roomNames.get(currentRoomID);
@@ -45,14 +44,6 @@ public class Database {
 
     public static String getRoomPassword(String roomId) {
         return roomPasswords.get(roomId);
-    }
-
-    public static int getTextColor() {
-        return textColor;
-    }
-
-    public static void setTextColor(int color) {
-        textColor = color;
     }
 
     public static int getTextSize() {

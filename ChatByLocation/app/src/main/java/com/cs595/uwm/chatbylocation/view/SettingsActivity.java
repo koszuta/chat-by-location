@@ -4,6 +4,7 @@ package com.cs595.uwm.chatbylocation.view;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.graphics.Color;
 import android.media.Ringtone;
@@ -216,6 +217,13 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             addPreferencesFromResource(R.xml.pref_general);
             setHasOptionsMenu(true);
 
+            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
+            ColorPickerPreference colorPref = (ColorPickerPreference) findPreference("color1");
+
+            // Set summary to correct preference values
+            int color = prefs.getInt("color1", Color.BLACK);
+            colorPref.setSummary(ColorPickerPreference.convertToRGB(color));
+
             inFragment = true;
 
             // Set 'Display Name' summary to Username
@@ -230,15 +238,11 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             bindPreferenceSummaryToValue(findPreference("example_list"));
 
             // Add PrefChange listener to text color picker
-            ColorPickerPreference colorPref = (ColorPickerPreference) findPreference("color1");
             colorPref.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
                 @Override
                 public boolean onPreferenceChange(Preference preference, Object newValue) {
-                    String color = ColorPickerPreference.convertToRGB(Integer.valueOf(String.valueOf(newValue)));
-                    int colorInt = Color.parseColor(color);
-
+                    String color = ColorPickerPreference.convertToRGB(Integer.valueOf((Integer) newValue));
                     preference.setSummary(color);
-                    Database.setTextColor(colorInt);
 
                     return true;
                 }
@@ -252,7 +256,6 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                     String sizeString = String.valueOf(newValue);
                     int sizeInt = Integer.valueOf(String.valueOf(newValue));
                     preference.setSummary(sizeString);
-                    Database.setTextColor(sizeInt);
 
                     return true;
                 }

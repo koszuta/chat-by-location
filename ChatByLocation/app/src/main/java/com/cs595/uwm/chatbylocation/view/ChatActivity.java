@@ -212,8 +212,8 @@ public class ChatActivity extends AppCompatActivity {
                         ss.setSpan(bold, timeLength, timeLength + username.length(), Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
 
                         // Nathan TODO: Change to message color rather than user color
-                        ForegroundColorSpan textColor = new ForegroundColorSpan(Database.getTextColor());
-                        ss.setSpan(textColor, timeLength + username.length() + 1, ss.length(),Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
+                        //ForegroundColorSpan textColor = new ForegroundColorSpan(Database.getTextColor());
+                        //ss.setSpan(textColor, timeLength + username.length() + 1, ss.length(),Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
 
                         messageText.setText(ss);
                     }
