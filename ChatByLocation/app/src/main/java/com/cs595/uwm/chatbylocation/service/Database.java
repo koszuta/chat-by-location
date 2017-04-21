@@ -184,7 +184,7 @@ public class Database {
     public static void createUser(String username) {
 
         getCurrentUserReference().child("currentRoomID").setValue("");
-        //getCurrentUserReference().child("username").setValue(username);
+        getCurrentUserReference().child("username").setValue(username);
         trace("created user");
 
     }

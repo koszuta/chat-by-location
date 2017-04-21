@@ -108,13 +108,9 @@ public class RegisterActivity extends AppCompatActivity {
                                 updateToast("Registration Failed. The account may already exist, or an unknown error occurred.");
 
                             } else {
-                                trace("making new user");
                                 FirebaseUser newUser = task.getResult().getUser();
-                                trace("building profile update");
                                 UserProfileChangeRequest profile = new UserProfileChangeRequest.Builder().setDisplayName(name).build();
-                                trace("update profile");
                                 newUser.updateProfile(profile);
-                                trace("update firebase db");
                                 Database.createUser(name);
                                 FirebaseAuth.getInstance().signOut();
                                 updateToast("Thank you for registering! Please sign in again to use Chat By Location");
