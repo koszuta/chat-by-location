@@ -1,9 +1,6 @@
 package com.cs595.uwm.chatbylocation.view;
 
-
-
 import android.app.DialogFragment;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
@@ -28,15 +25,14 @@ import android.widget.TextView;
 import com.cs595.uwm.chatbylocation.R;
 import com.cs595.uwm.chatbylocation.controllers.MuteController;
 import com.cs595.uwm.chatbylocation.objModel.ChatMessage;
+import com.cs595.uwm.chatbylocation.objModel.UserIcon;
 import com.cs595.uwm.chatbylocation.service.Database;
 import com.firebase.ui.database.FirebaseListAdapter;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.Date;
-import java.util.Random;
 
 /**
  * Created by Nathan on 3/13/17.
@@ -58,6 +54,8 @@ public class ChatActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.chat_layout);
 
+        Database.initRoomUsersListener();
+
         //construct objects
         messageListView = (ListView) this.findViewById(R.id.messageList);
         messageListView.setItemsCanFocus(false);
@@ -68,11 +66,12 @@ public class ChatActivity extends AppCompatActivity {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 ChatMessage message = (ChatMessage)parent.getItemAtPosition(position);
                 String messageUser = message.getMessageUser();
+                int iconRes = UserIcon.getIconResource(Database.getUserIcon(messageUser));
 
                 messageDialog = new MessageDetailsDialog();
                 Bundle args = new Bundle();
                 args.putString(NAME_ARGUMENT, messageUser);
-                args.putInt(ICON_ARGUMENT, R.drawable.ic_koala);
+                args.putInt(ICON_ARGUMENT, iconRes);
                 messageDialog.setArguments(args);
                 messageDialog.show(getFragmentManager(), "message details");
             }
@@ -183,8 +182,9 @@ public class ChatActivity extends AppCompatActivity {
                         final TextView messageText = (TextView) view.findViewById(R.id.messageText);
                         final ImageView userIcon = (ImageView) view.findViewById(R.id.userIcon);
 
-                        // Nathan TODO: Replace with image from user in userlist
-                        userIcon.setImageResource(R.drawable.ic_koala);
+                        // Use icon from corresponding user
+                        int icon = UserIcon.getIconResource(Database.getUserIcon(username));
+                        userIcon.setImageResource(icon);
 
                         // Set their text
                         String timestamp = formatTimestamp(chatMessage.getMessageTime());
@@ -259,34 +259,7 @@ public class ChatActivity extends AppCompatActivity {
         return dateFormatted;
     }
 
-    private int getIcon() {
-        int icon = 0;
-        switch (new Random().nextInt(5)) {
-            case 0:
-                icon = R.drawable.ic_bear;
-                break;
-            case 1:
-                icon = R.drawable.ic_dragon;
-                break;
-            case 2:
-                icon = R.drawable.ic_elephant;
-                break;
-            case 3:
-                icon = R.drawable.ic_hippo;
-                break;
-            case 4:
-                icon = R.drawable.ic_koala;
-                break;
-            default:
-                icon = R.mipmap.ic_launcher;
-                break;
-        }
-
-        return icon;
-    }
-
     private static void trace(String message){
         System.out.println("ChatActivity >> " + message); //todo android logger
-
     }
 }

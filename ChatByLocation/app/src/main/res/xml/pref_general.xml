@@ -25,6 +25,7 @@
         android:entries="@array/user_icon_display"
         android:entryValues="@array/user_icon_values"
         android:key="user_icon"
+        android:defaultValue="@string/none"
         android:negativeButtonText="@null"
         android:positiveButtonText="@null"
         android:title="@string/pref_user_icon" />

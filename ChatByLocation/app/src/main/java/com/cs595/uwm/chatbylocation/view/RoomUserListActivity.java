@@ -24,6 +24,7 @@ import android.widget.ToggleButton;
 
 import com.cs595.uwm.chatbylocation.R;
 import com.cs595.uwm.chatbylocation.controllers.MuteController;
+import com.cs595.uwm.chatbylocation.objModel.UserIcon;
 import com.cs595.uwm.chatbylocation.objModel.UserIdentity;
 import com.cs595.uwm.chatbylocation.service.Database;
 import com.firebase.ui.auth.AuthUI;
@@ -92,7 +93,7 @@ public class RoomUserListActivity extends AppCompatActivity {
                 Iterator<String> iterator = roomUsers.keySet().iterator();
                 while (iterator.hasNext()){
                     String userID = iterator.next();
-                    users.add(new UserIdentity(userID, 0));
+                    users.add(new UserIdentity(userID, UserIcon.NONE));
                 }
                 //users.add(new UserIdentity((String) dataSnapshot.getValue(), 0));
 

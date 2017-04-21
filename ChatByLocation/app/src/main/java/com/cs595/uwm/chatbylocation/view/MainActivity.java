@@ -2,12 +2,15 @@ package com.cs595.uwm.chatbylocation.view;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 
 import com.cs595.uwm.chatbylocation.R;
+import com.cs595.uwm.chatbylocation.objModel.UserIcon;
 import com.cs595.uwm.chatbylocation.objModel.UserIdentity;
 import com.cs595.uwm.chatbylocation.service.Database;
 import com.cs595.uwm.chatbylocation.service.Registration;
@@ -31,6 +34,13 @@ public class MainActivity extends AppCompatActivity {
         getSupportActionBar().hide();
 
         setContentView(R.layout.activity_main);
+
+        // If you get a weird ClassCastException you may need to uncomment
+        // this and run it once to reset the preference
+        /*
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        prefs.edit().putString("user_icon", UserIcon.NONE).apply();
+        //*/
 
         Database.setUsers(new ArrayList<UserIdentity>());
         Database.initUsersListener();
