@@ -28,30 +28,24 @@ public class ChatNameSelectionActivity extends AppCompatActivity {
     public void registerChatName(View v) {
         EditText input = (EditText) findViewById(R.id.chatname);
         String name = input.getText().toString();
-        System.out.println("register chat name@");
-
-//        if (name.equals("") || !Database.getUsernameUnique(name)) {
-//            //TODO: display error message
+//        System.out.println("register chat name@");
 //
-//        } else {
+//        Database.createUser();
+//
+//        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+//        UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
+//                .setDisplayName(name)
+//                .build();
+//        user.updateProfile(profileUpdates)
+//                .addOnCompleteListener(new OnCompleteListener<Void>() {
+//                    @Override
+//                    public void onComplete(Task<Void> task) {
+//                        if (task.isSuccessful()) {
+//                            startActivity(new Intent(ChatNameSelectionActivity.this, SelectActivity.class));
+//                        }
+//                    }
+//                });
 
-            Database.createUser();
-
-            FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-            UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
-                    .setDisplayName(name)
-                    .build();
-            user.updateProfile(profileUpdates)
-                    .addOnCompleteListener(new OnCompleteListener<Void>() {
-                        @Override
-                        public void onComplete(Task<Void> task) {
-                            if (task.isSuccessful()) {
-                                startActivity(new Intent(ChatNameSelectionActivity.this, SelectActivity.class));
-                            }
-                        }
-                    });
-
-//        }
 
     }
 }

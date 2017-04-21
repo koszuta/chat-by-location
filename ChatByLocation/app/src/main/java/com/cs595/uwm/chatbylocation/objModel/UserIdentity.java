@@ -5,22 +5,25 @@ package com.cs595.uwm.chatbylocation.objModel;
  */
 
 public class UserIdentity {
-    private String name;
+    private String username;
     private int icon;
+    private String currentRoomID;
+    private String removeFrom;
 
     public UserIdentity(){
     }
 
-    public UserIdentity(String name, int icon) {
-        this.name = name;
+    public UserIdentity(String username, int icon) {
+        this.username = username;
+        this.icon = icon;
     }
 
-    public String getName() {
-        return name;
+    public String getUsername() {
+        return username;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     public int getIcon() {
@@ -29,5 +32,21 @@ public class UserIdentity {
 
     public void setIcon(int icon) {
         this.icon = icon;
+    }
+
+    public String getCurrentRoomID() {
+        return currentRoomID;
+    }
+
+    public void setCurrentRoomID(String currentRoomID) {
+        this.currentRoomID = currentRoomID;
+    }
+
+    public String getRemoveFrom() {
+        return removeFrom;
+    }
+
+    public void setRemoveFrom(String removeFrom) {
+        this.removeFrom = removeFrom;
     }
 }

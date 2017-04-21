@@ -74,7 +74,7 @@ public class RoomUserListActivity extends AppCompatActivity {
                 }
 
                 TextView userName = (TextView) convertView.findViewById(R.id.user_name_in_list);
-                userName.setText(user.getName());
+                userName.setText(user.getUsername());
                 ImageView iV = (ImageView) convertView.findViewById(R.id.icon_in_user_list);
                 iV.setImageResource(R.drawable.ic_dragon);
                 return convertView;
