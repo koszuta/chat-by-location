@@ -1,9 +1,6 @@
 package com.cs595.uwm.chatbylocation.view;
 
-
-
 import android.app.DialogFragment;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
@@ -32,11 +29,9 @@ import com.cs595.uwm.chatbylocation.service.Database;
 import com.firebase.ui.database.FirebaseListAdapter;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.Date;
-import java.util.Random;
 
 /**
  * Created by Nathan on 3/13/17.
@@ -57,6 +52,8 @@ public class ChatActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.chat_layout);
+
+        Database.initRoomUsersListener();
 
         //construct objects
         messageListView = (ListView) this.findViewById(R.id.messageList);
@@ -184,7 +181,8 @@ public class ChatActivity extends AppCompatActivity {
                         final ImageView userIcon = (ImageView) view.findViewById(R.id.userIcon);
 
                         // Nathan TODO: Replace with image from user in userlist
-                        userIcon.setImageResource(R.drawable.ic_koala);
+                        int icon = getIcon(Database.getUserIcon(username));
+                        userIcon.setImageResource(icon);
 
                         // Set their text
                         String timestamp = formatTimestamp(chatMessage.getMessageTime());
@@ -259,34 +257,35 @@ public class ChatActivity extends AppCompatActivity {
         return dateFormatted;
     }
 
-    private int getIcon() {
-        int icon = 0;
-        switch (new Random().nextInt(5)) {
-            case 0:
+    private int getIcon(String iconName) {
+        int icon = R.drawable.ic_default_icon;
+        if (iconName == null) return icon;
+        switch (iconName) {
+            case "custom":
+
+                break;
+            case "bear":
                 icon = R.drawable.ic_bear;
                 break;
-            case 1:
+            case "dragon":
                 icon = R.drawable.ic_dragon;
                 break;
-            case 2:
+            case "elephant":
                 icon = R.drawable.ic_elephant;
                 break;
-            case 3:
+            case "hippo":
                 icon = R.drawable.ic_hippo;
                 break;
-            case 4:
+            case "koala":
                 icon = R.drawable.ic_koala;
                 break;
             default:
-                icon = R.mipmap.ic_launcher;
                 break;
         }
-
         return icon;
     }
 
     private static void trace(String message){
         System.out.println("ChatActivity >> " + message); //todo android logger
-
     }
 }

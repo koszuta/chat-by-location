@@ -1,7 +1,5 @@
 package com.cs595.uwm.chatbylocation.service;
 
-import android.graphics.Color;
-
 import com.cs595.uwm.chatbylocation.objModel.ChatMessage;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -26,6 +24,7 @@ public class Database {
     private static String removeFromRoom;
 
     private static int textSize = 14;
+    private static String userIcon = "default";
     private static boolean listening = false;
 
     private static boolean shouldSignOut = false;
@@ -33,6 +32,9 @@ public class Database {
     // TODO: Move this somewhere better
     private static Map<String, String> roomNames = new HashMap<>();
     private static Map<String, String> roomPasswords = new HashMap<>();
+
+    private static Map<String, String> roomUserNames = new HashMap<>();
+    private static Map<String, String> roomUserIcons = new HashMap<>();
 
     public static String getCurrentRoomName() {
         return (currentRoomID == null) ? null : roomNames.get(currentRoomID);
@@ -44,6 +46,22 @@ public class Database {
 
     public static String getRoomPassword(String roomId) {
         return roomPasswords.get(roomId);
+    }
+
+    public static String getUserName(String userId) {
+        return roomUserNames.get(userId);
+    }
+
+    public static String getUserIcon(String username) {
+        return roomUserIcons.get(username);
+    }
+
+    public static String getUserIcon() {
+        return userIcon;
+    }
+
+    public static void setUserIcon(String icon) {
+        userIcon = icon;
     }
 
     public static int getTextSize() {
@@ -72,7 +90,8 @@ public class Database {
 
                         String userId = getUserID();
                         if (userId != null) {
-                            getRoomUsersReference().child(roomID).child(userId).setValue(true);
+                            getRoomUsersReference().child(roomID).child(userId).child("name").setValue(getUserUsername());
+                            getRoomUsersReference().child(roomID).child(userId).child("icon").setValue(userIcon);
                         }
 
                         // Sign out user
@@ -140,16 +159,6 @@ public class Database {
             }
 
             @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) {
-                String roomId = dataSnapshot.getKey();
-                trace("Child " + roomId + " removed from \'roomIdentity\'");
-
-                // Remove room name and password when room is deleted
-                roomNames.remove(roomId);
-                roomPasswords.remove(roomId);
-            }
-
-            @Override
             public void onChildChanged(DataSnapshot dataSnapshot, String s) {
                 String roomId = dataSnapshot.getKey();
                 trace("Child " + roomId + " data changed in \'roomIdentity\'");
@@ -162,6 +171,16 @@ public class Database {
                 Object pw = dataSnapshot.child("password").getValue();
                 String password = (pw == null) ? null : pw.toString();
                 roomPasswords.put(roomId, password);
+            }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+                String roomId = dataSnapshot.getKey();
+                trace("Child " + roomId + " removed from \'roomIdentity\'");
+
+                // Remove room name and password when room is deleted
+                roomNames.remove(roomId);
+                roomPasswords.remove(roomId);
             }
 
             @Override
@@ -180,6 +199,62 @@ public class Database {
         trace("Assigned listener to \'roomIdentity\'");
 
         listening = true;
+    }
+
+    public static void initRoomUsersListener() {
+        getRoomUsersReference().child(currentRoomID)
+                .addChildEventListener(new ChildEventListener() {
+                    @Override
+                    public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                        String userId = dataSnapshot.getKey();
+                        trace("Child " + userId + " added to \'roomUsers/" + currentRoomID);
+
+                        // Add user name
+                        String name = String.valueOf(dataSnapshot.child("name").getValue());
+                        roomUserNames.put(userId, name);
+
+                        // Add user icon
+                        String icon = String.valueOf(dataSnapshot.child("icon").getValue());
+                        roomUserIcons.put(name, icon);
+                    }
+
+                    @Override
+                    public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+                        String userId = dataSnapshot.getKey();
+                        trace("Child " + userId + " data changed in \'roomUsers/" + currentRoomID);
+
+                        // Update user name
+                        String name = String.valueOf(dataSnapshot.child("name").getValue());
+                        roomUserNames.put(userId, name);
+
+                        // Update user icon
+                        String icon = String.valueOf(dataSnapshot.child("icon").getValue());
+                        roomUserIcons.put(name, icon);
+                    }
+
+                    @Override
+                    public void onChildRemoved(DataSnapshot dataSnapshot) {
+                        String userId = dataSnapshot.getKey();
+                        trace("Child " + userId + " removed from \'roomUsers/" + currentRoomID);
+
+                        // Update room password
+                        String name = String.valueOf(dataSnapshot.child("name").getValue());
+                        roomUserNames.remove(userId);
+                        roomUserIcons.remove(name);
+                    }
+
+                    @Override
+                    public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });
+
+        trace("Assigned listener to \'roomUsers/" + currentRoomID);
     }
 
     public static String getCurrentRoomID() {

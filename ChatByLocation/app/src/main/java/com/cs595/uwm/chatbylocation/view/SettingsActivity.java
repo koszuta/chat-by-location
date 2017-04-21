@@ -249,6 +249,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                 @Override
                 public boolean onPreferenceChange(Preference preference, Object newValue) {
                     String icon = String.valueOf(newValue);
+                    Database.setUserIcon(icon);
                     if ("custom".equals(icon)) {
                         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                         if (takePictureIntent.resolveActivity(getActivity().getPackageManager()) != null) {
@@ -259,7 +260,14 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                     else {
                         iconPref.setIcon(getIcon(icon));
                     }
-                    
+
+                    if (Database.getCurrentRoomID() != null) {
+                        String userId = Database.getUserID();
+                        if (userId != null) {
+                            Database.getRoomUsersReference().child(Database.getCurrentRoomID()).child(userId).child("icon").setValue(icon);
+                        }
+                    }
+
                     return true;
                 }
             });

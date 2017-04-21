@@ -6,7 +6,7 @@ package com.cs595.uwm.chatbylocation.objModel;
 
 public class UserIdentity {
     private String name;
-    private int icon;
+    private String icon;
 
     public UserIdentity(){
     }
@@ -23,11 +23,11 @@ public class UserIdentity {
         this.name = name;
     }
 
-    public int getIcon() {
+    public String getIcon() {
         return icon;
     }
 
-    public void setIcon(int icon) {
+    public void setIcon(String icon) {
         this.icon = icon;
     }
 }
