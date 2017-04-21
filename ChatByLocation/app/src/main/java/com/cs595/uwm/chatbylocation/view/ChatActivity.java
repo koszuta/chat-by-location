@@ -25,6 +25,7 @@ import android.widget.TextView;
 import com.cs595.uwm.chatbylocation.R;
 import com.cs595.uwm.chatbylocation.controllers.MuteController;
 import com.cs595.uwm.chatbylocation.objModel.ChatMessage;
+import com.cs595.uwm.chatbylocation.objModel.UserIcon;
 import com.cs595.uwm.chatbylocation.service.Database;
 import com.firebase.ui.database.FirebaseListAdapter;
 import com.google.firebase.database.DataSnapshot;
@@ -65,11 +66,12 @@ public class ChatActivity extends AppCompatActivity {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 ChatMessage message = (ChatMessage)parent.getItemAtPosition(position);
                 String messageUser = message.getMessageUser();
+                int iconRes = UserIcon.getIconResource(Database.getUserIcon(messageUser));
 
                 messageDialog = new MessageDetailsDialog();
                 Bundle args = new Bundle();
                 args.putString(NAME_ARGUMENT, messageUser);
-                args.putInt(ICON_ARGUMENT, R.drawable.ic_koala);
+                args.putInt(ICON_ARGUMENT, iconRes);
                 messageDialog.setArguments(args);
                 messageDialog.show(getFragmentManager(), "message details");
             }
@@ -180,8 +182,8 @@ public class ChatActivity extends AppCompatActivity {
                         final TextView messageText = (TextView) view.findViewById(R.id.messageText);
                         final ImageView userIcon = (ImageView) view.findViewById(R.id.userIcon);
 
-                        // Nathan TODO: Replace with image from user in userlist
-                        int icon = getIcon(Database.getUserIcon(username));
+                        // Use icon from corresponding user
+                        int icon = UserIcon.getIconResource(Database.getUserIcon(username));
                         userIcon.setImageResource(icon);
 
                         // Set their text
@@ -255,34 +257,6 @@ public class ChatActivity extends AppCompatActivity {
         dateFormatted = dateFormatted.replace("AM", "am").replace("PM", "pm");
 
         return dateFormatted;
-    }
-
-    private int getIcon(String iconName) {
-        int icon = R.drawable.ic_default_icon;
-        if (iconName == null) return icon;
-        switch (iconName) {
-            case "custom":
-
-                break;
-            case "bear":
-                icon = R.drawable.ic_bear;
-                break;
-            case "dragon":
-                icon = R.drawable.ic_dragon;
-                break;
-            case "elephant":
-                icon = R.drawable.ic_elephant;
-                break;
-            case "hippo":
-                icon = R.drawable.ic_hippo;
-                break;
-            case "koala":
-                icon = R.drawable.ic_koala;
-                break;
-            default:
-                break;
-        }
-        return icon;
     }
 
     private static void trace(String message){

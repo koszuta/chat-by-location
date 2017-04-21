@@ -20,6 +20,8 @@
     <string name="unmute">UNMUTE</string>
     <string name="ban">BAN</string>
 
+    <string name="none">none</string>
+
     <!-- Strings related to Settings -->
 
     <!-- Example General settings -->
@@ -34,14 +36,14 @@
         <item>Hippo</item>
         <item>Koala</item>
     </string-array>
-    <array name="user_icon_values">
+    <string-array name="user_icon_values">
         <item>custom</item>
         <item>bear</item>
         <item>dragon</item>
         <item>elephant</item>
         <item>hippo</item>
         <item>koala</item>
-    </array>
+    </string-array>
 
     <string name="pref_title_social_recommendations">Enable social recommendations</string>
     <string name="pref_description_social_recommendations">Recommendations for people to contact

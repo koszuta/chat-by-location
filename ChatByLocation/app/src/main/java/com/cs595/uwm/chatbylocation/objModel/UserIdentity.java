@@ -5,17 +5,15 @@ package com.cs595.uwm.chatbylocation.objModel;
  */
 
 public class UserIdentity {
-    private String name;
     private String icon;
     private String username;
-    private int icon;
     private String currentRoomID;
     private String removeFrom;
 
     public UserIdentity(){
     }
 
-    public UserIdentity(String username, int icon) {
+    public UserIdentity(String username, String icon) {
         this.username = username;
         this.icon = icon;
     }

@@ -1,6 +1,7 @@
 package com.cs595.uwm.chatbylocation.service;
 
 import com.cs595.uwm.chatbylocation.objModel.ChatMessage;
+import com.cs595.uwm.chatbylocation.objModel.UserIcon;
 import com.cs595.uwm.chatbylocation.objModel.UserIdentity;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -9,7 +10,6 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
@@ -27,7 +27,7 @@ public class Database {
     private static String removeFromRoom;
 
     private static int textSize = 14;
-    private static String userIcon = "default";
+    private static String userIcon = UserIcon.NONE;
     private static boolean listening = false;
 
     private static boolean shouldSignOut = false;
@@ -35,7 +35,6 @@ public class Database {
     // TODO: Move this somewhere better
     private static Map<String, String> roomNames = new HashMap<>();
     private static Map<String, String> roomPasswords = new HashMap<>();
-    private static int textColor = Color.parseColor("#000000");
     private static ArrayList<UserIdentity> users;
 
     private static Map<String, String> roomUserNames = new HashMap<>();
@@ -58,6 +57,9 @@ public class Database {
     }
 
     public static String getUserIcon(String username) {
+        if (!roomUserIcons.containsKey(username)) {
+            return userIcon;
+        }
         return roomUserIcons.get(username);
     }
 
@@ -275,22 +277,24 @@ public class Database {
 
     public static void createUser(String username) {
 
-        getCurrentUserReference().child("currentRoomID").setValue("");
-        getCurrentUserReference().child("username").setValue(username);
+        if (getCurrentUserReference() != null) {
+            getCurrentUserReference().child("currentRoomID").setValue("");
+            getCurrentUserReference().child("username").setValue(username);
+        }
         trace("created user");
-
     }
 
     public static void setUserRoom(String roomID) { // roomid = null removes from room
 
         trace("setUserRoom: " + roomID);
 
-        if (roomID == null) {
-            getCurrentUserReference().child("removeFrom").setValue(currentRoomID);
-        } else {
-            getCurrentUserReference().child("currentRoomID").setValue(roomID);
+        if (getCurrentUserReference() != null) {
+            if (roomID == null) {
+                getCurrentUserReference().child("removeFrom").setValue(currentRoomID);
+            } else {
+                getCurrentUserReference().child("currentRoomID").setValue(roomID);
+            }
         }
-
     }
 
     public static void signOutUser() {
@@ -398,7 +402,7 @@ public class Database {
         });
     }
 
-    public static void trace(String message) {
+    private static void trace(String message) {
         System.out.println("Database >> " + message); //todo android logger
     }
 

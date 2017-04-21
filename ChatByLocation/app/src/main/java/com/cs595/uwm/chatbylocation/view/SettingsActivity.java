@@ -1,6 +1,5 @@
 package com.cs595.uwm.chatbylocation.view;
 
-
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.Intent;
@@ -25,8 +24,8 @@ import android.text.TextUtils;
 import android.view.MenuItem;
 
 import com.cs595.uwm.chatbylocation.R;
+import com.cs595.uwm.chatbylocation.objModel.UserIcon;
 import com.cs595.uwm.chatbylocation.service.Database;
-import com.google.firebase.auth.UserProfileChangeRequest;
 
 import net.margaritov.preference.colorpicker.ColorPickerPreference;
 
@@ -221,18 +220,11 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             addPreferencesFromResource(R.xml.pref_general);
             setHasOptionsMenu(true);
 
+            inFragment = true;
+
             SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
             final ListPreference iconPref = (ListPreference) findPreference("user_icon");
             ColorPickerPreference colorPref = (ColorPickerPreference) findPreference("color1");
-
-            // Set summary to correct preference values
-            int color = prefs.getInt("color1", Color.BLACK);
-            colorPref.setSummary(ColorPickerPreference.convertToRGB(color));
-
-            String icon = prefs.getString("user_icon", "default");
-            iconPref.setIcon(getIcon(icon));
-
-            inFragment = true;
 
             // Set 'Display Name' summary to Username
             EditTextPreference namePref = (EditTextPreference) findPreference("example_text");
@@ -242,15 +234,17 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             // to their values. When their values change, their summaries are
             // updated to reflect the new value, per the Android Design
             // guidelines.
-            //bindPreferenceSummaryToValue(findPreference("example_text"));
             bindPreferenceSummaryToValue(findPreference("example_list"));
 
+            // User icon setting
+            String icon = prefs.getString("user_icon", UserIcon.NONE);
+            iconPref.setIcon(UserIcon.getIconResource(icon));
             iconPref.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
                 @Override
                 public boolean onPreferenceChange(Preference preference, Object newValue) {
                     String icon = String.valueOf(newValue);
                     Database.setUserIcon(icon);
-                    if ("custom".equals(icon)) {
+                    if (UserIcon.NONE.equals(icon)) {
                         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                         if (takePictureIntent.resolveActivity(getActivity().getPackageManager()) != null) {
                             //startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
@@ -258,21 +252,23 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                         }
                     }
                     else {
-                        iconPref.setIcon(getIcon(icon));
+                        iconPref.setIcon(UserIcon.getIconResource(icon));
                     }
 
-                    if (Database.getCurrentRoomID() != null) {
-                        String userId = Database.getUserID();
-                        if (userId != null) {
-                            Database.getRoomUsersReference().child(Database.getCurrentRoomID()).child(userId).child("icon").setValue(icon);
-                        }
+                    String userId = Database.getUserID();
+                    String roomId = Database.getCurrentRoomID();
+                    if (userId != null && roomId != null && !roomId.equals("")) {
+                        //System.out.println("*\n*\nroomId = " + roomId + "\n*\n*");
+                        Database.getRoomUsersReference().child(roomId).child(userId).child("icon").setValue(icon);
                     }
 
                     return true;
                 }
             });
 
-            // Add PrefChange listener to text color picker
+            // Message color setting
+            int color = prefs.getInt("color1", Color.BLACK);
+            colorPref.setSummary(ColorPickerPreference.convertToRGB(color));
             colorPref.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
                 @Override
                 public boolean onPreferenceChange(Preference preference, Object newValue) {
@@ -283,7 +279,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                 }
             });
 
-
+            // Text size setting
             ListPreference textSize = (ListPreference) findPreference("msg_font_size");
             textSize.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
                 @Override
@@ -306,34 +302,6 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             }
             return super.onOptionsItemSelected(item);
         }
-    }
-
-    private static int getIcon(String iconName) {
-        int icon = R.drawable.ic_default_icon;
-        if (iconName == null) return icon;
-        switch (iconName) {
-            case "custom":
-
-                break;
-            case "bear":
-                icon = R.drawable.ic_bear;
-                break;
-            case "dragon":
-                icon = R.drawable.ic_dragon;
-                break;
-            case "elephant":
-                icon = R.drawable.ic_elephant;
-                break;
-            case "hippo":
-                icon = R.drawable.ic_hippo;
-                break;
-            case "koala":
-                icon = R.drawable.ic_koala;
-                break;
-            default:
-                break;
-        }
-        return icon;
     }
 
     /**
