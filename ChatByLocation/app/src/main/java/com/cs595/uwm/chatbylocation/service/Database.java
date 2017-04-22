@@ -123,13 +123,16 @@ public class Database {
 
     public static String getUserIcon(String userName) {
         UserIdentity user = null;
+    public static String getUserId(String userName) {
+        if (userName == null) return null;
         for (Map.Entry<String, UserIdentity> entry : users.entrySet()) {
+            String userId = entry.getKey();
             UserIdentity u = entry.getValue();
-            if (userName != null && userName.equals(u.getUsername())) {
-                user = u;
+            if (userName.equals(u.getUsername())) {
+                return userId;
             }
         }
-        return (user != null) ? user.getIcon() : UserIcon.NONE;
+        return null;
     }
 
     public static void setIcon(String icon) {
