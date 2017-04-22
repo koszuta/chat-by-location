@@ -19,6 +19,7 @@ public class UserIcon {
         int res = R.drawable.ic_default_icon;
         switch (icon) {
             case PHOTO:
+                res = 0;
                 break;
             case BEAR:
                 res = R.drawable.ic_bear;

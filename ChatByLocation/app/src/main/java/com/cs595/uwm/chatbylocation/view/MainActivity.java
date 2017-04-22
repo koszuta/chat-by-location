@@ -11,13 +11,10 @@ import android.view.View;
 
 import com.cs595.uwm.chatbylocation.R;
 import com.cs595.uwm.chatbylocation.objModel.UserIcon;
-import com.cs595.uwm.chatbylocation.objModel.UserIdentity;
 import com.cs595.uwm.chatbylocation.service.Database;
-import com.cs595.uwm.chatbylocation.service.Registration;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.util.ArrayList;
 
 import static com.cs595.uwm.chatbylocation.controllers.MuteController.MUTE_FILENAME;
 

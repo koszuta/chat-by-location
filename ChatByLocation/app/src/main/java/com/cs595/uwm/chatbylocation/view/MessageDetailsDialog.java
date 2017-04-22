@@ -13,6 +13,7 @@ import android.widget.ToggleButton;
 
 import com.cs595.uwm.chatbylocation.R;
 import com.cs595.uwm.chatbylocation.controllers.MuteController;
+import com.cs595.uwm.chatbylocation.service.Database;
 
 /**
  * Created by Nathan on 3/29/17.
@@ -26,7 +27,7 @@ public class MessageDetailsDialog extends DialogFragment {
 
         // Get layout and set to dialog
         LayoutInflater inflater = LayoutInflater.from(getActivity());
-        final View dialogView = inflater.inflate(R.layout.message_details_dialog_layout, null);
+        final View dialogView = inflater.inflate(R.layout.message_details_layout, null);
         builder.setView(dialogView);
 
         final String userName = getArguments().getString(ChatActivity.NAME_ARGUMENT);
@@ -38,7 +39,14 @@ public class MessageDetailsDialog extends DialogFragment {
         final ToggleButton muteButton = (ToggleButton) dialogView.findViewById(R.id.blockUser);
 
         userNameView.setText(userName);
-        userImageView.setImageResource(userIcon);
+
+        String userId = Database.getUserId(userName);
+
+        if (userIcon == 0) {
+            userImageView.setImageBitmap(Database.getUserImage(userId));
+        } else {
+            userImageView.setImageResource(userIcon);
+        }
 
         if(MuteController.isMuted(dialogView.getContext(), userName)) {
             //have to swap text values for muted user - toggling it would trigger listener

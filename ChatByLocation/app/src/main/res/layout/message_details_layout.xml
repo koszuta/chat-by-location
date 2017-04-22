@@ -10,7 +10,7 @@
         android:id="@+id/userImage"
 
         android:clickable="true"
-        android:onClick="userImageClick"
+        android:onClick="imageClick"
 
         app:srcCompat="@color/colorAccent"
 

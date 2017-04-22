@@ -6,9 +6,8 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.graphics.drawable.Drawable;
+import android.graphics.drawable.BitmapDrawable;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
@@ -29,12 +28,13 @@ import android.view.MenuItem;
 import com.cs595.uwm.chatbylocation.R;
 import com.cs595.uwm.chatbylocation.objModel.UserIcon;
 import com.cs595.uwm.chatbylocation.service.Database;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
 import net.margaritov.preference.colorpicker.ColorPickerPreference;
 
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.ByteArrayOutputStream;
 import java.util.List;
 
 /**
@@ -51,7 +51,7 @@ import java.util.List;
 public class SettingsActivity extends AppCompatPreferenceActivity {
 
     public static final int REQUEST_IMAGE_CAPTURE = 42;
-    public static final String USER_PHOTO_PATH = "user_photo.webp";
+    public static final int IMAGE_QUALITY = 100;
 
     private static boolean inFragment = false;
     private static String caller;
@@ -230,6 +230,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             inFragment = true;
 
             SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
+
             final ListPreference iconPref = (ListPreference) findPreference("user_icon");
             ColorPickerPreference colorPref = (ColorPickerPreference) findPreference("color1");
 
@@ -245,25 +246,36 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
 
             // User icon setting
             String icon = prefs.getString("user_icon", UserIcon.NONE);
-            iconPref.setIcon(UserIcon.getIconResource(icon));
+            int iconRes = UserIcon.getIconResource(icon);
+            if (iconRes == 0) {
+                trace("Set icon as custom photo");
+                // Nathan TODO: Check if this works
+                Bitmap image = Database.getUserImage(Database.getUserId());
+                if (image != null) {
+                    iconPref.setIcon(new BitmapDrawable(getResources(), image));
+                }
+            } else {
+                iconPref.setIcon(iconRes);
+            }
+
             iconPref.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
                 @Override
                 public boolean onPreferenceChange(Preference preference, Object newValue) {
                     String icon = String.valueOf(newValue);
-                    // TODO: Check Database.setUserIcon(icon);
+                    Database.setIcon(icon);
+
                     if (UserIcon.PHOTO.equals(icon)) {
+                        Bitmap image = Database.getUserImage(Database.getUserId());
+                        iconPref.setIcon(new BitmapDrawable(getResources(), image));
                         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                         if (takePictureIntent.resolveActivity(getActivity().getPackageManager()) != null) {
                             startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
                         }
                     }
 
-                    iconPref.setIcon(UserIcon.getIconResource(icon));
-
-                    String userId = Database.getUserID();
-                    if (userId != null) {
-                        //System.out.println("*\n*\nroomId = " + roomId + "\n*\n*");
-                        Database.setIcon(icon);
+                    int iconRes = UserIcon.getIconResource(icon);
+                    if (iconRes != 0) {
+                        iconPref.setIcon(iconRes);
                     }
 
                     return true;
@@ -296,27 +308,49 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                 }
             });
         }
-    }
 
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
-            Bitmap image = (Bitmap) data.getExtras().get("data");
-            if (image != null) {
-                FileOutputStream fos = null;
-                try {
-                    fos = new FileOutputStream(USER_PHOTO_PATH);
-                    image.compress(Bitmap.CompressFormat.WEBP, 50, fos);
+        @Override
+        public void onActivityResult(int requestCode, int resultCode, Intent data) {
+            if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
 
-                } catch (FileNotFoundException e) {
-                    e.printStackTrace();
-                } finally {
-                    try {
-                        if (fos != null) {
-                            fos.close();
-                        }
-                    } catch (IOException e) {
-                        e.printStackTrace();
+                // Get bitmap from camera result
+                Bitmap image = (Bitmap) data.getExtras().get("data");
+                if (image != null) {
+
+                    // Crop image to square proportions
+                    Bitmap squareImage;
+                    int w = image.getWidth();
+                    int h = image.getHeight();
+                    if (w < h) {
+                        squareImage = Bitmap.createBitmap(image, 0, h/2 - w/2, w, w);
+                    } else {
+                        squareImage = Bitmap.createBitmap(image, w/2 - h/2, 0, h, h);
+                    }
+
+                    // Set preference icon to new image
+                    final ListPreference iconPref = (ListPreference) findPreference("user_icon");
+                    iconPref.setIcon(new BitmapDrawable(getResources(), image));
+
+                    // Get image as bytes array for upload
+                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                    squareImage.compress(Bitmap.CompressFormat.PNG, IMAGE_QUALITY, baos);
+                    byte[] imageBytes = baos.toByteArray();
+
+                    final String userId = Database.getUserId();
+                    if (userId != null) {
+
+                        // Upload image bytes to Firebase Storage
+                        Database.getImageStorageReference(userId)
+                        .putBytes(imageBytes)
+                        .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                            @Override
+                            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                                trace("Upload success");
+
+                                // When image is successfully uploaded, update local list of images
+                                Database.updateUserImage(userId);
+                            }
+                        });
                     }
                 }
             }
@@ -343,16 +377,6 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             // guidelines.
             bindPreferenceSummaryToValue(findPreference("notifications_new_message_ringtone"));
         }
-
-        @Override
-        public boolean onOptionsItemSelected(MenuItem item) {
-            int id = item.getItemId();
-            if (id == android.R.id.home) {
-                startActivity(new Intent(getActivity(), SettingsActivity.class));
-                return true;
-            }
-            return super.onOptionsItemSelected(item);
-        }
     }
 
     /**
@@ -375,15 +399,9 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             // guidelines.
             bindPreferenceSummaryToValue(findPreference("sync_frequency"));
         }
+    }
 
-        @Override
-        public boolean onOptionsItemSelected(MenuItem item) {
-            int id = item.getItemId();
-            if (id == android.R.id.home) {
-                startActivity(new Intent(getActivity(), SettingsActivity.class));
-                return true;
-            }
-            return super.onOptionsItemSelected(item);
-        }
+    private static void trace(String message) {
+        System.out.println("Settings >> " + message);
     }
 }

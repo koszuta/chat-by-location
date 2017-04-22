@@ -6,7 +6,6 @@ import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.provider.ContactsContract;
 import android.support.v4.content.res.ResourcesCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Spannable;
@@ -29,6 +28,7 @@ import com.cs595.uwm.chatbylocation.objModel.ChatMessage;
 import com.cs595.uwm.chatbylocation.objModel.UserIcon;
 import com.cs595.uwm.chatbylocation.service.Database;
 import com.firebase.ui.database.FirebaseListAdapter;
+import com.google.android.gms.ads.formats.NativeAd;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -66,7 +66,8 @@ public class ChatActivity extends AppCompatActivity {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 ChatMessage message = (ChatMessage)parent.getItemAtPosition(position);
                 String messageUser = message.getMessageUser();
-                int iconRes = UserIcon.getIconResource(Database.getUserIcon(messageUser));
+                String userId = Database.getUserId(messageUser);
+                int iconRes = UserIcon.getIconResource(Database.getUserIcon(userId));
 
                 messageDialog = new MessageDetailsDialog();
                 Bundle args = new Bundle();
@@ -94,10 +95,9 @@ public class ChatActivity extends AppCompatActivity {
 
     // Nathan TODO: Remove user from current room and put on blacklist
     public void banUserClick(View view) {
-
     }
 
-    public void userImageClick(View view) {
+    public void imageClick(View view) {
 
     }
 
@@ -185,8 +185,14 @@ public class ChatActivity extends AppCompatActivity {
                             final ImageView userIcon = (ImageView) view.findViewById(R.id.userIcon);
 
                             // Use icon from corresponding user
-                            int icon = UserIcon.getIconResource(Database.getUserIcon(username));
-                            userIcon.setImageResource(icon);
+                            String userId = Database.getUserId(username);
+                            int iconRes = UserIcon.getIconResource(Database.getUserIcon(userId));
+                            if (iconRes == 0) {
+                                // Nathan TODO: Get bitmap from Storage for specific user
+                                userIcon.setImageBitmap(Database.getUserImage(userId));
+                            } else {
+                                userIcon.setImageResource(iconRes);
+                            }
 
                             // Set their text
                             String timestamp = formatTimestamp(chatMessage.getMessageTime());

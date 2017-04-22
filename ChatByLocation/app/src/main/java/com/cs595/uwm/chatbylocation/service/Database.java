@@ -1,9 +1,13 @@
 package com.cs595.uwm.chatbylocation.service;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+
 import com.cs595.uwm.chatbylocation.objModel.ChatMessage;
 import com.cs595.uwm.chatbylocation.objModel.RoomIdentity;
 import com.cs595.uwm.chatbylocation.objModel.UserIcon;
 import com.cs595.uwm.chatbylocation.objModel.UserIdentity;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.ChildEventListener;
@@ -12,6 +16,8 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -21,6 +27,7 @@ import java.util.Map;
  */
 
 public class Database {
+    private static final long MAX_BYTES = 1024 * 1024 * 10;
 
     private static String currentRoomID;
     private static String removeFromRoom;
@@ -32,6 +39,8 @@ public class Database {
 
     private static Map<String, UserIdentity> users = new HashMap<>();
     private static Map<String, RoomIdentity> rooms = new HashMap<>();
+
+    private static Map<String, Bitmap> userImages = new HashMap<>();
 
     // These need to be defined here so they can be removed when a user signs out
     private static ValueEventListener cridListener = new ValueEventListener() {
@@ -121,8 +130,10 @@ public class Database {
         return (users.containsKey(userId)) ? users.get(userId).getUsername() : null;
     }
 
-    public static String getUserIcon(String userName) {
-        UserIdentity user = null;
+    public static String getUserIcon(String userId) {
+        return (users.containsKey(userId)) ? users.get(userId).getIcon() : UserIcon.NONE;
+    }
+
     public static String getUserId(String userName) {
         if (userName == null) return null;
         for (Map.Entry<String, UserIdentity> entry : users.entrySet()) {
@@ -154,6 +165,31 @@ public class Database {
         return users;
     }
 
+    public static Bitmap getUserImage(String userId) {
+        if (!userImages.containsKey(userId)) {
+            updateUserImage(userId);
+            return null;
+        } else {
+            return userImages.get(userId);
+        }
+    }
+
+    public static void updateUserImage(final String userId) {
+        if (userId == null) return;
+        getImageStorageReference(userId).getBytes(MAX_BYTES)
+                .addOnSuccessListener(new OnSuccessListener<byte[]>() {
+                    @Override
+                    public void onSuccess(byte[] bytes) {
+                        Bitmap image = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+                        if (image == null) trace("User image for " + users.get(userId).getUsername() + " is null");
+                        userImages.put(userId, image);
+                    }
+                });
+    }
+
+    public static StorageReference getImageStorageReference(String userId) {
+        return FirebaseStorage.getInstance().getReference().child(userId);
+    }
 
     public static void initCurrentUserListeners() {
         DatabaseReference userRef = getCurrentUserReference();
@@ -190,6 +226,9 @@ public class Database {
                 // Add UserIdentity to list
                 users.put(userId, user);
 
+                // Add user image to list
+                updateUserImage(userId);
+
                 trace("added user to local users list: " + user.getUsername());
             }
 
@@ -200,6 +239,11 @@ public class Database {
 
                 // Update UserIdentity
                 users.put(userId, user);
+
+                // Update user image
+                if (UserIcon.PHOTO.equals(user.getIcon())) {
+                    updateUserImage(userId);
+                }
 
                 trace("Updated data in users list: " + user.getUsername());
             }
