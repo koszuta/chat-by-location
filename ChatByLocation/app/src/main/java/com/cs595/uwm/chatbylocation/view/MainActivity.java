@@ -45,6 +45,7 @@ public class MainActivity extends AppCompatActivity {
 
         Database.setIcon(prefs.getString("user_icon", UserIcon.NONE));
         Database.initUsersListener();
+        Database.initRoomsListener();
 
 //        AuthUI.getInstance().signOut(this).addOnCompleteListener(new OnCompleteListener<Void>() {
 //            @Override

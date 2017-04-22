@@ -28,11 +28,70 @@ public class Database {
     private static int textSize = 14;
     private static boolean listening = false;
     private static boolean listeningToUsers = false;
-
     private static boolean shouldSignOut = false;
 
     private static Map<String, UserIdentity> users = new HashMap<>();
     private static Map<String, RoomIdentity> rooms = new HashMap<>();
+
+    // These need to be defined here so they can be removed when a user signs out
+    private static ValueEventListener cridListener = new ValueEventListener() {
+        @Override
+        public void onDataChange(DataSnapshot dataSnapshot) {
+            String roomID = String.valueOf(dataSnapshot.getValue());
+            trace("roomIDListener sees roomID: " + roomID);
+            currentRoomID = roomID;
+
+            if (roomID == null || roomID.equals("")) return;
+
+            String userId = getUserId();
+            if (userId != null) {
+                getRoomUsersReference().child(roomID).child(userId).setValue(true);
+            }
+
+            // Sign out user
+            if (shouldSignOut && "".equals(currentRoomID) && "".equals(removeFromRoom)) {
+                shouldSignOut = false;
+                FirebaseAuth.getInstance().signOut();
+                trace("User signed out");
+            }
+        }
+
+        @Override
+        public void onCancelled(DatabaseError databaseError) {
+        }
+    };
+    private static ValueEventListener rfrListener = new ValueEventListener() {
+        @Override
+        public void onDataChange(DataSnapshot dataSnapshot) {
+            String removeFrom = String.valueOf(dataSnapshot.getValue());
+            trace("removeFromListener sees removeFrom: " + removeFrom);
+
+            String userId = getUserId();
+            if (!(removeFrom == null || removeFrom.equals(""))) {
+                // Remove user from roomUsers list
+                if (userId != null) {
+                    getRoomUsersReference().child(removeFrom).child(userId).removeValue();
+                    getCurrentUserReference().child("currentRoomID").setValue("");
+                }
+
+                getCurrentUserReference().child("removeFrom").setValue("");
+
+                trace("removeFromListener has removed the user from their room");
+            }
+
+            // Sign out user
+            if (shouldSignOut && "".equals(currentRoomID) && "".equals(removeFromRoom)) {
+                shouldSignOut = false;
+                FirebaseAuth.getInstance().signOut();
+                trace("User signed out");
+            }
+        }
+
+        @Override
+        public void onCancelled(DatabaseError databaseError) {
+        }
+    };
+
 
     public static String getCurrentRoomName() {
         return (rooms.containsKey(currentRoomID)) ? rooms.get(currentRoomID).getName() : null;
@@ -48,6 +107,14 @@ public class Database {
 
     public static int getRoomRadius(String roomId) {
         return (rooms.containsKey(roomId)) ? rooms.get(roomId).getRad() : 0;
+    }
+
+    public static double getRoomLat(String roomId) {
+        return (rooms.containsKey(roomId)) ? Double.valueOf(rooms.get(roomId).getLat()) : 0;
+    }
+
+    public static double getRoomLng(String roomId) {
+        return (rooms.containsKey(roomId)) ? Double.valueOf(rooms.get(roomId).getLongg()) : 0;
     }
 
     public static String getUserName(String userId) {
@@ -66,7 +133,7 @@ public class Database {
     }
 
     public static void setIcon(String icon) {
-        String userId = getUserID();
+        String userId = getUserId();
         if (userId != null) {
             getUsersReference().child(userId).child("icon").setValue(icon);
         }
@@ -84,10 +151,29 @@ public class Database {
         return users;
     }
 
+
+    public static void initCurrentUserListeners() {
+        DatabaseReference userRef = getCurrentUserReference();
+        if (userRef != null) {
+            userRef.child("currentRoomID").addValueEventListener(cridListener);
+            userRef.child("removeFrom").addValueEventListener(rfrListener);
+
+            trace("assigned listeners to user.currentRoomID and user.removeFrom");
+        }
+    }
+
+    public static void removeCurrentUserListeners() {
+        DatabaseReference userRef = getCurrentUserReference();
+        if (listening && userRef != null) {
+            userRef.child("currentRoomID").removeEventListener(cridListener);
+            userRef.child("removeFrom").removeEventListener(rfrListener);
+        }
+    }
+
     public static void initUsersListener() {
         if (listeningToUsers) return;
 
-        String userId = getUserID();
+        String userId = getUserId();
         if (userId != null) {
             getUsersReference().child(userId).child("username").setValue(getUserUsername());
         }
@@ -98,8 +184,7 @@ public class Database {
                 String userId = dataSnapshot.getKey();
                 UserIdentity user = dataSnapshot.getValue(UserIdentity.class);
 
-                System.out.println("*\n*\nUserIdentity(" + user.getUsername() + ", " + user.getIcon() + ", " + user.getCurrentRoomID() + ", " + user.getRemoveFrom() + ") (" + userId + ")\n*\n*");
-
+                // Add UserIdentity to list
                 users.put(userId, user);
 
                 trace("added user to local users list: " + user.getUsername());
@@ -110,8 +195,7 @@ public class Database {
                 String userId = dataSnapshot.getKey();
                 UserIdentity user = dataSnapshot.getValue(UserIdentity.class);
 
-                System.out.println("*\n*\nUserIdentity(" + user.getUsername() + ", " + user.getIcon() + ", " + user.getCurrentRoomID() + ", " + user.getRemoveFrom() + ") (" + userId + ")\n*\n*");
-
+                // Update UserIdentity
                 users.put(userId, user);
 
                 trace("Updated data in users list: " + user.getUsername());
@@ -141,76 +225,8 @@ public class Database {
         listeningToUsers = true;
     }
 
-    public static void initListeners() {
+    public static void initRoomsListener() {
         if (listening) return;
-
-        DatabaseReference userRef = getCurrentUserReference();
-
-        if (userRef != null) {
-            userRef.child("currentRoomID")
-                    .addValueEventListener(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(DataSnapshot dataSnapshot) {
-                            String roomID = String.valueOf(dataSnapshot.getValue());
-                            trace("roomIDListener sees roomID: " + roomID);
-                            currentRoomID = roomID;
-
-                            if (roomID == null || roomID.equals("")) return;
-
-                            String userId = getUserID();
-                            if (userId != null) {
-                                getRoomUsersReference().child(roomID).child(userId).setValue(true);
-                            }
-
-                            // Sign out user
-                            if (shouldSignOut && "".equals(currentRoomID) && "".equals(removeFromRoom)) {
-                                shouldSignOut = false;
-                                FirebaseAuth.getInstance().signOut();
-                                trace("User signed out");
-                            }
-                        }
-
-                        @Override
-                        public void onCancelled(DatabaseError databaseError) {
-                        }
-                    });
-
-            userRef.child("removeFrom")
-                    .addValueEventListener(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(DataSnapshot dataSnapshot) {
-                            String removeFrom = String.valueOf(dataSnapshot.getValue());
-                            trace("removeFromListener sees removeFrom: " + removeFrom);
-
-                            String userId = getUserID();
-                            if (!(removeFrom == null || removeFrom.equals(""))) {
-                                // Remove user from roomUsers list
-                                if (userId != null) {
-                                    getRoomUsersReference().child(removeFrom).child(userId).removeValue();
-                                    getCurrentUserReference().child("currentRoomID").setValue("");
-                                }
-
-                                getCurrentUserReference().child("removeFrom").setValue("");
-
-                                trace("removeFromListener has removed the user from their room");
-                            }
-
-                            // Sign out user
-                            if (shouldSignOut && "".equals(currentRoomID) && "".equals(removeFromRoom)) {
-                                shouldSignOut = false;
-                                FirebaseAuth.getInstance().signOut();
-                                trace("User signed out");
-                            }
-                        }
-
-                        @Override
-                        public void onCancelled(DatabaseError databaseError) {
-                        }
-                    });
-
-            trace("assigned listeners to user.currentRoomID and user.removeFrom");
-        }
-
         getRoomIdentityReference().addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
@@ -285,6 +301,7 @@ public class Database {
 
     public static void signOutUser() {
         shouldSignOut = true;
+        removeCurrentUserListeners();
         setUserRoom(null);
     }
 
@@ -321,17 +338,16 @@ public class Database {
         getRoomMessagesReference().child(roomID).push().setValue(chatMessage);
     }
 
-    public static String getUserID() {
+    public static String getUserId() {
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if (user != null) return user.getUid();
         return null;
     }
 
     public static DatabaseReference getCurrentUserReference() {
-        String userID = getUserID();
-        trace("userID = " + userID);
-        if (userID == null) return null;
-        return getUsersReference().child(userID);
+        String userId = getUserId();
+        trace("userID = " + userId);
+        return (userId != null) ? getUsersReference().child(userId) : null;
     }
 
     public static DatabaseReference getRoomUsersReference() {
@@ -353,6 +369,4 @@ public class Database {
     private static void trace(String message) {
         System.out.println("Database >> " + message); //todo android logger
     }
-
-
 }

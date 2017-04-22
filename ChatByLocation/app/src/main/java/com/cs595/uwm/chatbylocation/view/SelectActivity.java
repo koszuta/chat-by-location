@@ -34,10 +34,7 @@ public class SelectActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.select_layout);
 
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        // TODO: Check Database.setUserIcon(prefs.getString("user_icon", UserIcon.NONE));
-
-        Database.initListeners();
+        Database.initCurrentUserListeners();
         displayRoomList();
     }
 
