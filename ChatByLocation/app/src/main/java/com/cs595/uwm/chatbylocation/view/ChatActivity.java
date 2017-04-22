@@ -6,6 +6,7 @@ import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.provider.ContactsContract;
 import android.support.v4.content.res.ResourcesCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Spannable;
@@ -30,6 +31,7 @@ import com.cs595.uwm.chatbylocation.service.Database;
 import com.firebase.ui.database.FirebaseListAdapter;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.Date;
@@ -53,8 +55,6 @@ public class ChatActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.chat_layout);
-
-        Database.initRoomUsersListener();
 
         //construct objects
         messageListView = (ListView) this.findViewById(R.id.messageList);
@@ -161,79 +161,78 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     private void displayChatMessages() {
+        DatabaseReference currentUserRef = Database.getCurrentUserReference();
+        if (currentUserRef != null) {
 
-        ValueEventListener roomIDListener = new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                final String roomID = String.valueOf(dataSnapshot.getValue());
-                trace("roomIDListener sees roomid = " + roomID);
+            currentUserRef.child("currentRoomID").addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    final String roomID = String.valueOf(dataSnapshot.getValue());
+                    trace("roomIDListener sees roomid = " + roomID);
 
-                FirebaseListAdapter<ChatMessage> chatMessageListener = new FirebaseListAdapter<ChatMessage>(
-                        ChatActivity.this,
-                        ChatMessage.class,
-                        R.layout.message,
-                        Database.getRoomMessagesReference().child(roomID)) {
-                    @Override
-                    protected void populateView(View view, ChatMessage chatMessage, int position) {
-                        String username = chatMessage.getMessageUser();
-                        if (username == null) username = "no name";
+                    FirebaseListAdapter<ChatMessage> chatMessageListener = new FirebaseListAdapter<ChatMessage>(
+                            ChatActivity.this,
+                            ChatMessage.class,
+                            R.layout.message,
+                            Database.getRoomMessagesReference().child(roomID)) {
+                        @Override
+                        protected void populateView(View view, ChatMessage chatMessage, int position) {
+                            String username = chatMessage.getMessageUser();
+                            if (username == null) username = "no name";
 
-                        // Get reference to the views of message.xml
-                        final TextView messageText = (TextView) view.findViewById(R.id.messageText);
-                        final ImageView userIcon = (ImageView) view.findViewById(R.id.userIcon);
+                            // Get reference to the views of message.xml
+                            final TextView messageText = (TextView) view.findViewById(R.id.messageText);
+                            final ImageView userIcon = (ImageView) view.findViewById(R.id.userIcon);
 
-                        // Use icon from corresponding user
-                        int icon = UserIcon.getIconResource(Database.getUserIcon(username));
-                        userIcon.setImageResource(icon);
+                            // Use icon from corresponding user
+                            int icon = UserIcon.getIconResource(Database.getUserIcon(username));
+                            userIcon.setImageResource(icon);
 
-                        // Set their text
-                        String timestamp = formatTimestamp(chatMessage.getMessageTime());
-                        if (timestamp == null) timestamp = "";
+                            // Set their text
+                            String timestamp = formatTimestamp(chatMessage.getMessageTime());
+                            if (timestamp == null) timestamp = "";
 
-                        SpannableString ss = new SpannableString(timestamp + ' ' + username + ": " + chatMessage.getMessageText());
-                        if(MuteController.isMuted(view.getContext(), username)) {
-                            ss = new SpannableString("\t\t-- This user is muted --");
-                            userIcon.setVisibility(View.GONE);
+                            SpannableString ss = new SpannableString(timestamp + ' ' + username + ": " + chatMessage.getMessageText());
+                            if (MuteController.isMuted(view.getContext(), username)) {
+                                ss = new SpannableString("\t\t-- This user is muted --");
+                                userIcon.setVisibility(View.GONE);
+                            } else {
+                                StyleSpan bold = new StyleSpan(android.graphics.Typeface.BOLD);
+                                RelativeSizeSpan timeSize = new RelativeSizeSpan(0.8f);
+                                ForegroundColorSpan timeColor = new ForegroundColorSpan(ResourcesCompat.getColor(getResources(), R.color.timestamp, null));
+
+                                int timeLength = timestamp.length() + 1;
+                                ss.setSpan(timeSize, 0, timeLength, Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
+                                ss.setSpan(timeColor, 0, timeLength, Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
+                                ss.setSpan(bold, timeLength, timeLength + username.length(), Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
+
+                                ForegroundColorSpan textColor = new ForegroundColorSpan(chatMessage.getMessageColor());
+                                ss.setSpan(textColor, timeLength + username.length() + 1, ss.length(), Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
+                            }
+
+                            messageText.setText(ss);
                         }
-                        else {
-                            StyleSpan bold = new StyleSpan(android.graphics.Typeface.BOLD);
-                            RelativeSizeSpan timeSize = new RelativeSizeSpan(0.8f);
-                            ForegroundColorSpan timeColor = new ForegroundColorSpan(ResourcesCompat.getColor(getResources(), R.color.timestamp, null));
+                    };
 
-                            int timeLength = timestamp.length() + 1;
-                            ss.setSpan(timeSize, 0, timeLength, Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
-                            ss.setSpan(timeColor, 0, timeLength, Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
-                            ss.setSpan(bold, timeLength, timeLength + username.length(), Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
+                    ListView listOfMessages = (ListView) findViewById(R.id.messageList);
+                    if (roomID.equals("")) {
+                        chatMessageListener.cleanup();
+                        listOfMessages.setAdapter(null);
+                        trace("roomIDListener removing adapter");
+                    } else {
+                        listOfMessages.setAdapter(chatMessageListener);
+                        trace("roomIDListener setting adapter");
 
-                            ForegroundColorSpan textColor = new ForegroundColorSpan(chatMessage.getMessageColor());
-                            ss.setSpan(textColor, timeLength + username.length() + 1, ss.length(), Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
-                        }
-
-                        messageText.setText(ss);
                     }
-                };
-
-                ListView listOfMessages = (ListView) findViewById(R.id.messageList);
-                if (roomID.equals("")) {
-                    chatMessageListener.cleanup();
-                    listOfMessages.setAdapter(null);
-                    trace("roomIDListener removing adapter");
-                } else {
-                    listOfMessages.setAdapter(chatMessageListener);
-                    trace("roomIDListener setting adapter");
 
                 }
 
-            }
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+                }
 
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-            }
-
-        };
-
-        Database.getCurrentUserReference().child("currentRoomID").addValueEventListener(roomIDListener);
-
+            });
+        }
     }
 
     private String formatTimestamp(long timeMillis) {

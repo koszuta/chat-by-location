@@ -1,6 +1,7 @@
 package com.cs595.uwm.chatbylocation.service;
 
 import com.cs595.uwm.chatbylocation.objModel.ChatMessage;
+import com.cs595.uwm.chatbylocation.objModel.RoomIdentity;
 import com.cs595.uwm.chatbylocation.objModel.UserIcon;
 import com.cs595.uwm.chatbylocation.objModel.UserIdentity;
 import com.google.firebase.auth.FirebaseAuth;
@@ -12,9 +13,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 /**
@@ -27,48 +26,50 @@ public class Database {
     private static String removeFromRoom;
 
     private static int textSize = 14;
-    private static String userIcon = UserIcon.NONE;
     private static boolean listening = false;
+    private static boolean listeningToUsers = false;
 
     private static boolean shouldSignOut = false;
 
-    // TODO: Move this somewhere better
-    private static Map<String, String> roomNames = new HashMap<>();
-    private static Map<String, String> roomPasswords = new HashMap<>();
-    private static ArrayList<UserIdentity> users;
-
-    private static Map<String, String> roomUserNames = new HashMap<>();
-    private static Map<String, String> roomUserIcons = new HashMap<>();
+    private static Map<String, UserIdentity> users = new HashMap<>();
+    private static Map<String, RoomIdentity> rooms = new HashMap<>();
 
     public static String getCurrentRoomName() {
-        return (currentRoomID == null) ? null : roomNames.get(currentRoomID);
+        return (rooms.containsKey(currentRoomID)) ? rooms.get(currentRoomID).getName() : null;
     }
 
     public static String getRoomName(String roomId) {
-        return roomNames.get(roomId);
+        return (rooms.containsKey(roomId)) ? rooms.get(roomId).getName() : null;
     }
 
     public static String getRoomPassword(String roomId) {
-        return roomPasswords.get(roomId);
+        return (rooms.containsKey(roomId)) ? rooms.get(roomId).getPassword() : null;
+    }
+
+    public static int getRoomRadius(String roomId) {
+        return (rooms.containsKey(roomId)) ? rooms.get(roomId).getRad() : 0;
     }
 
     public static String getUserName(String userId) {
-        return roomUserNames.get(userId);
+        return (users.containsKey(userId)) ? users.get(userId).getUsername() : null;
     }
 
-    public static String getUserIcon(String username) {
-        if (!roomUserIcons.containsKey(username)) {
-            return userIcon;
+    public static String getUserIcon(String userName) {
+        UserIdentity user = null;
+        for (Map.Entry<String, UserIdentity> entry : users.entrySet()) {
+            UserIdentity u = entry.getValue();
+            if (userName != null && userName.equals(u.getUsername())) {
+                user = u;
+            }
         }
-        return roomUserIcons.get(username);
+        return (user != null) ? user.getIcon() : UserIcon.NONE;
     }
 
-    public static String getUserIcon() {
-        return userIcon;
-    }
-
-    public static void setUserIcon(String icon) {
-        userIcon = icon;
+    public static void setIcon(String icon) {
+        String userId = getUserID();
+        if (userId != null) {
+            getUsersReference().child(userId).child("icon").setValue(icon);
+        }
     }
 
     public static int getTextSize() {
@@ -79,12 +80,65 @@ public class Database {
         textSize = size;
     }
 
-    public static ArrayList<UserIdentity> getUsers() {
+    public static Map<String, UserIdentity> getUsers() {
         return users;
     }
 
-    public static void setUsers(ArrayList<UserIdentity> users) {
-        Database.users = users;
+    public static void initUsersListener() {
+        if (listeningToUsers) return;
+
+        String userId = getUserID();
+        if (userId != null) {
+            getUsersReference().child(userId).child("username").setValue(getUserUsername());
+        }
+
+        getUsersReference().addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                String userId = dataSnapshot.getKey();
+                UserIdentity user = dataSnapshot.getValue(UserIdentity.class);
+
+                System.out.println("*\n*\nUserIdentity(" + user.getUsername() + ", " + user.getIcon() + ", " + user.getCurrentRoomID() + ", " + user.getRemoveFrom() + ") (" + userId + ")\n*\n*");
+
+                users.put(userId, user);
+
+                trace("added user to local users list: " + user.getUsername());
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+                String userId = dataSnapshot.getKey();
+                UserIdentity user = dataSnapshot.getValue(UserIdentity.class);
+
+                System.out.println("*\n*\nUserIdentity(" + user.getUsername() + ", " + user.getIcon() + ", " + user.getCurrentRoomID() + ", " + user.getRemoveFrom() + ") (" + userId + ")\n*\n*");
+
+                users.put(userId, user);
+
+                trace("Updated data in users list: " + user.getUsername());
+            }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+                String userId = dataSnapshot.getKey();
+                UserIdentity user = dataSnapshot.getValue(UserIdentity.class);
+                trace("removing user from local users list: " + user.getUsername());
+
+                users.remove(userId);
+            }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
+        trace("Assigned listener to users list");
+        listeningToUsers = true;
     }
 
     public static void initListeners() {
@@ -92,69 +146,70 @@ public class Database {
 
         DatabaseReference userRef = getCurrentUserReference();
 
-        userRef.child("currentRoomID")
-                .addValueEventListener(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        String roomID = String.valueOf(dataSnapshot.getValue());
-                        trace("roomIDListener sees roomID: " + roomID);
-                        currentRoomID = roomID;
+        if (userRef != null) {
+            userRef.child("currentRoomID")
+                    .addValueEventListener(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            String roomID = String.valueOf(dataSnapshot.getValue());
+                            trace("roomIDListener sees roomID: " + roomID);
+                            currentRoomID = roomID;
 
-                        if (roomID == null || roomID.equals("")) return;
+                            if (roomID == null || roomID.equals("")) return;
 
-                        String userId = getUserID();
-                        if (userId != null) {
-                            getRoomUsersReference().child(roomID).child(userId).child("name").setValue(getUserUsername());
-                            getRoomUsersReference().child(roomID).child(userId).child("icon").setValue(userIcon);
-                        }
-
-                        // Sign out user
-                        if (shouldSignOut && "".equals(currentRoomID) && "".equals(removeFromRoom)) {
-                            shouldSignOut = false;
-                            FirebaseAuth.getInstance().signOut();
-                            trace("User signed out");
-                        }
-                    }
-
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
-                    }
-                });
-
-        userRef.child("removeFrom")
-                .addValueEventListener(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        String removeFrom = String.valueOf(dataSnapshot.getValue());
-                        trace("removeFromListener sees removeFrom: " + removeFrom);
-
-                        String userId = getUserID();
-                        if (!(removeFrom == null || removeFrom.equals(""))) {
-                            // Remove user from roomUsers list
+                            String userId = getUserID();
                             if (userId != null) {
-                                getRoomUsersReference().child(removeFrom).child(userId).removeValue();
-                                getCurrentUserReference().child("currentRoomID").setValue("");
+                                getRoomUsersReference().child(roomID).child(userId).setValue(true);
                             }
-                            
-                            getCurrentUserReference().child("removeFrom").setValue("");
 
-                            trace("removeFromListener has removed the user from their room");
+                            // Sign out user
+                            if (shouldSignOut && "".equals(currentRoomID) && "".equals(removeFromRoom)) {
+                                shouldSignOut = false;
+                                FirebaseAuth.getInstance().signOut();
+                                trace("User signed out");
+                            }
                         }
 
-                        // Sign out user
-                        if (shouldSignOut && "".equals(currentRoomID) && "".equals(removeFromRoom)) {
-                            shouldSignOut = false;
-                            FirebaseAuth.getInstance().signOut();
-                            trace("User signed out");
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
                         }
-                    }
+                    });
 
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
-                    }
-                });
+            userRef.child("removeFrom")
+                    .addValueEventListener(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            String removeFrom = String.valueOf(dataSnapshot.getValue());
+                            trace("removeFromListener sees removeFrom: " + removeFrom);
 
-        trace("assigned listeners to user.currentRoomID and user.removeFrom");
+                            String userId = getUserID();
+                            if (!(removeFrom == null || removeFrom.equals(""))) {
+                                // Remove user from roomUsers list
+                                if (userId != null) {
+                                    getRoomUsersReference().child(removeFrom).child(userId).removeValue();
+                                    getCurrentUserReference().child("currentRoomID").setValue("");
+                                }
+
+                                getCurrentUserReference().child("removeFrom").setValue("");
+
+                                trace("removeFromListener has removed the user from their room");
+                            }
+
+                            // Sign out user
+                            if (shouldSignOut && "".equals(currentRoomID) && "".equals(removeFromRoom)) {
+                                shouldSignOut = false;
+                                FirebaseAuth.getInstance().signOut();
+                                trace("User signed out");
+                            }
+                        }
+
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+                        }
+                    });
+
+            trace("assigned listeners to user.currentRoomID and user.removeFrom");
+        }
 
         getRoomIdentityReference().addChildEventListener(new ChildEventListener() {
             @Override
@@ -162,14 +217,8 @@ public class Database {
                 String roomId = dataSnapshot.getKey();
                 trace("Child " + roomId + " added to \'roomIdentity\'");
 
-                // Add room name to list
-                String name = String.valueOf(dataSnapshot.child("name").getValue());
-                roomNames.put(roomId, name);
-
-                // Add room password to list
-                Object pw = dataSnapshot.child("password").getValue();
-                String password = (pw == null) ? null : pw.toString();
-                roomPasswords.put(roomId, password);
+                RoomIdentity room = dataSnapshot.getValue(RoomIdentity.class);
+                rooms.put(roomId, room);
             }
 
             @Override
@@ -177,14 +226,8 @@ public class Database {
                 String roomId = dataSnapshot.getKey();
                 trace("Child " + roomId + " data changed in \'roomIdentity\'");
 
-                // Update room name
-                String name = String.valueOf(dataSnapshot.child("name").getValue());
-                roomNames.put(roomId, name);
-
-                // Update room password
-                Object pw = dataSnapshot.child("password").getValue();
-                String password = (pw == null) ? null : pw.toString();
-                roomPasswords.put(roomId, password);
+                RoomIdentity room = dataSnapshot.getValue(RoomIdentity.class);
+                rooms.put(roomId, room);
             }
 
             @Override
@@ -192,9 +235,8 @@ public class Database {
                 String roomId = dataSnapshot.getKey();
                 trace("Child " + roomId + " removed from \'roomIdentity\'");
 
-                // Remove room name and password when room is deleted
-                roomNames.remove(roomId);
-                roomPasswords.remove(roomId);
+                // Remove room when it's deleted
+                rooms.remove(roomId);
             }
 
             @Override
@@ -213,62 +255,6 @@ public class Database {
         trace("Assigned listener to \'roomIdentity\'");
 
         listening = true;
-    }
-
-    public static void initRoomUsersListener() {
-        getRoomUsersReference().child(currentRoomID)
-                .addChildEventListener(new ChildEventListener() {
-                    @Override
-                    public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                        String userId = dataSnapshot.getKey();
-                        trace("Child " + userId + " added to \'roomUsers/" + currentRoomID);
-
-                        // Add user name
-                        String name = String.valueOf(dataSnapshot.child("name").getValue());
-                        roomUserNames.put(userId, name);
-
-                        // Add user icon
-                        String icon = String.valueOf(dataSnapshot.child("icon").getValue());
-                        roomUserIcons.put(name, icon);
-                    }
-
-                    @Override
-                    public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-                        String userId = dataSnapshot.getKey();
-                        trace("Child " + userId + " data changed in \'roomUsers/" + currentRoomID);
-
-                        // Update user name
-                        String name = String.valueOf(dataSnapshot.child("name").getValue());
-                        roomUserNames.put(userId, name);
-
-                        // Update user icon
-                        String icon = String.valueOf(dataSnapshot.child("icon").getValue());
-                        roomUserIcons.put(name, icon);
-                    }
-
-                    @Override
-                    public void onChildRemoved(DataSnapshot dataSnapshot) {
-                        String userId = dataSnapshot.getKey();
-                        trace("Child " + userId + " removed from \'roomUsers/" + currentRoomID);
-
-                        // Update room password
-                        String name = String.valueOf(dataSnapshot.child("name").getValue());
-                        roomUserNames.remove(userId);
-                        roomUserIcons.remove(name);
-                    }
-
-                    @Override
-                    public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-
-                    }
-
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
-
-                    }
-                });
-
-        trace("Assigned listener to \'roomUsers/" + currentRoomID);
     }
 
     public static String getCurrentRoomID() {
@@ -361,45 +347,7 @@ public class Database {
     }
 
     public static DatabaseReference getUsersReference(){
-        return FirebaseDatabase.getInstance().getReference().child("users");
-    }
-
-    public static void initUsersListener() {
-        getRoomUsersReference().addChildEventListener(new ChildEventListener() {
-            @Override
-            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                UserIdentity user = dataSnapshot.getValue(UserIdentity.class);
-                trace("adding user to local users list: " + user.getUsername());
-                Database.getUsers().add(user);
-            }
-
-            @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-
-            }
-
-            @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) {
-                UserIdentity user = dataSnapshot.getValue(UserIdentity.class);
-                trace("removing user from local users list: " + user.getUsername());
-                Iterator<UserIdentity> usersIt = Database.getUsers().iterator();
-                while (usersIt.hasNext()){
-                    UserIdentity u = usersIt.next();
-                    if(u.equals(user)) usersIt.remove();
-                }
-
-            }
-
-            @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
+        return FirebaseDatabase.getInstance().getReference().child("usersMap");
     }
 
     private static void trace(String message) {

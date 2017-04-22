@@ -5,7 +5,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
@@ -29,6 +32,9 @@ import com.cs595.uwm.chatbylocation.service.Database;
 
 import net.margaritov.preference.colorpicker.ColorPickerPreference;
 
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -45,6 +51,7 @@ import java.util.List;
 public class SettingsActivity extends AppCompatPreferenceActivity {
 
     public static final int REQUEST_IMAGE_CAPTURE = 42;
+    public static final String USER_PHOTO_PATH = "user_photo.webp";
 
     private static boolean inFragment = false;
     private static String caller;
@@ -243,23 +250,20 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                 @Override
                 public boolean onPreferenceChange(Preference preference, Object newValue) {
                     String icon = String.valueOf(newValue);
-                    Database.setUserIcon(icon);
-                    if (UserIcon.NONE.equals(icon)) {
+                    // TODO: Check Database.setUserIcon(icon);
+                    if (UserIcon.PHOTO.equals(icon)) {
                         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                         if (takePictureIntent.resolveActivity(getActivity().getPackageManager()) != null) {
-                            //startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
-                            //UserProfileChangeRequest.Builder changeRequest = new UserProfileChangeRequest.Builder();
+                            startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
                         }
                     }
-                    else {
-                        iconPref.setIcon(UserIcon.getIconResource(icon));
-                    }
+
+                    iconPref.setIcon(UserIcon.getIconResource(icon));
 
                     String userId = Database.getUserID();
-                    String roomId = Database.getCurrentRoomID();
-                    if (userId != null && roomId != null && !roomId.equals("")) {
+                    if (userId != null) {
                         //System.out.println("*\n*\nroomId = " + roomId + "\n*\n*");
-                        Database.getRoomUsersReference().child(roomId).child(userId).child("icon").setValue(icon);
+                        Database.setIcon(icon);
                     }
 
                     return true;
@@ -292,15 +296,30 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                 }
             });
         }
+    }
 
-        @Override
-        public boolean onOptionsItemSelected(MenuItem item) {
-            int id = item.getItemId();
-            if (id == android.R.id.home) {
-                startActivity(new Intent(getActivity(), SettingsActivity.class));
-                return true;
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
+            Bitmap image = (Bitmap) data.getExtras().get("data");
+            if (image != null) {
+                FileOutputStream fos = null;
+                try {
+                    fos = new FileOutputStream(USER_PHOTO_PATH);
+                    image.compress(Bitmap.CompressFormat.WEBP, 50, fos);
+
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                } finally {
+                    try {
+                        if (fos != null) {
+                            fos.close();
+                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
             }
-            return super.onOptionsItemSelected(item);
         }
     }
 

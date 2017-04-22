@@ -35,14 +35,15 @@ public class MainActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_main);
 
-        // If you get a weird ClassCastException you may need to uncomment
-        // this and run it once to reset the preference
-        /*
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        prefs.edit().putString("user_icon", UserIcon.NONE).apply();
-        //*/
 
-        Database.setUsers(new ArrayList<UserIdentity>());
+        // If you get a weird ClassCastException you may need to uncomment
+        // this next line and run it once to reset the preference
+
+        // prefs.edit().getString("user_icon", UserIcon.NONE).apply();
+
+
+        Database.setIcon(prefs.getString("user_icon", UserIcon.NONE));
         Database.initUsersListener();
 
 //        AuthUI.getInstance().signOut(this).addOnCompleteListener(new OnCompleteListener<Void>() {
