@@ -254,7 +254,6 @@ public class Database {
                         // Update room password
                         String name = String.valueOf(dataSnapshot.child("name").getValue());
                         roomUserNames.remove(userId);
-                        roomUserIcons.remove(name);
                     }
 
                     @Override

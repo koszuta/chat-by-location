@@ -8,7 +8,7 @@ import com.cs595.uwm.chatbylocation.R;
 
 public class UserIcon {
     public static final String NONE = "none";
-    public static final String CUSTOM = "custom";
+    public static final String PHOTO = "custom";
     public static final String BEAR = "bear";
     public static final String DRAGON = "dragon";
     public static final String ELEPHANT = "elephant";
@@ -18,7 +18,7 @@ public class UserIcon {
     public static int getIconResource(String icon) {
         int res = R.drawable.ic_default_icon;
         switch (icon) {
-            case CUSTOM:
+            case PHOTO:
                 break;
             case BEAR:
                 res = R.drawable.ic_bear;
