@@ -3,11 +3,11 @@ package com.cs595.uwm.chatbylocation.objModel;
 
 public class RoomIdentity {
 
-    public String name;
-    public String longg;
-    public String lat;
-    public int rad;
-    public String password;
+    private String name;
+    private String longg;
+    private String lat;
+    private int rad;
+    private String password;
 
     public RoomIdentity() {
 

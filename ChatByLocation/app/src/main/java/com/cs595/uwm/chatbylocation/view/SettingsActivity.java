@@ -250,23 +250,20 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                 @Override
                 public boolean onPreferenceChange(Preference preference, Object newValue) {
                     String icon = String.valueOf(newValue);
-                    Database.setUserIcon(icon);
+                    // TODO: Check Database.setUserIcon(icon);
                     if (UserIcon.PHOTO.equals(icon)) {
                         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                         if (takePictureIntent.resolveActivity(getActivity().getPackageManager()) != null) {
                             startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
-                            //UserProfileChangeRequest.Builder changeRequest = new UserProfileChangeRequest.Builder();
                         }
                     }
-                    else {
-                        iconPref.setIcon(UserIcon.getIconResource(icon));
-                    }
+
+                    iconPref.setIcon(UserIcon.getIconResource(icon));
 
                     String userId = Database.getUserID();
-                    String roomId = Database.getCurrentRoomID();
-                    if (userId != null && roomId != null && !roomId.equals("")) {
+                    if (userId != null) {
                         //System.out.println("*\n*\nroomId = " + roomId + "\n*\n*");
-                        Database.getRoomUsersReference().child(roomId).child(userId).child("icon").setValue(icon);
+                        Database.setIcon(icon);
                     }
 
                     return true;
@@ -303,32 +300,26 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        switch(requestCode) {
-            case REQUEST_IMAGE_CAPTURE:
-                if (resultCode == RESULT_OK) {
-                    Bitmap image = (Bitmap) data.getExtras().get("data");
-                    // Nathan TODO: Save this image somewhere
-                    FileOutputStream fos = null;
+        if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
+            Bitmap image = (Bitmap) data.getExtras().get("data");
+            if (image != null) {
+                FileOutputStream fos = null;
+                try {
+                    fos = new FileOutputStream(USER_PHOTO_PATH);
+                    image.compress(Bitmap.CompressFormat.WEBP, 50, fos);
+
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                } finally {
                     try {
-                        fos = new FileOutputStream(USER_PHOTO_PATH);
-                        image.compress(Bitmap.CompressFormat.WEBP, 50, fos);
-
-                    } catch (FileNotFoundException e) {
-                        e.printStackTrace();
-                    } finally {
-                        try {
-                            if (fos != null) {
-                                fos.close();
-                            }
-                        } catch (IOException e) {
-                            e.printStackTrace();
+                        if (fos != null) {
+                            fos.close();
                         }
+                    } catch (IOException e) {
+                        e.printStackTrace();
                     }
-
-
-                    //Drawable.createFromPath(USER_PHOTO_PATH);
                 }
-                break;
+            }
         }
     }
 

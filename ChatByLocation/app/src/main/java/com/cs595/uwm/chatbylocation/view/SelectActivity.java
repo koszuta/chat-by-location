@@ -17,6 +17,7 @@ import android.widget.TextView;
 
 import com.cs595.uwm.chatbylocation.objModel.RoomIdentity;
 import com.cs595.uwm.chatbylocation.R;
+import com.cs595.uwm.chatbylocation.objModel.UserIcon;
 import com.cs595.uwm.chatbylocation.service.Database;
 import com.firebase.ui.database.FirebaseListAdapter;
 import com.google.firebase.database.DatabaseReference;
@@ -34,7 +35,7 @@ public class SelectActivity extends AppCompatActivity {
         setContentView(R.layout.select_layout);
 
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        Database.setUserIcon(prefs.getString("user_icon", "default"));
+        // TODO: Check Database.setUserIcon(prefs.getString("user_icon", UserIcon.NONE));
 
         Database.initListeners();
         displayRoomList();
@@ -44,7 +45,6 @@ public class SelectActivity extends AppCompatActivity {
         String roomId = String.valueOf(view.getTag());
         System.out.println("roomId = " + roomId);
 
-        DatabaseReference passwordRef = Database.getRoomIdentityReference().child(roomId).child("password");
         if (Database.getRoomPassword(roomId) != null) {
             DialogFragment dialog = new PasswordCheckDialog();
             Bundle args = new Bundle();
@@ -70,7 +70,7 @@ public class SelectActivity extends AppCompatActivity {
         final FirebaseListAdapter<RoomIdentity> adapter = new FirebaseListAdapter<RoomIdentity>(this,
                 RoomIdentity.class,
                 R.layout.room_list_item,
-                FirebaseDatabase.getInstance().getReference().child("roomIdentity")) {
+                Database.getRoomIdentityReference()) {
             @Override
             protected void populateView(View view, RoomIdentity roomIdentity, int position) {
                 final TextView roomName = (TextView) view.findViewById(R.id.roomName);

@@ -23,6 +23,8 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
 
+import java.util.Map;
+
 /**
  * Created by Jason on 4/16/2017.
  */
@@ -124,10 +126,14 @@ public class RegisterActivity extends AppCompatActivity {
     }
 
     private boolean isUniqueUsername(String username) {
-        for (UserIdentity user : Database.getUsers()) {
-            if (user.getUsername().equals(username)) {
-                Log.d("Register Activity >> ", "Username is NOT unique: " + username);
-                return false;
+        Map<String, UserIdentity> users = Database.getUsers();
+        if (users != null) {
+            for (Map.Entry<String, UserIdentity> entry : users.entrySet()) {
+                UserIdentity user = entry.getValue();
+                if (username != null && username.equals(user.getUsername())) {
+                    Log.d("Register Activity >> ", "Username is NOT unique: " + username);
+                    return false;
+                }
             }
         }
         Log.d("Register Activity >> ", "Username is unique: " + username);
