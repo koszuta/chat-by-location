@@ -132,7 +132,14 @@ public class ChatActivity extends AppCompatActivity {
 
     public void sendMessageClick(View view) {
         ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-        if (connectivityManager.getActiveNetworkInfo() == null) return;
+        if (connectivityManager.getActiveNetworkInfo() == null) {
+            Toast.makeText(this, "No network connectivity", Toast.LENGTH_LONG).show();
+            return;
+        }
+
+
+        // TODO: User exited Geofence can't send message
+
 
         // Nathan TODO: Use better ban method
         //block message and kick out user if banned from current room
@@ -254,6 +261,7 @@ public class ChatActivity extends AppCompatActivity {
                         }
                     };
 
+                    // Nathan TODO: Implement kicked from room using database listener
                     ListView listOfMessages = (ListView) findViewById(R.id.messageList);
                     if (roomID.equals("")) {
                         chatMessageListener.cleanup();

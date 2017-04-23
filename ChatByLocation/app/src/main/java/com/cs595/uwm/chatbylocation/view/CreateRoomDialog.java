@@ -216,8 +216,15 @@ public class CreateRoomDialog extends DialogFragment implements GoogleApiClient.
                 Database.getUserId(),
                 name, longg, lat, radius, password));
         startActivity(new Intent(getActivity(), ChatActivity.class));
-/*        createGeofence();*/
+        //startGeofence();
+
         dialog.dismiss();
+    }
+
+    private void startGeofence() {
+        Geofence geofence = createGeofence();
+        GeofencingRequest geofenceRequest = createGeofenceRequest(geofence);
+        addGeofence(geofenceRequest);
     }
 
     private Geofence createGeofence() {
@@ -228,12 +235,6 @@ public class CreateRoomDialog extends DialogFragment implements GoogleApiClient.
                 .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER
                         | Geofence.GEOFENCE_TRANSITION_EXIT)
                 .build();
-    }
-
-    private void startGeofence() {
-        Geofence geofence = createGeofence();
-        GeofencingRequest geofenceRequest = createGeofenceRequest(geofence);
-        addGeofence(geofenceRequest);
     }
 
     // Create a Geofence Request

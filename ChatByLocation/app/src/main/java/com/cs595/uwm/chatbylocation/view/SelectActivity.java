@@ -92,6 +92,14 @@ public class SelectActivity extends AppCompatActivity {
                 final TextView roomRadius = (TextView) view.findViewById(R.id.roomRadius);
                 final ImageView roomIsPrivate = (ImageView) view.findViewById(R.id.roomIsPrivate);
 
+
+                // TODO: Check if user is within room radius (with math)
+                float lat = Float.valueOf(roomIdentity.getLat());
+                float lng = Float.valueOf(roomIdentity.getLongg());
+                if (!withinRoomRadius(lat, lng, roomIdentity.getRad())) {
+
+                }
+
                 if (roomIdentity.getPassword() != null) {
                     roomIsPrivate.setVisibility(View.VISIBLE);
                 }
@@ -108,6 +116,10 @@ public class SelectActivity extends AppCompatActivity {
         };
 
         listOfRooms.setAdapter(adapter);
+    }
+
+    private boolean withinRoomRadius(float lat, float lng, int radius) {
+        return false;
     }
 
     private String formatCoords(String lat, String lng) {

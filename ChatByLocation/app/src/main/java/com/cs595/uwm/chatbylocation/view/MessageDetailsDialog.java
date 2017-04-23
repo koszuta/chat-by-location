@@ -62,9 +62,9 @@ public class MessageDetailsDialog extends DialogFragment {
             muteButton.setText("UNMUTE");
         }
 
-        // Nathan TODO: Make 'Ban' button visible when user is admin of current room
-        /*
-        if (user == admin) {
+        // TODO: Make 'Ban' button visible when user is admin of current room
+        //*
+        if (Database.isCurrentUserAdminOfRoom(userId)) {
             banButton.setVisibility(Button.VISIBLE);
         }
         //*/

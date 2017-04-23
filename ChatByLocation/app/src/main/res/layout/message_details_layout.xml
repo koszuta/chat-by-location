@@ -63,7 +63,7 @@
 
         style="@style/colorThemeButton"
         android:background="@color/transparent"
-        android:visibility="visible"
+        android:visibility="invisible"
 
         android:layout_width="45dp"
         android:layout_height="36dp"
