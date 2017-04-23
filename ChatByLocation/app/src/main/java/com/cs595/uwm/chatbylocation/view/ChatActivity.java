@@ -1,11 +1,13 @@
 package com.cs595.uwm.chatbylocation.view;
 
 import android.app.DialogFragment;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.DataSetObserver;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.content.res.ResourcesCompat;
@@ -129,12 +131,18 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     public void sendMessageClick(View view) {
-        final EditText textInput = (EditText) findViewById(R.id.textInput);
+        ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        if (connectivityManager.getActiveNetworkInfo() == null) return;
+
+        // Nathan TODO: Use better ban method
         //block message and kick out user if banned from current room
         if(isUserBannedFromCurrentRoom()) {
-            startActivity(new Intent(view.getContext(), SelectActivity.class));
+            Database.setUserRoom(null);
+            startActivity(new Intent(this, SelectActivity.class));
             finish();
         }
+
+        final EditText textInput = (EditText) findViewById(R.id.textInput);
         String roomID = Database.getCurrentRoomID();
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         if (roomID != null) {

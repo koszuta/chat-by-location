@@ -12,6 +12,7 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -81,7 +82,6 @@ public class CreateRoomDialog extends DialogFragment implements GoogleApiClient.
         }
     };
 
-
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
@@ -117,7 +117,7 @@ public class CreateRoomDialog extends DialogFragment implements GoogleApiClient.
         roomRadius.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                int radius = MIN_RADIUS + seekBar.getProgress() * RADIUS_INCREMENT;
+                int radius = radiusFromProgress(seekBar.getProgress());
 
                 radiusValue.setText("Radius: " + Integer.toString(radius) + " m");
             }
@@ -156,7 +156,7 @@ public class CreateRoomDialog extends DialogFragment implements GoogleApiClient.
                             return;
                         }
 
-                        radius = MIN_RADIUS + roomRadius.getProgress() * RADIUS_INCREMENT;
+                        radius = radiusFromProgress(roomRadius.getProgress());
 
                         password = null;
                         if (roomIsPrivate.isChecked()) {
@@ -195,6 +195,10 @@ public class CreateRoomDialog extends DialogFragment implements GoogleApiClient.
         });
 
         return dialog;
+    }
+
+    private int radiusFromProgress(int progress) {
+        return MIN_RADIUS + progress * RADIUS_INCREMENT;
     }
 
     private void createGoogleApi() {
