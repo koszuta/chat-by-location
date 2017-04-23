@@ -24,6 +24,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.cs595.uwm.chatbylocation.R;
 import com.cs595.uwm.chatbylocation.controllers.BanController;
@@ -58,6 +59,7 @@ public class ChatActivity extends AppCompatActivity {
     private DialogFragment messageDialog;
     private ListView messageListView;
     private Intent banUserIntent;
+    Bundle args = new Bundle();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,7 +81,7 @@ public class ChatActivity extends AppCompatActivity {
                 int iconRes = UserIcon.getIconResource(Database.getUserIcon(userId));
 
                 messageDialog = new MessageDetailsDialog();
-                Bundle args = new Bundle();
+
                 args.putString(NAME_ARGUMENT, messageUser);
                 args.putInt(ICON_ARGUMENT, iconRes);
                 args.putString(USER_ID_ARGUMENT, userId);
@@ -92,6 +94,7 @@ public class ChatActivity extends AppCompatActivity {
         setTitle(Database.getCurrentRoomName());
         displayChatMessages();
     }
+
     public void onMuteClick(View view) {
         String name = messageDialog.getArguments().getString(NAME_ARGUMENT);
 
@@ -106,10 +109,14 @@ public class ChatActivity extends AppCompatActivity {
 
     // Nathan TODO: Remove user from current room and put on blacklist
     public void banUserClick(View view) {
-        String iD = messageDialog.getArguments().getString(USER_ID_ARGUMENT);
+        String iD = args.getString(USER_ID_ARGUMENT);
         String roomID = Database.getCurrentRoomID();
-
+        Toast.makeText(view.getContext(), "User has been banned from the room!", Toast.LENGTH_SHORT).show();
         BanController.addToRoomBanList(view.getContext(), iD, roomID);
+        if(isUserBannedFromCurrentRoom()) {
+            startActivity(banUserIntent);
+            finish();
+        }
     }
 
     public void imageClick(View view) {
@@ -259,7 +266,9 @@ public class ChatActivity extends AppCompatActivity {
                         public void onChanged()
                         {
                             //block message and kick out user if banned from current room
+                            //TODO:add a method delay to prevent spamming this method call on every message
                             if(isUserBannedFromCurrentRoom()) {
+                                Toast.makeText(getApplicationContext(), "You have been banned from the room!", Toast.LENGTH_SHORT).show();
                                 startActivity(banUserIntent);
                                 finish();
                             }

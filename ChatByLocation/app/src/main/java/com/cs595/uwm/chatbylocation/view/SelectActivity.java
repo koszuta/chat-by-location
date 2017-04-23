@@ -49,7 +49,7 @@ public class SelectActivity extends AppCompatActivity {
         if (BanController.isCurrentUserBanned(roomId)) {
             AlertDialog aD = new AlertDialog.Builder(view.getContext())
                     .setTitle("Cannot Join Room")
-                    .setMessage("You have been banned from this room! Please choose a different room to join.")
+                    .setMessage("You have been banned from this room!")
                     .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int which) {
                             dialog.cancel();
@@ -96,7 +96,7 @@ public class SelectActivity extends AppCompatActivity {
                     roomIsPrivate.setVisibility(View.VISIBLE);
                 }
                 //create a ban database listener for the room
-                BanController.addRoom(roomIdentity.getName());
+                BanController.addRoom(getRef(position).getKey());
 
                 roomName.setText(roomIdentity.getName());
                 roomCoords.setText(roomIdentity.getLongg() + ", " + roomIdentity.getLat());
