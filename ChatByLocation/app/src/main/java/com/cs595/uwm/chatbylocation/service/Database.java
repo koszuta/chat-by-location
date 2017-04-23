@@ -181,8 +181,12 @@ public class Database {
                     @Override
                     public void onSuccess(byte[] bytes) {
                         Bitmap image = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
-                        if (image == null) trace("User image for " + users.get(userId).getUsername() + " is null");
+                        if (image == null) {
+                            trace("User image for " + users.get(userId).getUsername() + " is null");
+                            return;
+                        }
                         userImages.put(userId, image);
+                        trace("User image successfully updated for " + users.get(userId).getUsername());
                     }
                 });
     }
@@ -328,6 +332,8 @@ public class Database {
 
         if (getCurrentUserReference() != null) {
             getCurrentUserReference().child("currentRoomID").setValue("");
+            getCurrentUserReference().child("icon").setValue(UserIcon.NONE);
+            getCurrentUserReference().child("removeFrom").setValue("");
             getCurrentUserReference().child("username").setValue(username);
         }
         trace("created user");
