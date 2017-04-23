@@ -2,18 +2,9 @@ package com.cs595.uwm.chatbylocation.controllers;
 
 import android.content.Context;
 import android.util.Log;
-import android.view.View;
 
-import com.cs595.uwm.chatbylocation.service.Database;
-
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.util.ArrayList;
 
 /**
  * Created by Jason on 4/14/2017.

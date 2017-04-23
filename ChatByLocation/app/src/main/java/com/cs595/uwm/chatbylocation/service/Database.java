@@ -133,7 +133,6 @@ public class Database {
     public static String getUserIcon(String userId) {
         return (users.containsKey(userId)) ? users.get(userId).getIcon() : UserIcon.NONE;
     }
-    //TODO entries contain null values in getUserId(String userName)
     public static String getUserId(String userName) {
         if (userName == null) return null;
         for (Map.Entry<String, UserIdentity> entry : users.entrySet()) {

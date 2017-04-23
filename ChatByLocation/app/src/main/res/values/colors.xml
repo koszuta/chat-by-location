@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimaryLight">#B3E5FC</color>
     <color name="colorPrimary">#03a9f4</color>
     <color name="colorPrimaryDark">#0277BD</color>
     <color name="colorAccent">#FFEA00</color>
@@ -9,13 +8,11 @@
 
     <color name="black">#000000</color>
 
-    <color name="messageBg">#FAFAFA</color>
     <color name="background">#FAFAFA</color>
     <color name="listDivider">#DADADA</color>
 
     <color name="inputHint">#888888</color>
     <color name="inputBackground">@color/background</color>
-    <color name="sendButtonBackground">@color/transparent</color>
     <color name="bottomLayout">#EEEEEE</color>
 
     <color name="timestamp">#666666</color>

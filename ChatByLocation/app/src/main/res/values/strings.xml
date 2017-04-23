@@ -7,7 +7,6 @@
     <string name="dummyMessage">21:13 Koszuta: Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim</string>
     <string name="chatActivityLabel">Chat Room</string>
     <string name="selectActivityLabel">Join a Chatroom</string>
-    <string name="authActivityLabel">Sign in</string>
 
     <string name="chatnameHint">Enter a chatname...</string>
     <string name="chatnameHelp">Please select a unique chat name:</string>
@@ -96,20 +95,6 @@
         <item>18</item>
         <item>22</item>
     </string-array>
-
-    <string-array name="list_preference_entries">
-        <item>Entry 1</item>
-        <item>Entry 2</item>
-        <item>Entry 3</item>
-    </string-array>
-
-    <string-array name="list_preference_entry_values">
-        <item>1</item>
-        <item>2</item>
-        <item>3</item>
-    </string-array>
-
-    <string-array name="multi_select_list_preference_default_value" />
 
     <string name="pref_title_system_sync_settings">System sync settings</string>
 

@@ -14,8 +14,6 @@ import android.widget.Toast;
 
 import com.cs595.uwm.chatbylocation.R;
 import com.cs595.uwm.chatbylocation.service.Database;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.Query;
 
 /**
  * Created by Nathan on 4/14/17.

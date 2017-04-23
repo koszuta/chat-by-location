@@ -36,8 +36,7 @@ dependencies {
     })
     compile 'com.google.firebase:firebase-core:10.0.1'
     compile 'com.android.support.constraint:constraint-layout:1.0.1'
-    compile project(path: ':auth')
-    compile project(path: ':database')
+    compile 'com.firebaseui:firebase-ui:1.1.1'
 }
 
 apply plugin: 'com.google.gms.google-services'

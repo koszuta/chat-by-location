@@ -1,8 +1,6 @@
 package com.cs595.uwm.chatbylocation.view;
 
 import android.annotation.TargetApi;
-import android.app.Dialog;
-import android.app.DialogFragment;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -31,7 +29,6 @@ import com.cs595.uwm.chatbylocation.R;
 import com.cs595.uwm.chatbylocation.objModel.UserIcon;
 import com.cs595.uwm.chatbylocation.service.Database;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
 import net.margaritov.preference.colorpicker.ColorPickerPreference;

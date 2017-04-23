@@ -1,21 +1,11 @@
 package com.cs595.uwm.chatbylocation.objModel;
 
-import android.content.Context;
-import android.content.Intent;
-
 import com.cs595.uwm.chatbylocation.service.Database;
-import com.cs595.uwm.chatbylocation.view.SelectActivity;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
 
 /**
  * Created by Jason on 4/14/2017.
