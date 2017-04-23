@@ -73,11 +73,16 @@ public class RoomUserListActivity extends AppCompatActivity {
                 trace("ds key " + dataSnapshot.getKey());
                 trace("ds val " + dataSnapshot.getValue());
                 HashMap<String, Object> roomUsers = (HashMap<String, Object>) dataSnapshot.getValue();
-                Iterator<String> iterator = roomUsers.keySet().iterator();
-                while (iterator.hasNext()){
-                    String userID = iterator.next();
-                    users.add(new UserIdentity(userID, UserIcon.NONE));
+
+                for(String userID : roomUsers.keySet()){
+                    users.add(Database.getUserByID(userID));
                 }
+
+//                Iterator<String> iterator = roomUsers.keySet().iterator();
+//                while (iterator.hasNext()){
+//                    String userID = iterator.next();
+//                    users.add(new UserIdentity(userID, UserIcon.NONE));
+//                }
                 //users.add(new UserIdentity((String) dataSnapshot.getValue(), 0));
 
             }

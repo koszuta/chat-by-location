@@ -11,6 +11,7 @@ public class UserIdentity {
     private String removeFrom;
 
     public UserIdentity(){
+        icon = UserIcon.NONE;
     }
 
     public UserIdentity(String username, String icon) {
