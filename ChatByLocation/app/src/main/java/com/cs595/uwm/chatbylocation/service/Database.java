@@ -69,6 +69,7 @@ public class Database {
         public void onCancelled(DatabaseError databaseError) {
         }
     };
+
     private static ValueEventListener rfrListener = new ValueEventListener() {
         @Override
         public void onDataChange(DataSnapshot dataSnapshot) {
@@ -101,6 +102,10 @@ public class Database {
         }
     };
 
+    public static UserIdentity getUserByID(String userID){
+        if(users == null) return null;
+        return users.get(userID);
+    }
 
     public static String getCurrentRoomName() {
         return (rooms.containsKey(currentRoomID)) ? rooms.get(currentRoomID).getName() : null;
