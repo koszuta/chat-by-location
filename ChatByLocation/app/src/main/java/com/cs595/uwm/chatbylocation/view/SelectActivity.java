@@ -80,7 +80,7 @@ public class SelectActivity extends AppCompatActivity {
                 }
 
                 roomName.setText(roomIdentity.getName());
-                roomCoords.setText(roomIdentity.getLongg() + ", " + roomIdentity.getLat());
+                roomCoords.setText(formatCoords(roomIdentity.getLat(), roomIdentity.getLongg()));
                 roomRadius.setText("Radius: " + roomIdentity.getRad() + "m");
 
                 Button joinButton = (Button) view.findViewById(R.id.joinButton);
@@ -89,6 +89,28 @@ public class SelectActivity extends AppCompatActivity {
         };
 
         listOfRooms.setAdapter(adapter);
+    }
+
+    private String formatCoords(String lat, String lng) {
+        float remainder = 0;
+
+        float latf = Math.abs(Float.valueOf(lat));
+        int latDegree = (int) latf;
+        remainder = 60 * (latf - latDegree);
+        int latMinute = Math.abs((int) remainder);
+        float latSecond = 60 * (remainder - latMinute);
+
+        float lngf = Math.abs(Float.valueOf(lng));
+        int lngDegree = (int) lngf;
+        remainder = 60 * (lngf - lngDegree);
+        int lngMinute = (int) remainder;
+        float lngSecond = 60 * (remainder - lngMinute);
+
+        String ns = (Float.valueOf(lat) >= 0) ? "N" : "S";
+        String ew = (Float.valueOf(lng) >= 0) ? "E" : "W";
+
+        return latDegree + "\u00b0 " + latMinute + "\" " + String.format("%.0f", latSecond) + "\' " + ns + ", " +
+                lngDegree + "\u00b0 " + lngMinute + "\" " + String.format("%.0f", lngSecond) + "\' " + ew;
     }
 
     @Override

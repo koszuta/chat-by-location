@@ -211,7 +211,7 @@ public class CreateRoomDialog extends DialogFragment implements GoogleApiClient.
 
     private void finishRoomCreation() {
         Database.setUserRoom(Database.createRoom(
-                FirebaseAuth.getInstance().getCurrentUser().getUid(),
+                Database.getUserId(),
                 name, longg, lat, radius, password));
         startActivity(new Intent(getActivity(), ChatActivity.class));
 /*        createGeofence();*/
@@ -221,7 +221,7 @@ public class CreateRoomDialog extends DialogFragment implements GoogleApiClient.
     private Geofence createGeofence() {
         return new Geofence.Builder()
                 .setRequestId(GEOFENCE_REQ_ID)
-                .setCircularRegion(Double.parseDouble(longg), Double.parseDouble(lat), radius)
+                .setCircularRegion(Double.parseDouble(lat), Double.parseDouble(longg), radius)
                 .setExpirationDuration(GEO_DURATION)
                 .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER
                         | Geofence.GEOFENCE_TRANSITION_EXIT)
