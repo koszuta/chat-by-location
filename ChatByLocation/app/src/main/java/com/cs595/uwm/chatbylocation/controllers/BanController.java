@@ -26,8 +26,8 @@ public class BanController {
     }
 
     public static void addToRoomBanList(Context context, String userID, String roomID) {
-        DatabaseReference dRef = FirebaseDatabase.getInstance().getReference().child("roomUsers").child(roomID);
-        dRef.child("bannedUsers").child(userID).setValue(true);
+        DatabaseReference dRef = FirebaseDatabase.getInstance().getReference().child("roomUsers");
+        dRef.child(roomID).child("bannedUsers").child(userID).setValue(true);
         //immediately ban current user, for demo purposes
         if(Database.getUserId().equals(userID) ) {
             userBannedRoomList.put(roomID, new RoomBan(roomID));

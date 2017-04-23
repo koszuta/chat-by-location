@@ -355,10 +355,6 @@ public class Database {
             }
         }
     }
-    public static boolean getRoomOwner(String roomID) {
-        //TODO: compare current user with ownerID of specific room in database
-        return true;
-    }
 
     public static void signOutUser() {
         shouldSignOut = true;
@@ -429,5 +425,10 @@ public class Database {
 
     private static void trace(String message) {
         System.out.println("Database >> " + message); //todo android logger
+    }
+
+    public static boolean isCurrentUserAdminOfRoom(String roomID) {
+        //TODO: compare current user with ownerID of specific room in database
+        return true;
     }
 }
