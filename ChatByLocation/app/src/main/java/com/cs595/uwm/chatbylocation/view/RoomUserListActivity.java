@@ -3,12 +3,7 @@ package com.cs595.uwm.chatbylocation.view;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.provider.ContactsContract;
-import android.support.annotation.NonNull;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -17,21 +12,13 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
-import android.widget.ScrollView;
 import android.widget.TextView;
-import android.widget.Toast;
-import android.widget.ToggleButton;
 
 import com.cs595.uwm.chatbylocation.R;
 import com.cs595.uwm.chatbylocation.controllers.MuteController;
 import com.cs595.uwm.chatbylocation.objModel.UserIcon;
 import com.cs595.uwm.chatbylocation.objModel.UserIdentity;
 import com.cs595.uwm.chatbylocation.service.Database;
-import com.firebase.ui.auth.AuthUI;
-import com.google.android.gms.fitness.data.Value;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
@@ -46,10 +33,9 @@ public class RoomUserListActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_user_list_layout);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.user_list_toolbar);
-        toolbar.setTitle("Current Room User List");
-        setSupportActionBar(toolbar);
+        setContentView(R.layout.user_list_layout);
+        getSupportActionBar().setHomeButtonEnabled(true);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         displayUsers();
     }
@@ -119,22 +105,19 @@ public class RoomUserListActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.menu_sign_out:
-                Database.signOutUser();
-                //return to sign in
-                startActivity(new Intent(this, MainActivity.class));
+            case android.R.id.home:
+                Intent roomIntent = new Intent(this, ChatActivity.class);
+                startActivity(roomIntent);
                 break;
             case R.id.menu_settings:
                 Intent n = new Intent(this, SettingsActivity.class);
                 startActivity(n);
                 break;
-            case R.id.return_to_room:
-                Intent roomIntent = new Intent(this, ChatActivity.class);
-                startActivity(roomIntent);
+            case R.id.menu_sign_out:
+                Database.signOutUser();
+                //return to sign in
+                startActivity(new Intent(this, MainActivity.class));
                 break;
-            case R.id.room_users:
-                Intent userIntent = new Intent(this, RoomUserListActivity.class);
-                startActivity(userIntent);
             default:
                 break;
         }

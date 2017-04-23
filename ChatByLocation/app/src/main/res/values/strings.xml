@@ -122,6 +122,6 @@
     <string name="pref_ringtone_silent">Silent</string>
 
     <string name="pref_title_vibrate">Vibrate</string>
-    <string name="title_activity_room_user_list">RoomUserListActivity</string>
+    <string name="title_activity_room_user_list">Users List</string>
     <string name="enter">Enter</string>
 </resources>

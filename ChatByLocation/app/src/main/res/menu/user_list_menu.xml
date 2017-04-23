@@ -6,7 +6,7 @@
         android:id="@+id/return_to_room"
         android:enabled="true"
         android:title="Return to Room"
-        android:visible="true" />
+        android:visible="false" />
     <item
         android:title="Preferences"
         app:showAsAction="never"

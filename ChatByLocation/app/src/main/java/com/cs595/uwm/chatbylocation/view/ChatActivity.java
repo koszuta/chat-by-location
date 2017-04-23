@@ -158,28 +158,24 @@ public class ChatActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-
             case android.R.id.home:
                 Database.setUserRoom(null);
                 startActivity(new Intent(this, SelectActivity.class));
                 break;
-
-            case R.id.menu_sign_out:
-                Database.signOutUser();
-                //return to sign in
-                startActivity(new Intent(this, MainActivity.class));
+            case R.id.room_users:
+                Intent userIntent = new Intent(this, RoomUserListActivity.class);
+                startActivity(userIntent);
                 break;
-
             case R.id.menu_settings:
                 Intent settingsIntent = new Intent(this, SettingsActivity.class);
                 settingsIntent.putExtra("caller", ChatActivity.class.getName());
                 startActivity(settingsIntent);
                 break;
-
-            case R.id.room_users:
-                Intent userIntent = new Intent(this, RoomUserListActivity.class);
-                startActivity(userIntent);
-
+            case R.id.menu_sign_out:
+                Database.signOutUser();
+                //return to sign in
+                startActivity(new Intent(this, MainActivity.class));
+                break;
             default:
                 break;
         }
@@ -199,14 +195,14 @@ public class ChatActivity extends AppCompatActivity {
                     FirebaseListAdapter<ChatMessage> chatMessageListener = new FirebaseListAdapter<ChatMessage>(
                             ChatActivity.this,
                             ChatMessage.class,
-                            R.layout.message,
+                            R.layout.message_item,
                             Database.getRoomMessagesReference().child(roomID)) {
                         @Override
                         protected void populateView(View view, ChatMessage chatMessage, int position) {
                             String username = chatMessage.getMessageUser();
                             if (username == null) username = "no name";
 
-                            // Get reference to the views of message.xml
+                            // Get reference to the views of message_item
                             final TextView messageText = (TextView) view.findViewById(R.id.messageText);
                             final ImageView userIcon = (ImageView) view.findViewById(R.id.userIcon);
 
@@ -230,8 +226,8 @@ public class ChatActivity extends AppCompatActivity {
 
                             SpannableString ss = new SpannableString(timestamp + ' ' + username + ": " + chatMessage.getMessageText());
                             if (MuteController.isMuted(view.getContext(), username)) {
-                                ss = new SpannableString("\t\t-- This user is muted --");
-                                userIcon.setVisibility(View.GONE);
+                                ss = new SpannableString("-- This user is muted --");
+                                //userIcon.setVisibility(View.GONE);
                             } else {
                                 StyleSpan bold = new StyleSpan(android.graphics.Typeface.BOLD);
                                 RelativeSizeSpan timeSize = new RelativeSizeSpan(0.8f);
