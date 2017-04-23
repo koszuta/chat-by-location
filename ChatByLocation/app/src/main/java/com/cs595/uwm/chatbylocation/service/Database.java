@@ -350,6 +350,10 @@ public class Database {
             }
         }
     }
+    public static boolean getRoomOwner(String roomID) {
+        //TODO: compare current user with ownerID of specific room in database
+        return true;
+    }
 
     public static void signOutUser() {
         shouldSignOut = true;

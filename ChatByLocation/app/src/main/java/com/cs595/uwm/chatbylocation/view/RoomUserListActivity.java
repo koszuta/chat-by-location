@@ -39,10 +39,7 @@ public class RoomUserListActivity extends AppCompatActivity {
 
         displayUsers();
     }
-
-    /**
-     * TODO: reimplement populating scrollList using database (currently using mock data)
-     */
+    
     private void displayUsers() {
 
         ListView lV = (ListView) findViewById(R.id.user_list_view);

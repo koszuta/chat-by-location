@@ -105,12 +105,14 @@ public class ChatActivity extends AppCompatActivity {
         displayChatMessages();
     }
 
-    // Nathan TODO: Remove user from current room and put on blacklist
+
     public void banUserClick(View view) {
         String iD = args.getString(USER_ID_ARGUMENT);
         String roomID = Database.getCurrentRoomID();
         Toast.makeText(view.getContext(), "User has been banned from the room!", Toast.LENGTH_SHORT).show();
-        BanController.addToRoomBanList(view.getContext(), iD, roomID);
+        if(Database.getUserId().equals(Database.getRoomOwner(roomID))) {
+            BanController.addToRoomBanList(view.getContext(), iD, roomID);
+        }
         if(isUserBannedFromCurrentRoom()) {
             startActivity(banUserIntent);
             finish();
