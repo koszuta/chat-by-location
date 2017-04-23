@@ -51,8 +51,7 @@
         <activity
             android:name=".view.RoomUserListActivity"
             android:screenOrientation="portrait"
-            android:label="@string/title_activity_room_user_list"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:label="@string/title_activity_room_user_list" />
         <activity
             android:name=".view.RegisterActivity"
             android:screenOrientation="portrait"

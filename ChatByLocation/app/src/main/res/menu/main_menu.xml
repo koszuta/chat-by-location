@@ -4,8 +4,9 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
-        android:title="Current User List"
-        app:showAsAction="never"
+        android:title="Users List"
+        android:icon="@drawable/ic_users_list"
+        app:showAsAction="ifRoom"
         android:id="@+id/room_users"/>
 
     <item
