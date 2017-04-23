@@ -1,8 +1,10 @@
 package com.cs595.uwm.chatbylocation.view;
 
 import android.app.DialogFragment;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -12,6 +14,8 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.cs595.uwm.chatbylocation.controllers.BanController;
+import com.cs595.uwm.chatbylocation.objModel.RoomBan;
 import com.cs595.uwm.chatbylocation.objModel.RoomIdentity;
 import com.cs595.uwm.chatbylocation.R;
 import com.cs595.uwm.chatbylocation.service.Database;
@@ -36,7 +40,20 @@ public class SelectActivity extends AppCompatActivity {
         String roomId = String.valueOf(view.getTag());
         System.out.println("roomId = " + roomId);
 
-        if (Database.getRoomPassword(roomId) != null) {
+        if (BanController.isCurrentUserBanned(roomId)) {
+            AlertDialog aD = new AlertDialog.Builder(view.getContext())
+                    .setTitle("Cannot Join Room")
+                    .setMessage("You have been banned from this room! Please choose a different room to join.")
+                    .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.cancel();
+                        }
+                    })
+                    .setIcon(android.R.drawable.ic_dialog_alert)
+                    .show();
+
+        }
+        else if (Database.getRoomPassword(roomId) != null) {
             DialogFragment dialog = new PasswordCheckDialog();
             Bundle args = new Bundle();
             args.putString("roomId", roomId);
@@ -72,6 +89,8 @@ public class SelectActivity extends AppCompatActivity {
                 if (roomIdentity.getPassword() != null) {
                     roomIsPrivate.setVisibility(View.VISIBLE);
                 }
+                //create a ban database listener for the room
+                BanController.addRoom(roomIdentity.getName());
 
                 roomName.setText(roomIdentity.getName());
                 roomCoords.setText(roomIdentity.getLongg() + ", " + roomIdentity.getLat());
@@ -117,4 +136,5 @@ public class SelectActivity extends AppCompatActivity {
         }
         return true;
     }
+
 }

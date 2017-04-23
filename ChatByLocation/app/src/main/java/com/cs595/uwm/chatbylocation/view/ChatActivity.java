@@ -3,6 +3,7 @@ package com.cs595.uwm.chatbylocation.view;
 import android.app.DialogFragment;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.DataSetObserver;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -17,18 +18,20 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.BaseAdapter;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
 import com.cs595.uwm.chatbylocation.R;
+import com.cs595.uwm.chatbylocation.controllers.BanController;
+import com.cs595.uwm.chatbylocation.objModel.RoomBan;
 import com.cs595.uwm.chatbylocation.controllers.MuteController;
 import com.cs595.uwm.chatbylocation.objModel.ChatMessage;
 import com.cs595.uwm.chatbylocation.objModel.UserIcon;
 import com.cs595.uwm.chatbylocation.service.Database;
 import com.firebase.ui.database.FirebaseListAdapter;
-import com.google.android.gms.ads.formats.NativeAd;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -45,11 +48,15 @@ public class ChatActivity extends AppCompatActivity {
     public static final long ONE_DAY_IN_MILLIS = 24 * 60 * 60 * 1000;
     public static final long ONE_WEEK_IN_MILLIS = 7 * ONE_DAY_IN_MILLIS;
     public static final long ONE_YEAR_IN_MILLIS = 365 * ONE_DAY_IN_MILLIS;
+
     public static final String NAME_ARGUMENT = "usernameForBundle";
     public static final String ICON_ARGUMENT = "iconForBundle";
+    private static final String USER_ID_ARGUMENT = "userIdForBundle";
+    private static final String ROOM_ID_ARGUMENT = "roomIdForBundle";
 
     private DialogFragment messageDialog;
     private ListView messageListView;
+    private Intent banUserIntent;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,6 +64,7 @@ public class ChatActivity extends AppCompatActivity {
         setContentView(R.layout.chat_layout);
 
         //construct objects
+        banUserIntent = new Intent(this, SelectActivity.class);
         messageListView = (ListView) this.findViewById(R.id.messageList);
         messageListView.setItemsCanFocus(false);
         messageDialog = new MessageDetailsDialog();
@@ -73,6 +81,8 @@ public class ChatActivity extends AppCompatActivity {
                 Bundle args = new Bundle();
                 args.putString(NAME_ARGUMENT, messageUser);
                 args.putInt(ICON_ARGUMENT, iconRes);
+                args.putString(USER_ID_ARGUMENT, userId);
+                args.putString(ROOM_ID_ARGUMENT, Database.getCurrentRoomID());
                 messageDialog.setArguments(args);
                 messageDialog.show(getFragmentManager(), "message details");
             }
@@ -95,6 +105,10 @@ public class ChatActivity extends AppCompatActivity {
 
     // Nathan TODO: Remove user from current room and put on blacklist
     public void banUserClick(View view) {
+        String iD = messageDialog.getArguments().getString(USER_ID_ARGUMENT);
+        String roomID = Database.getCurrentRoomID();
+
+        BanController.addToRoomBanList(view.getContext(), iD, roomID);
     }
 
     public void imageClick(View view) {
@@ -108,7 +122,11 @@ public class ChatActivity extends AppCompatActivity {
 
     public void sendMessageClick(View view) {
         final EditText textInput = (EditText) findViewById(R.id.textInput);
-
+        //block message and kick out user if banned from current room
+        if(isUserBannedFromCurrentRoom()) {
+            startActivity(new Intent(view.getContext(), SelectActivity.class));
+            finish();
+        }
         String roomID = Database.getCurrentRoomID();
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         if (roomID != null) {
@@ -230,7 +248,18 @@ public class ChatActivity extends AppCompatActivity {
                         trace("roomIDListener setting adapter");
 
                     }
-
+                    chatMessageListener.registerDataSetObserver(new DataSetObserver()
+                    {
+                        @Override
+                        public void onChanged()
+                        {
+                            //block message and kick out user if banned from current room
+                            if(isUserBannedFromCurrentRoom()) {
+                                startActivity(banUserIntent);
+                                finish();
+                            }
+                        }
+                    });
                 }
 
                 @Override
@@ -266,5 +295,9 @@ public class ChatActivity extends AppCompatActivity {
 
     private static void trace(String message){
         System.out.println("ChatActivity >> " + message); //todo android logger
+    }
+
+    private boolean isUserBannedFromCurrentRoom() {
+        return BanController.isCurrentUserBanned(Database.getCurrentRoomID());
     }
 }

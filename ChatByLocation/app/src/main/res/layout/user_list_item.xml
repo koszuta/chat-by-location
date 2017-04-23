@@ -48,7 +48,7 @@
         android:layout_height="53dp"
         android:layout_marginRight="0dp"
         android:layout_marginTop="0dp"
-        android:onClick="muteUserInUserList"
+        android:onClick="onMuteClick"
         android:textOff="@string/mute"
         android:textOn="@string/unmute"
         app:layout_constraintRight_toRightOf="parent"
