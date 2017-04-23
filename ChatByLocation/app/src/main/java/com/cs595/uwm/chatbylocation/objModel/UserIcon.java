@@ -17,6 +17,7 @@ public class UserIcon {
 
     public static int getIconResource(String icon) {
         int res = R.drawable.ic_default_icon;
+        if (icon == null) return res;
         switch (icon) {
             case PHOTO:
                 res = 0;

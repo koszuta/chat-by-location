@@ -3,6 +3,7 @@ package com.cs595.uwm.chatbylocation.view;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,6 +14,7 @@ import android.widget.ToggleButton;
 
 import com.cs595.uwm.chatbylocation.R;
 import com.cs595.uwm.chatbylocation.controllers.MuteController;
+import com.cs595.uwm.chatbylocation.objModel.UserIcon;
 import com.cs595.uwm.chatbylocation.service.Database;
 
 /**
@@ -43,7 +45,12 @@ public class MessageDetailsDialog extends DialogFragment {
         String userId = Database.getUserId(userName);
 
         if (userIcon == 0) {
-            userImageView.setImageBitmap(Database.getUserImage(userId));
+            Bitmap image = Database.getUserImage(userId);
+            if (image != null) {
+                userImageView.setImageBitmap(image);
+            } else {
+                userImageView.setImageResource(UserIcon.getIconResource(UserIcon.NONE));
+            }
         } else {
             userImageView.setImageResource(userIcon);
         }

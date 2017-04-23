@@ -1,6 +1,8 @@
 package com.cs595.uwm.chatbylocation.view;
 
 import android.annotation.TargetApi;
+import android.app.Dialog;
+import android.app.DialogFragment;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -248,13 +250,15 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             String icon = prefs.getString("user_icon", UserIcon.NONE);
             int iconRes = UserIcon.getIconResource(icon);
             if (iconRes == 0) {
-                trace("Set icon as custom photo");
-                // Nathan TODO: Check if this works
+                trace("Set icon setting icon as custom photo");
                 Bitmap image = Database.getUserImage(Database.getUserId());
                 if (image != null) {
                     iconPref.setIcon(new BitmapDrawable(getResources(), image));
+                } else {
+                    iconPref.setIcon(UserIcon.getIconResource(UserIcon.NONE));
                 }
             } else {
+                trace("Set icon setting icon");
                 iconPref.setIcon(iconRes);
             }
 
@@ -267,6 +271,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                     if (UserIcon.PHOTO.equals(icon)) {
                         Bitmap image = Database.getUserImage(Database.getUserId());
                         iconPref.setIcon(new BitmapDrawable(getResources(), image));
+
                         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                         if (takePictureIntent.resolveActivity(getActivity().getPackageManager()) != null) {
                             startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
@@ -329,7 +334,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
 
                     // Set preference icon to new image
                     final ListPreference iconPref = (ListPreference) findPreference("user_icon");
-                    iconPref.setIcon(new BitmapDrawable(getResources(), image));
+                    iconPref.setIcon(new BitmapDrawable(getResources(), squareImage));
 
                     // Get image as bytes array for upload
                     ByteArrayOutputStream baos = new ByteArrayOutputStream();

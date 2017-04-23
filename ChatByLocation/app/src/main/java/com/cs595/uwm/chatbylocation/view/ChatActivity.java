@@ -4,6 +4,7 @@ import android.app.DialogFragment;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.DataSetObserver;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -206,8 +207,12 @@ public class ChatActivity extends AppCompatActivity {
                             String userId = Database.getUserId(username);
                             int iconRes = UserIcon.getIconResource(Database.getUserIcon(userId));
                             if (iconRes == 0) {
-                                // Nathan TODO: Get bitmap from Storage for specific user
-                                userIcon.setImageBitmap(Database.getUserImage(userId));
+                                Bitmap image = Database.getUserImage(userId);
+                                if (image != null) {
+                                    userIcon.setImageBitmap(image);
+                                } else {
+                                    userIcon.setImageResource(UserIcon.getIconResource(UserIcon.NONE));
+                                }
                             } else {
                                 userIcon.setImageResource(iconRes);
                             }
