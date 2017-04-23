@@ -13,10 +13,10 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.ToggleButton;
 
 import com.cs595.uwm.chatbylocation.R;
 import com.cs595.uwm.chatbylocation.controllers.MuteController;
-import com.cs595.uwm.chatbylocation.objModel.UserIcon;
 import com.cs595.uwm.chatbylocation.objModel.UserIdentity;
 import com.cs595.uwm.chatbylocation.service.Database;
 import com.google.firebase.database.DataSnapshot;
@@ -25,7 +25,6 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 
 public class RoomUserListActivity extends AppCompatActivity {
 
@@ -56,7 +55,14 @@ public class RoomUserListActivity extends AppCompatActivity {
                 if (convertView == null) {
                     convertView = LayoutInflater.from(getContext()).inflate(R.layout.user_list_item, parent, false);
                 }
+                ToggleButton muteButton = (ToggleButton) convertView.findViewById(R.id.mute_button_user);
 
+                if(MuteController.isMuted(getContext(), user.getUsername())) {
+                    //have to swap text values for muted user - toggling it would trigger listener
+                    muteButton.setTextOff("UNMUTE");
+                    muteButton.setTextOn("MUTE");
+                    muteButton.setText("UNMUTE");
+                }
                 TextView userName = (TextView) convertView.findViewById(R.id.user_name_in_list);
                 userName.setText(user.getUsername());
                 ImageView iV = (ImageView) convertView.findViewById(R.id.icon_in_user_list);
@@ -77,6 +83,8 @@ public class RoomUserListActivity extends AppCompatActivity {
                 for(String userID : roomUsers.keySet()){
                     users.add(Database.getUserByID(userID));
                 }
+
+
 
 //                Iterator<String> iterator = roomUsers.keySet().iterator();
 //                while (iterator.hasNext()){
