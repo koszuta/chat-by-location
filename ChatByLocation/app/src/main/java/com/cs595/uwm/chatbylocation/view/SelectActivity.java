@@ -20,6 +20,8 @@ import com.cs595.uwm.chatbylocation.objModel.UserIcon;
 import com.cs595.uwm.chatbylocation.service.Database;
 import com.firebase.ui.database.FirebaseListAdapter;
 
+import java.util.Locale;
+
 /**
  * Created by Nathan on 3/13/17.
  */
@@ -109,8 +111,8 @@ public class SelectActivity extends AppCompatActivity {
         String ns = (Float.valueOf(lat) >= 0) ? "N" : "S";
         String ew = (Float.valueOf(lng) >= 0) ? "E" : "W";
 
-        return latDegree + "\u00b0 " + latMinute + "\" " + String.format("%.0f", latSecond) + "\' " + ns + ", " +
-                lngDegree + "\u00b0 " + lngMinute + "\" " + String.format("%.0f", lngSecond) + "\' " + ew;
+        return latDegree + "\u00b0 " + latMinute + "\' " + String.format(Locale.getDefault(), "%.0f", latSecond) + "\" " + ns + ", " +
+                lngDegree + "\u00b0 " + lngMinute + "\' " + String.format(Locale.getDefault(), "%.0f", lngSecond) + "\" " + ew;
     }
 
     @Override
