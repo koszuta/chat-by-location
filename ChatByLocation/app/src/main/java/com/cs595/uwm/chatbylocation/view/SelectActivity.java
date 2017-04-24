@@ -69,11 +69,6 @@ public class SelectActivity extends AppCompatActivity implements GoogleApiClient
         super.onStart();
     }
     @Override
-    protected void onPause() {
-        LocationServices.FusedLocationApi.removeLocationUpdates(googleApiClient, this);
-        super.onPause();
-    }
-    @Override
     protected void onStop() {
         googleApiClient.disconnect();
         super.onStop();
