@@ -138,6 +138,11 @@ public class Database {
     public static String getUserIcon(String userId) {
         return (users.containsKey(userId)) ? users.get(userId).getIcon() : UserIcon.NONE;
     }
+
+    public static String getCurrentUserIcon() {
+        return getUserIcon(getUserId());
+    }
+
     public static String getUserId(String userName) {
         if (userName == null) return null;
         for (Map.Entry<String, UserIdentity> entry : users.entrySet()) {
@@ -176,6 +181,10 @@ public class Database {
         } else {
             return userImages.get(userId);
         }
+    }
+
+    public static Bitmap getCurrentUserImage() {
+        return getUserImage(getUserId());
     }
 
     public static void updateUserImage(final String userId) {

@@ -49,7 +49,7 @@ public class MessageDetailsDialog extends DialogFragment {
             if (image != null) {
                 userImageView.setImageBitmap(image);
             } else {
-                userImageView.setImageResource(UserIcon.getIconResource(UserIcon.NONE));
+                userImageView.setImageResource(UserIcon.NONE_RESOURCE);
             }
         } else {
             userImageView.setImageResource(userIcon);

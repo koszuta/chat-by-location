@@ -229,7 +229,7 @@ public class ChatActivity extends AppCompatActivity {
                                 if (image != null) {
                                     userIcon.setImageBitmap(image);
                                 } else {
-                                    userIcon.setImageResource(UserIcon.getIconResource(UserIcon.NONE));
+                                    userIcon.setImageResource(UserIcon.NONE_RESOURCE);
                                 }
                             } else {
                                 userIcon.setImageResource(iconRes);

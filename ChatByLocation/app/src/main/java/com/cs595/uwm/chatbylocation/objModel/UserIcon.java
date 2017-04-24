@@ -8,36 +8,36 @@ import com.cs595.uwm.chatbylocation.R;
 
 public class UserIcon {
     public static final String NONE = "none";
+    public static final int NONE_RESOURCE = R.drawable.ic_default_icon;
     public static final String PHOTO = "custom";
     public static final String BEAR = "bear";
+    public static final int BEAR_RESOURCE = R.drawable.ic_bear;
     public static final String DRAGON = "dragon";
+    public static final int DRAGON_RESOURCE = R.drawable.ic_dragon;
     public static final String ELEPHANT = "elephant";
+    public static final int ELEPHANT_RESOURCE = R.drawable.ic_elephant;
     public static final String HIPPO = "hippo";
+    public static final int HIPPO_RESOURCE = R.drawable.ic_hippo;
     public static final String KOALA = "koala";
+    public static final int KOALA_RESOURCE = R.drawable.ic_koala;
 
     public static int getIconResource(String icon) {
-        int res = R.drawable.ic_default_icon;
-        if (icon == null) return res;
+        if (icon == null) return NONE_RESOURCE;
         switch (icon) {
             case PHOTO:
-                res = 0;
-                break;
+                return 0;
             case BEAR:
-                res = R.drawable.ic_bear;
-                break;
+                return BEAR_RESOURCE;
             case DRAGON:
-                res = R.drawable.ic_dragon;
-                break;
+                return DRAGON_RESOURCE;
             case ELEPHANT:
-                res = R.drawable.ic_elephant;
-                break;
+                return ELEPHANT_RESOURCE;
             case HIPPO:
-                res = R.drawable.ic_hippo;
-                break;
+                return HIPPO_RESOURCE;
             case KOALA:
-                res = R.drawable.ic_koala;
-                break;
+                return KOALA_RESOURCE;
+            default:
+                return NONE_RESOURCE;
         }
-        return res;
     }
 }

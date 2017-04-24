@@ -1,7 +1,9 @@
 package com.cs595.uwm.chatbylocation.view;
 
+import android.app.DialogFragment;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
@@ -9,6 +11,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -35,6 +38,29 @@ public class RoomUserListActivity extends AppCompatActivity {
         setContentView(R.layout.user_list_layout);
         getSupportActionBar().setHomeButtonEnabled(true);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+        /*
+        // Create dialog on item click which zooms user image
+        ListView usersList = (ListView) findViewById(R.id.user_list_view);
+        usersList.setItemsCanFocus(false);
+        usersList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                UserIdentity user = (UserIdentity) parent.getItemAtPosition(position);
+                trace("Clicked user item " + user.getUsername());
+                String icon = user.getIcon();
+                trace("User icon = " + user.getIcon());
+                if (UserIcon.PHOTO.equals(icon)) {
+                    String userId = Database.getUserId(user.getUsername());
+                    Bundle args = new Bundle();
+                    args.putString("userId", userId);
+                    DialogFragment dialog = new ZoomImageDialog();
+                    dialog.setArguments(args);
+                    dialog.show(getFragmentManager(), "zoom image");
+                }
+            }
+        });
+        //*/
 
         displayUsers();
     }
@@ -64,9 +90,29 @@ public class RoomUserListActivity extends AppCompatActivity {
                     muteButton.setText("UNMUTE");
                 }
                 TextView userName = (TextView) convertView.findViewById(R.id.user_name_in_list);
-                userName.setText(user.getUsername());
-                ImageView iV = (ImageView) convertView.findViewById(R.id.icon_in_user_list);
-                iV.setImageResource(R.drawable.ic_dragon);
+                if (user != null) {
+                    userName.setText(user.getUsername());
+
+                    // Set list item icon
+                    ImageView imageView = (ImageView) convertView.findViewById(R.id.icon_in_user_list);
+                    String userId = Database.getUserId(user.getUsername());
+                    String icon = Database.getUserIcon(userId);
+                    int iconRes = UserIcon.getIconResource(icon);
+                    if (iconRes == 0) {
+                        // Set custom image to ImageView
+                        Bitmap image = Database.getUserImage(userId);
+                        if (image != null) {
+                            imageView.setImageBitmap(image);
+                        } else {
+                            // No custom image in Storage, use default icon
+                            imageView.setImageResource(UserIcon.NONE_RESOURCE);
+                        }
+                    } else {
+                        // Otherwise set icon to ImageView
+                        imageView.setImageResource(iconRes);
+                    }
+                }
+
                 return convertView;
             }
 
@@ -120,8 +166,9 @@ public class RoomUserListActivity extends AppCompatActivity {
                 startActivity(roomIntent);
                 break;
             case R.id.menu_settings:
-                Intent n = new Intent(this, SettingsActivity.class);
-                startActivity(n);
+                Intent intent = new Intent(this, SettingsActivity.class);
+                intent.putExtra("caller", RoomUserListActivity.class.getName());
+                startActivity(intent);
                 break;
             case R.id.menu_sign_out:
                 Database.signOutUser();

@@ -244,18 +244,19 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             bindPreferenceSummaryToValue(findPreference("example_list"));
 
             // User icon setting
-            String icon = prefs.getString("user_icon", UserIcon.NONE);
+            // Nathan TODO: Set pref icon to user icon saved in DB
+            String icon = Database.getCurrentUserIcon();//prefs.getString("user_icon", UserIcon.NONE);
             int iconRes = UserIcon.getIconResource(icon);
             if (iconRes == 0) {
-                trace("Set icon setting icon as custom photo");
-                Bitmap image = Database.getUserImage(Database.getUserId());
+                trace("Set 'user icon' setting icon as custom photo");
+                Bitmap image = Database.getCurrentUserImage();
                 if (image != null) {
                     iconPref.setIcon(new BitmapDrawable(getResources(), image));
                 } else {
-                    iconPref.setIcon(UserIcon.getIconResource(UserIcon.NONE));
+                    iconPref.setIcon(UserIcon.NONE_RESOURCE);
                 }
             } else {
-                trace("Set icon setting icon");
+                trace("Set 'user icon' setting icon");
                 iconPref.setIcon(iconRes);
             }
 
