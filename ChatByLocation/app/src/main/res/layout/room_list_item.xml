@@ -3,18 +3,20 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:padding="10dp"
     android:id="@+id/roomLayout">
 
     <TextView
         android:text="Default Chatroom"
+        android:paddingTop="10dp"
+        android:paddingLeft="10dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentStart="true"
         android:id="@+id/roomName"/>
 
     <TextView
-        android:text="43°03′8″ N, 87°57′21″ W"
+        android:text="43° 03′ 8″ N, 87° 57′ 21″ W"
+        android:paddingLeft="10dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentStart="true"
@@ -23,6 +25,8 @@
 
     <TextView
         android:text="Radius: 20 m"
+        android:paddingLeft="10dp"
+        android:paddingBottom="10dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/roomCoords"
@@ -30,6 +34,7 @@
 
     <Button
         android:id="@+id/joinButton"
+        android:layout_margin="10dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
@@ -41,7 +46,7 @@
         android:visibility="invisible"
         android:src="@drawable/ic_lock_24dp"
 
-        android:padding="10dp"
+        android:paddingTop="20dp"
 
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
