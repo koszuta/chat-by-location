@@ -4,11 +4,18 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
-        android:visible="false"
+        android:visible="true"
+        android:title="Create Chatroom"
+        android:icon="@drawable/ic_add_chatroom"
+        app:showAsAction="always"
+        android:id="@+id/menu_create_chatroom"/>
 
-        android:title="To map"
+    <item
+        android:visible="true"
+        android:title="View Map"
+        android:icon="@drawable/ic_map"
         app:showAsAction="ifRoom"
-        android:id="@+id/menu_bypass"/>
+        android:id="@+id/menu_view_map"/>
 
     <item
         android:title="Preferences"

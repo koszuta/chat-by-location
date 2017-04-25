@@ -111,6 +111,10 @@ public class Database {
         return (rooms.containsKey(currentRoomID)) ? rooms.get(currentRoomID).getName() : null;
     }
 
+    public static RoomIdentity getRoomIdentity(String roomId) {
+        return (rooms.containsKey(roomId)) ? rooms.get(roomId) : null;
+    }
+
     public static String getRoomName(String roomId) {
         return (rooms.containsKey(roomId)) ? rooms.get(roomId).getName() : null;
     }

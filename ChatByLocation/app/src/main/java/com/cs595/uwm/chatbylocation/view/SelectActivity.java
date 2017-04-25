@@ -21,6 +21,7 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.cs595.uwm.chatbylocation.R;
 import com.cs595.uwm.chatbylocation.controllers.BanController;
@@ -142,7 +143,12 @@ public class SelectActivity extends AppCompatActivity
         String roomId = String.valueOf(view.getTag());
         System.out.println("roomId = " + roomId);
 
-        if (BanController.isCurrentUserBanned(roomId)) {
+        // Check if user is in radius (just to make sure)
+        RoomIdentity room = Database.getRoomIdentity(roomId);
+        if (!withinRoomRadius(Float.valueOf(room.getLat()), Float.valueOf(room.getLongg()), room.getRad())) {
+            Toast.makeText(this, "You must be within a room's area to enter", Toast.LENGTH_LONG).show();
+        }
+        else if (BanController.isCurrentUserBanned(roomId)) {
             AlertDialog aD = new AlertDialog.Builder(view.getContext())
                     .setTitle("Cannot Join Room")
                     .setMessage("You are banned from this room!")
@@ -167,12 +173,12 @@ public class SelectActivity extends AppCompatActivity
             startActivity(new Intent(this, ChatActivity.class));
         }
     }
-
+    /*
     public void createRoomClick(View view) {
         DialogFragment dialog = new CreateRoomDialog();
         dialog.show(getFragmentManager(), "create room");
     }
-
+    //*/
     private void displayRoomList() {
         final ListView listOfRooms = (ListView) findViewById(R.id.roomList);
         roomListAdapter = new FirebaseListAdapter<RoomIdentity>(
@@ -240,24 +246,24 @@ public class SelectActivity extends AppCompatActivity
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-
+            case R.id.menu_create_chatroom:
+                // TODO: Move create room button logic here
+                DialogFragment dialog = new CreateRoomDialog();
+                dialog.show(getFragmentManager(), "create room");
+                break;
+            case R.id.menu_view_map:
+                // TODO: Set map view visible here
+                break;
             case R.id.menu_settings:
                 Intent settingsIntent = new Intent(this, SettingsActivity.class);
                 settingsIntent.putExtra("caller", SelectActivity.class.getName());
                 startActivity(settingsIntent);
                 break;
-
             case R.id.menu_sign_out:
                 Database.signOutUser();
                 //return to sign in
                 startActivity(new Intent(this, MainActivity.class));
                 break;
-
-            case R.id.menu_bypass:
-                Intent intent = new Intent(this, ChatActivity.class);
-                startActivity(intent);
-                break;
-
             default:
                 break;
         }
