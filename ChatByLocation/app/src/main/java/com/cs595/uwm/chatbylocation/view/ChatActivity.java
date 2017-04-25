@@ -40,6 +40,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.Date;
+import java.util.StringTokenizer;
 
 /**
  * Created by Nathan on 3/13/17.
@@ -149,52 +150,17 @@ public class ChatActivity extends AppCompatActivity {
             finish();
         }
 
-        final EditText textInput = (EditText) findViewById(R.id.textInput);
-        String roomID = Database.getCurrentRoomID();
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        if (roomID != null) {
+        final EditText textInput = (EditText) findViewById(R.id.textInput);
+        String message = String.valueOf(textInput.getText());
+        String roomId = Database.getCurrentRoomID();
+        if (roomId != null && !"".equals(message) && message != null) {
             Database.sendChatMessage(
-                    new ChatMessage(
-                            String.valueOf(textInput.getText()),
-                            Database.getUserUsername(),
-                            prefs.getInt("color1", Color.BLACK)),
-                    roomID);
+                    new ChatMessage(message, Database.getUserUsername(), prefs.getInt("color1", Color.BLACK)),
+                    roomId);
         }
 
         textInput.setText("");
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.main_menu, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case android.R.id.home:
-                Database.setUserRoom(null);
-                startActivity(new Intent(this, SelectActivity.class));
-                break;
-            case R.id.room_users:
-                Intent userIntent = new Intent(this, RoomUserListActivity.class);
-                startActivity(userIntent);
-                break;
-            case R.id.menu_settings:
-                Intent settingsIntent = new Intent(this, SettingsActivity.class);
-                settingsIntent.putExtra("caller", ChatActivity.class.getName());
-                startActivity(settingsIntent);
-                break;
-            case R.id.menu_sign_out:
-                Database.signOutUser();
-                //return to sign in
-                startActivity(new Intent(this, MainActivity.class));
-                break;
-            default:
-                break;
-        }
-        return true;
     }
 
     private void displayChatMessages() {
@@ -294,6 +260,39 @@ public class ChatActivity extends AppCompatActivity {
 
             });
         }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.main_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                Database.setUserRoom(null);
+                startActivity(new Intent(this, SelectActivity.class));
+                break;
+            case R.id.room_users:
+                Intent userIntent = new Intent(this, RoomUserListActivity.class);
+                startActivity(userIntent);
+                break;
+            case R.id.menu_settings:
+                Intent settingsIntent = new Intent(this, SettingsActivity.class);
+                settingsIntent.putExtra("caller", ChatActivity.class.getName());
+                startActivity(settingsIntent);
+                break;
+            case R.id.menu_sign_out:
+                Database.signOutUser();
+                //return to sign in
+                startActivity(new Intent(this, MainActivity.class));
+                break;
+            default:
+                break;
+        }
+        return true;
     }
 
     private String formatTimestamp(long timeMillis) {
