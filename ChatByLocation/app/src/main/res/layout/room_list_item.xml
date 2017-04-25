@@ -43,13 +43,22 @@
 
     <ImageView
         android:id="@+id/roomIsPrivate"
-        android:visibility="invisible"
+        android:visibility="visible"
         android:src="@drawable/ic_lock_24dp"
 
-        android:paddingTop="20dp"
+        android:paddingTop="10dp"
+        android:layout_alignTop="@id/joinButton"
 
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_toStartOf="@id/joinButton"/>
+
+    <RelativeLayout
+        android:id="@+id/customDivider"
+        android:layout_below="@id/roomRadius"
+        android:layout_width="match_parent"
+        android:background="@color/listDivider"
+        android:layout_height="1dp">
+    </RelativeLayout>
 
 </RelativeLayout>

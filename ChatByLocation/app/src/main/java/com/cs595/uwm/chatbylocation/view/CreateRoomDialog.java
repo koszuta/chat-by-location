@@ -1,6 +1,7 @@
 package com.cs595.uwm.chatbylocation.view;
 
 import android.Manifest;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
@@ -12,11 +13,11 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
-import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -46,41 +47,11 @@ import static com.facebook.FacebookSdk.getApplicationContext;
  * Created by Nathan on 3/15/17.
  */
 
-public class CreateRoomDialog extends DialogFragment implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, ResultCallback<Status> {
-    private static final String GEOFENCE_REQ_ID = "Geofence";
-    private static final int MIN_RADIUS = 100;
-    private static final long GEO_DURATION = 60 * 60 * 1000;
-    private static final int MAX_RADIUS = 5000;
-    private static final int RADIUS_INCREMENT = 10;
-    private static final int MY_PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 2;
-    private GoogleApiClient mGoogleApiClient;
+public class CreateRoomDialog extends DialogFragment {
 
-    String longg, lat, name, password;
-    Location user_location;
-    int radius;
-    AlertDialog dialog;
-
-    LocationManager lm;
-
-    private final LocationListener locationListener = new LocationListener() {
-        public void onLocationChanged(Location location) {
-            user_location = location;
-            longg = String.valueOf(location.getLongitude());
-            lat = String.valueOf(location.getLatitude());
-        }
-
-        @Override
-        public void onStatusChanged(String provider, int status, Bundle extras) {
-        }
-
-        @Override
-        public void onProviderEnabled(String provider) {
-        }
-
-        @Override
-        public void onProviderDisabled(String provider) {
-        }
-    };
+    public static final int MIN_RADIUS = 100;
+    public static final int MAX_RADIUS = 5000;
+    public static final int RADIUS_INCREMENT = 10;
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -102,8 +73,6 @@ public class CreateRoomDialog extends DialogFragment implements GoogleApiClient.
             }
         });
 
-        dialog = builder.create();
-
         // Get layout components for later use
         final EditText roomName = (EditText) dialogView.findViewById(R.id.roomName);
         final SeekBar roomRadius = (SeekBar) dialogView.findViewById(R.id.roomRadius);
@@ -121,14 +90,10 @@ public class CreateRoomDialog extends DialogFragment implements GoogleApiClient.
 
                 radiusValue.setText("Radius: " + Integer.toString(radius) + " m");
             }
-
             @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-            }
-
+            public void onStartTrackingTouch(SeekBar seekBar) {}
             @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-            }
+            public void onStopTrackingTouch(SeekBar seekBar) {}
         });
 
         // Checkbox listener; enables password field
@@ -141,6 +106,7 @@ public class CreateRoomDialog extends DialogFragment implements GoogleApiClient.
 
         // Create a custom button listener
         // Allows checks on input before closing dialog
+        AlertDialog dialog = builder.create();
         dialog.setOnShowListener(new DialogInterface.OnShowListener() {
             @Override
             public void onShow(final DialogInterface dialog) {
@@ -149,46 +115,43 @@ public class CreateRoomDialog extends DialogFragment implements GoogleApiClient.
                 positiveButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        name = roomName.getText().toString();
-                        System.out.println('<' + name + '>');
+                        String name = String.valueOf(roomName.getText());
                         if ("".equals(name)) {
                             Toast.makeText(getActivity(), "Please enter a name", Toast.LENGTH_LONG).show();
                             return;
                         }
 
-                        radius = radiusFromProgress(roomRadius.getProgress());
+                        int radius = radiusFromProgress(roomRadius.getProgress());
 
-                        password = null;
+                        String password = null;
                         if (roomIsPrivate.isChecked()) {
                             password = roomPassword.getText().toString();
-                            System.out.println('<' + password + '>');
                             if ("".equals(password)) {
                                 Toast.makeText(getActivity(), "Please enter a password", Toast.LENGTH_LONG).show();
                                 return;
                             }
                         }
 
-                        longg = "0";
-                        lat = "0";
-
-                        lm = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
-
-                        int permissionCheckFine = ContextCompat.checkSelfPermission(getActivity(),
-                                Manifest.permission.ACCESS_FINE_LOCATION);
-                        if (!lm.isProviderEnabled(LocationManager.GPS_PROVIDER) && !lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
-                            Toast.makeText(getApplicationContext(), "Please enable your GPS location service to use Chat By Location.",
-                                    Toast.LENGTH_SHORT).show();
-                        } else if (permissionCheckFine == PackageManager.PERMISSION_GRANTED) {
-
-                            getLocationData();
-                            finishRoomCreation();
-                        } else {
-                            ActivityCompat.requestPermissions(getActivity(),
-                                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                                    MY_PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
+                        Location location = null;
+                        Activity activity = getActivity();
+                        if (activity instanceof SelectActivity) {
+                            location = ((SelectActivity) activity).getLastLocation();
                         }
 
+                        if (location != null) {
+                            Database.setUserRoom(Database.createRoom(
+                                    Database.getUserId(),
+                                    name,
+                                    String.valueOf(location.getLongitude()),
+                                    String.valueOf(location.getLatitude()),
+                                    radius,
+                                    password));
+                            startActivity(new Intent(getActivity(), ChatActivity.class));
+                        } else {
+                            Toast.makeText(getActivity(), "Failed to get location data", Toast.LENGTH_LONG).show();
+                        }
 
+                        dialog.dismiss();
                     }
                 });
             }
@@ -201,6 +164,16 @@ public class CreateRoomDialog extends DialogFragment implements GoogleApiClient.
         return MIN_RADIUS + progress * RADIUS_INCREMENT;
     }
 
+
+
+// TODO: Remove all of this once Graham's done
+/*
+    private static final String GEOFENCE_REQ_ID = "Geofence";
+    private static final long GEO_DURATION = 60 * 60 * 1000;
+    private static final int MY_PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 2;
+
+    private GoogleApiClient mGoogleApiClient;
+
     private void createGoogleApi() {
         if (mGoogleApiClient == null) {
             mGoogleApiClient = new GoogleApiClient.Builder(getApplicationContext())
@@ -209,16 +182,6 @@ public class CreateRoomDialog extends DialogFragment implements GoogleApiClient.
                     .addApi(LocationServices.API)
                     .build();
         }
-    }
-
-    private void finishRoomCreation() {
-        Database.setUserRoom(Database.createRoom(
-                Database.getUserId(),
-                name, longg, lat, radius, password));
-        startActivity(new Intent(getActivity(), ChatActivity.class));
-        //startGeofence();
-
-        dialog.dismiss();
     }
 
     private void startGeofence() {
@@ -230,7 +193,7 @@ public class CreateRoomDialog extends DialogFragment implements GoogleApiClient.
     private Geofence createGeofence() {
         return new Geofence.Builder()
                 .setRequestId(GEOFENCE_REQ_ID)
-                .setCircularRegion(Double.parseDouble(lat), Double.parseDouble(longg), radius)
+                .setCircularRegion(Double.parseDouble(lat), Double.parseDouble(lon), radius)
                 .setExpirationDuration(GEO_DURATION)
                 .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER
                         | Geofence.GEOFENCE_TRANSITION_EXIT)
@@ -255,7 +218,7 @@ public class CreateRoomDialog extends DialogFragment implements GoogleApiClient.
                 createGeofencePendingIntent()
         ).setResultCallback(this);
     }
-
+//*/
     private static final String NOTIFICATION_MSG = "NOTIFICATION MSG";
     // Create a Intent send by the notification
     public static Intent makeNotificationIntent(Context context, String msg) {
@@ -263,7 +226,7 @@ public class CreateRoomDialog extends DialogFragment implements GoogleApiClient.
         intent.putExtra( NOTIFICATION_MSG, msg );
         return intent;
     }
-
+/*
     private PendingIntent geoFencePendingIntent;
     private final int GEOFENCE_REQ_CODE = 0;
     private PendingIntent createGeofencePendingIntent() {
@@ -278,7 +241,7 @@ public class CreateRoomDialog extends DialogFragment implements GoogleApiClient.
     public void getLocationData() {
         try {
             Location location = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-            longg = String.valueOf(location.getLongitude());
+            lon = String.valueOf(location.getLongitude());
             lat = String.valueOf(location.getLatitude());
         } catch(SecurityException e) {
             Log.d("Create Room Location", "SecurityException - Permission not set for location service");
@@ -336,4 +299,5 @@ public class CreateRoomDialog extends DialogFragment implements GoogleApiClient.
     public void onResult(@NonNull Status status) {
 
     }
+//*/
 }

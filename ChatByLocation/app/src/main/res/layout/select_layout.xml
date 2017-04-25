@@ -18,7 +18,7 @@
         android:layout_above="@+id/createRoomButton"
 
         android:divider="@color/listDivider"
-        android:dividerHeight="1dp"
+        android:dividerHeight="0dp"
 
         android:background="@color/background"
 
