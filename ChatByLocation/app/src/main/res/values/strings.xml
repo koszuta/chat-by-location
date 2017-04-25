@@ -109,4 +109,5 @@
     <string name="pref_title_vibrate">Vibrate</string>
     <string name="title_activity_room_user_list">Users List</string>
     <string name="enter">Enter</string>
+    <string name="title_activity_map">Map</string>
 </resources>

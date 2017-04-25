@@ -32,7 +32,6 @@ public class Database {
     private static String currentRoomID;
     private static String removeFromRoom;
 
-    private static int textSize = 14;
     private static boolean listening = false;
     private static boolean listeningToUsers = false;
     private static boolean shouldSignOut = false;
@@ -166,16 +165,12 @@ public class Database {
         }
     }
 
-    public static int getTextSize() {
-        return textSize;
-    }
-
-    public static void setTextSize(int size) {
-        textSize = size;
-    }
-
     public static Map<String, UserIdentity> getUsers() {
         return users;
+    }
+
+    public static Map<String, RoomIdentity> getRooms() {
+        return rooms;
     }
 
     public static Bitmap getUserImage(String userId) {
