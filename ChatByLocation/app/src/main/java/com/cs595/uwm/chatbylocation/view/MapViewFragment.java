@@ -1,9 +1,12 @@
 package com.cs595.uwm.chatbylocation.view;
 
+import android.Manifest;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.location.Location;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -62,7 +65,12 @@ public class MapViewFragment extends FragmentActivity implements OnMapReadyCallb
     public void onMapReady(GoogleMap googleMap) {
         Map<String, RoomIdentity> rooms = Database.getRooms();
         mMap = googleMap;
-        mMap.setMinZoomPreference(4);
+        mMap.clear();
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            mMap.setMyLocationEnabled(true);
+        }
+
+        mMap.setMinZoomPreference(3);
         mMap.setMaxZoomPreference(18);
 
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(CENTER_OF_USA, mMap.getMinZoomLevel()));
