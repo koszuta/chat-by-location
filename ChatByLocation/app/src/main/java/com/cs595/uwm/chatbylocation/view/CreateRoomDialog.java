@@ -148,6 +148,7 @@ public class CreateRoomDialog extends DialogFragment {
                                     radius,
                                     password));
                             startActivity(new Intent(getActivity(), ChatActivity.class));
+                            getActivity().finish();
                         } else {
                             Toast.makeText(getActivity(), "Failed to get location data", Toast.LENGTH_LONG).show();
                         }

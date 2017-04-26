@@ -6,6 +6,7 @@ public class RoomIdentity {
     private String name;
     private String longg;
     private String lat;
+    private String ownerID;
     private int rad;
     private String password;
 
@@ -13,10 +14,11 @@ public class RoomIdentity {
 
     }
 
-    public RoomIdentity(String name, String longg, String lat, int rad, String password) {
+    public RoomIdentity(String name, String longg, String lat, String ownerID, int rad, String password) {
         this.name = name;
         this.longg = longg;
         this.lat = lat;
+        this.ownerID = ownerID;
         this.rad = rad;
         this.password = password;
     }
@@ -59,5 +61,13 @@ public class RoomIdentity {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public String getOwnerID() {
+        return ownerID;
+    }
+
+    public void setOwnerID(String ownerID) {
+        this.ownerID = ownerID;
     }
 }
