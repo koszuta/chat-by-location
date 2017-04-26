@@ -6,7 +6,7 @@
     <item
         android:title="Users List"
         android:icon="@drawable/ic_users_list"
-        app:showAsAction="ifRoom"
+        app:showAsAction="always"
         android:id="@+id/room_users"/>
 
     <item

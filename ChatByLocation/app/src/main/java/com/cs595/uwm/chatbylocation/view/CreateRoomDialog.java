@@ -138,6 +138,7 @@ public class CreateRoomDialog extends DialogFragment {
                             location = ((SelectActivity) activity).getLastLocation();
                         }
 
+                        // Nathan TODO: Figure out how to return input values to SelectActivity and join room from there
                         if (location != null) {
                             Database.setUserRoom(Database.createRoom(
                                     Database.getUserId(),
@@ -147,6 +148,7 @@ public class CreateRoomDialog extends DialogFragment {
                                     radius,
                                     password));
                             startActivity(new Intent(getActivity(), ChatActivity.class));
+                            getActivity().finish();
                         } else {
                             Toast.makeText(getActivity(), "Failed to get location data", Toast.LENGTH_LONG).show();
                         }

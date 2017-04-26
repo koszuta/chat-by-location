@@ -1,12 +1,17 @@
 package com.cs595.uwm.chatbylocation.service;
 
+import android.app.Activity;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.support.annotation.NonNull;
+import android.widget.Toast;
 
 import com.cs595.uwm.chatbylocation.objModel.ChatMessage;
 import com.cs595.uwm.chatbylocation.objModel.RoomIdentity;
 import com.cs595.uwm.chatbylocation.objModel.UserIcon;
 import com.cs595.uwm.chatbylocation.objModel.UserIdentity;
+import com.cs595.uwm.chatbylocation.view.ChatActivity;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -31,6 +36,25 @@ public class Database {
 
     private static String currentRoomID;
     private static String removeFromRoom;
+
+    private static long joinTimeMillis;
+    private static ChildEventListener messageCountListener = new ChildEventListener() {
+        @Override
+        public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+            ChatMessage message = dataSnapshot.getValue(ChatMessage.class);
+            if (message.getMessageTime() < joinTimeMillis) {
+                ChatActivity.incrNumMessages();
+            }
+        }
+        @Override
+        public void onChildRemoved(DataSnapshot dataSnapshot) {}
+        @Override
+        public void onChildChanged(DataSnapshot dataSnapshot, String s) {}
+        @Override
+        public void onChildMoved(DataSnapshot dataSnapshot, String s) {}
+        @Override
+        public void onCancelled(DatabaseError databaseError) {}
+    };
 
     private static boolean listening = false;
     private static boolean listeningToUsers = false;
@@ -101,7 +125,7 @@ public class Database {
         }
     };
 
-    public static UserIdentity getUserByID(String userID){
+    public static UserIdentity getUserByID(final String userID){
         if(users == null) return null;
         return users.get(userID);
     }
@@ -110,35 +134,35 @@ public class Database {
         return (rooms.containsKey(currentRoomID)) ? rooms.get(currentRoomID).getName() : null;
     }
 
-    public static RoomIdentity getRoomIdentity(String roomId) {
+    public static RoomIdentity getRoomIdentity(final String roomId) {
         return (rooms.containsKey(roomId)) ? rooms.get(roomId) : null;
     }
 
-    public static String getRoomName(String roomId) {
+    public static String getRoomName(final String roomId) {
         return (rooms.containsKey(roomId)) ? rooms.get(roomId).getName() : null;
     }
 
-    public static String getRoomPassword(String roomId) {
+    public static String getRoomPassword(final String roomId) {
         return (rooms.containsKey(roomId)) ? rooms.get(roomId).getPassword() : null;
     }
 
-    public static int getRoomRadius(String roomId) {
+    public static int getRoomRadius(final String roomId) {
         return (rooms.containsKey(roomId)) ? rooms.get(roomId).getRad() : 0;
     }
 
-    public static double getRoomLat(String roomId) {
+    public static double getRoomLat(final String roomId) {
         return (rooms.containsKey(roomId)) ? Double.valueOf(rooms.get(roomId).getLat()) : 0;
     }
 
-    public static double getRoomLng(String roomId) {
+    public static double getRoomLng(final String roomId) {
         return (rooms.containsKey(roomId)) ? Double.valueOf(rooms.get(roomId).getLongg()) : 0;
     }
 
-    public static String getUserName(String userId) {
+    public static String getUserName(final String userId) {
         return (users.containsKey(userId)) ? users.get(userId).getUsername() : null;
     }
 
-    public static String getUserIcon(String userId) {
+    public static String getUserIcon(final String userId) {
         return (users.containsKey(userId)) ? users.get(userId).getIcon() : UserIcon.NONE;
     }
 
@@ -146,7 +170,7 @@ public class Database {
         return getUserIcon(getUserId());
     }
 
-    public static String getUserId(String userName) {
+    public static String getUserId(final String userName) {
         if (userName == null) return null;
         for (Map.Entry<String, UserIdentity> entry : users.entrySet()) {
             String userId = entry.getKey();
@@ -158,7 +182,7 @@ public class Database {
         return null;
     }
 
-    public static void setIcon(String icon) {
+    public static void setIcon(final String icon) {
         String userId = getUserId();
         if (userId != null) {
             getUsersReference().child(userId).child("icon").setValue(icon);
@@ -173,7 +197,7 @@ public class Database {
         return rooms;
     }
 
-    public static Bitmap getUserImage(String userId) {
+    public static Bitmap getUserImage(final String userId) {
         if (!userImages.containsKey(userId)) {
             updateUserImage(userId);
             return null;
@@ -203,8 +227,24 @@ public class Database {
                 });
     }
 
-    public static StorageReference getImageStorageReference(String userId) {
+    public static StorageReference getImageStorageReference(final String userId) {
         return FirebaseStorage.getInstance().getReference().child(userId);
+    }
+
+    public static void initRoomMessagesListener(final long joinTimeMillis) {
+        if (getCurrentRoomID() != null) {
+            Database.joinTimeMillis = joinTimeMillis;
+            getRoomMessagesReference().child(getCurrentRoomID())
+            .addChildEventListener(messageCountListener);
+            trace("Added room messages listener");
+        }
+    }
+
+    public static void removeRoomMessagesListener() {
+        if (getCurrentRoomID() != null) {
+            getRoomMessagesReference().child(getCurrentRoomID()).removeEventListener(messageCountListener);
+            trace("Removed room messages listener");
+        }
     }
 
     public static void initCurrentUserListeners() {
@@ -340,7 +380,7 @@ public class Database {
         return currentRoomID;
     }
 
-    public static void createUser(String username) {
+    public static void createUser(final String username) {
 
         if (getCurrentUserReference() != null) {
             getCurrentUserReference().child("currentRoomID").setValue("");
@@ -351,7 +391,7 @@ public class Database {
         trace("created user");
     }
 
-    public static void setUserRoom(String roomID) { // roomid = null removes from room
+    public static void setUserRoom(final String roomID) { // roomid = null removes from room
 
         trace("setUserRoom: " + roomID);
 
@@ -370,7 +410,7 @@ public class Database {
         setUserRoom(null);
     }
 
-    public static void setUsersListener(ValueEventListener usersListener){
+    public static void setUsersListener(final ValueEventListener usersListener) {
         getRoomUsersReference().child(currentRoomID).addListenerForSingleValueEvent(usersListener);
     }
 
@@ -381,8 +421,9 @@ public class Database {
 
     }
 
-    public static String createRoom(String ownerID, String name, String longg, String lat,
-                                    int rad, String password) {
+    public static String createRoom(final String ownerID, final String name,
+                                    final String longg, final String lat,
+                                    final int rad, final String password) {
 
         DatabaseReference roomIDRef = getRoomIdentityReference();
         String roomID = roomIDRef.push().getKey();
@@ -399,8 +440,18 @@ public class Database {
 
     }
 
-    public static void sendChatMessage(ChatMessage chatMessage, String roomID) {
-        getRoomMessagesReference().child(roomID).push().setValue(chatMessage);
+    public static void sendChatMessage(final ChatMessage chatMessage, final String roomID, final Activity activity) {
+        getRoomMessagesReference()
+                .child(roomID).push()
+                .setValue(chatMessage)
+                .addOnFailureListener(activity, new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                trace("Failed to send message: " + e.getLocalizedMessage());
+                ChatActivity.setTextInput(chatMessage.getMessageText());
+                Toast.makeText(activity, "Failed to send message", Toast.LENGTH_LONG).show();
+            }
+        });
     }
 
     public static String getUserId() {
@@ -431,11 +482,11 @@ public class Database {
         return FirebaseDatabase.getInstance().getReference().child("usersMap");
     }
 
-    private static void trace(String message) {
+    private static void trace(final String message) {
         System.out.println("Database >> " + message); //todo android logger
     }
 
-    public static boolean isCurrentUserAdminOfRoom(String roomID) {
+    public static boolean isCurrentUserAdminOfRoom(final String roomID) {
         //TODO: compare current user with ownerID of specific room in database
         return true;
     }

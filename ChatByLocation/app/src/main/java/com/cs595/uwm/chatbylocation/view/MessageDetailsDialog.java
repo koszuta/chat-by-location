@@ -55,17 +55,14 @@ public class MessageDetailsDialog extends DialogFragment {
             userImageView.setImageResource(userIcon);
         }
 
-        if(MuteController.isMuted(dialogView.getContext(), userName)) {
-            //have to swap text values for muted user - toggling it would trigger listener
-            muteButton.setTextOff("UNMUTE");
-            muteButton.setTextOn("MUTE");
-            muteButton.setText("UNMUTE");
-        }
+        MuteController.adjustMuteButton(muteButton, userName);
 
         // TODO: Make 'Ban' button visible when user is admin of current room
         //*
         if (Database.isCurrentUserAdminOfRoom(userId)) {
             banButton.setVisibility(Button.VISIBLE);
+        } else {
+            banButton.setVisibility(View.GONE);
         }
         //*/
 

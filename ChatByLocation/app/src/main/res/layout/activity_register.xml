@@ -20,7 +20,7 @@
         app:layout_constraintTop_toBottomOf="@+id/reg_reenter" />
 
     <EditText
-        android:id="@+id/reg_password"
+        android:id="@+id/reg_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="84dp"
@@ -28,12 +28,11 @@
         android:layout_marginRight="84dp"
         android:layout_marginStart="8dp"
         android:ems="10"
-        android:inputType="textPassword"
-        android:password="true"
+        android:inputType="textPersonName"
         app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/reg_password_hint" />
+        app:layout_constraintTop_toBottomOf="@+id/reg_name_hint" />
 
     <EditText
         android:id="@+id/reg_email"
@@ -51,7 +50,7 @@
         app:layout_constraintTop_toBottomOf="@+id/reg_email_hint" />
 
     <EditText
-        android:id="@+id/reg_name"
+        android:id="@+id/reg_password"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="84dp"
@@ -59,11 +58,12 @@
         android:layout_marginRight="84dp"
         android:layout_marginStart="8dp"
         android:ems="10"
-        android:inputType="textPersonName"
+        android:inputType="textPassword"
+        android:password="true"
         app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/reg_name_hint" />
+        app:layout_constraintTop_toBottomOf="@+id/reg_password_hint" />
 
     <EditText
         android:id="@+id/reg_reenter"

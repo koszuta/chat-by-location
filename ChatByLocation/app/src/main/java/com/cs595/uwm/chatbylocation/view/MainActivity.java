@@ -8,6 +8,7 @@ import android.util.Log;
 import android.view.View;
 
 import com.cs595.uwm.chatbylocation.R;
+import com.cs595.uwm.chatbylocation.controllers.MuteController;
 import com.cs595.uwm.chatbylocation.service.Database;
 
 import java.io.File;
@@ -26,9 +27,7 @@ public class MainActivity extends AppCompatActivity {
         //must call before setContentView to hide activity's app title in actionbar
         //getSupportActionBar().setDisplayOptions(0, ActionBar.DISPLAY_SHOW_TITLE);
         getSupportActionBar().hide();
-
         setContentView(R.layout.activity_main);
-
 
         // If you get a weird ClassCastException you may need to uncomment
         // these next lines and run it once to reset the preference
@@ -37,29 +36,9 @@ public class MainActivity extends AppCompatActivity {
         prefs.edit().getString("user_icon", UserIcon.NONE).apply();
         //*/
 
-
+        MuteController.initMuteList(getApplicationContext());
         Database.initUsersListener();
         Database.initRoomsListener();
-
-//        AuthUI.getInstance().signOut(this).addOnCompleteListener(new OnCompleteListener<Void>() {
-//            @Override
-//            public void onComplete(@NonNull Task<Void> task) {
-//                Toast.makeText(MainActivity.this, "boop", Toast.LENGTH_LONG).show();
-//                finish();
-//            }
-//        });
-        try {
-            File file = new File(this.getCacheDir().toString() + MUTE_FILENAME);
-            if(!file.exists()) {
-                FileOutputStream oStream = this.openFileOutput(MUTE_FILENAME, Context.MODE_PRIVATE);
-                String newline = "\n";
-                oStream.write(newline.getBytes());
-                oStream.close();
-            }
-        }
-        catch (Exception e) {
-            Log.d("MainActivity","Error initializing mute file");
-        }
     }
 
     public void signIn(View v) {

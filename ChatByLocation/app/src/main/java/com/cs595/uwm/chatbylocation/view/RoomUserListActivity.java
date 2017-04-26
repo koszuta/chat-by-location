@@ -1,7 +1,5 @@
 package com.cs595.uwm.chatbylocation.view;
 
-import android.app.DialogFragment;
-import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
@@ -11,7 +9,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -31,7 +28,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public class RoomUserListActivity extends AppCompatActivity {
-
+    public ArrayList<UserIdentity> users = new ArrayList<>();
+    ArrayAdapter<UserIdentity> itemsAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,38 +63,52 @@ public class RoomUserListActivity extends AppCompatActivity {
 
         displayUsers();
     }
-    
+
     private void displayUsers() {
 
         ListView lV = (ListView) findViewById(R.id.user_list_view);
-        final ArrayList<UserIdentity> users = new ArrayList<>();
+
         //users.add(new UserIdentity("Mock User 1", 0));
         //TODO: order alphabetically by user name
 
-        ArrayAdapter<UserIdentity> itemsAdapter = new ArrayAdapter<UserIdentity>(this, R.layout.user_list_item, users) {
+        itemsAdapter = new ArrayAdapter<UserIdentity>(this, R.layout.user_list_item, users) {
             @Override
             public View getView(int position, View convertView, ViewGroup parent) {
 
                 UserIdentity user = getItem(position);
+                if (user == null) return convertView;
+
                 //create new view if not yet created
                 if (convertView == null) {
                     convertView = LayoutInflater.from(getContext()).inflate(R.layout.user_list_item, parent, false);
                 }
-                ToggleButton muteButton = (ToggleButton) convertView.findViewById(R.id.mute_button_user);
 
-                if(MuteController.isMuted(getContext(), user.getUsername())) {
-                    //have to swap text values for muted user - toggling it would trigger listener
-                    muteButton.setTextOff("UNMUTE");
-                    muteButton.setTextOn("MUTE");
-                    muteButton.setText("UNMUTE");
-                }
+                String username = user.getUsername();
+
+                final ToggleButton muteButton = (ToggleButton) convertView.findViewById(R.id.mute_button_user);
+                //MuteController.adjustMuteButton(muteButton, username);
+                muteButton.setTag(position);
+
                 TextView userName = (TextView) convertView.findViewById(R.id.user_name_in_list);
                 if (user != null) {
-                    userName.setText(user.getUsername());
+                    userName.setText(username);
+                    //set text to unmute is this user is muted
+                    //*
+                    if(MuteController.isMuted(username) != -1) {
+                        muteButton.setTextOff("UNMUTE");
+                        muteButton.setTextOn("MUTE");
+                        muteButton.setText("UNMUTE");
+                    }
+                    else {
+                        muteButton.setTextOff("MUTE");
+                        muteButton.setTextOn("UNMUTE");
+                        muteButton.setText("MUTE");
+                    }
+                    //*/
 
                     // Set list item icon
                     ImageView imageView = (ImageView) convertView.findViewById(R.id.icon_in_user_list);
-                    String userId = Database.getUserId(user.getUsername());
+                    String userId = Database.getUserId(username);
                     String icon = Database.getUserIcon(userId);
                     int iconRes = UserIcon.getIconResource(icon);
                     if (iconRes == 0) {
@@ -128,7 +140,7 @@ public class RoomUserListActivity extends AppCompatActivity {
                 HashMap<String, Object> roomUsers = (HashMap<String, Object>) dataSnapshot.getValue();
 
                 for(String userID : roomUsers.keySet()){
-                    users.add(Database.getUserByID(userID));
+                    itemsAdapter.add(Database.getUserByID(userID));
                 }
 
 
@@ -183,14 +195,8 @@ public class RoomUserListActivity extends AppCompatActivity {
     }
 
     public void onMuteClick(View v) {
-        String name = Database.getUserUsername();
-        Context context = v.getContext();
-
-        if (MuteController.isMuted(v.getContext(), name)) {
-            MuteController.removeUserFromMuteList(context, name);
-        } else {
-            MuteController.addUserToMuteList(context, name);
-        }
+        String username = users.get((Integer) v.getTag()).getUsername();
+        MuteController.onMuteClick(username, getApplicationContext());
     }
 
     private static void trace(String message){
