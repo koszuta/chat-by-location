@@ -1,6 +1,5 @@
 package com.cs595.uwm.chatbylocation.view;
 
-import android.app.DialogFragment;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -11,7 +10,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -78,18 +76,16 @@ public class RoomUserListActivity extends AppCompatActivity {
             public View getView(int position, View convertView, ViewGroup parent) {
 
                 UserIdentity user = getItem(position);
+                if (user == null) return convertView;
+
                 //create new view if not yet created
                 if (convertView == null) {
                     convertView = LayoutInflater.from(getContext()).inflate(R.layout.user_list_item, parent, false);
                 }
-                ToggleButton muteButton = (ToggleButton) convertView.findViewById(R.id.mute_button_user);
+                
+                final ToggleButton muteButton = (ToggleButton) convertView.findViewById(R.id.mute_button_user);
+                MuteController.toggleMuteButton(muteButton, user.getUsername());
 
-                if(MuteController.isMuted(getContext(), user.getUsername())) {
-                    //have to swap text values for muted user - toggling it would trigger listener
-                    muteButton.setTextOff("UNMUTE");
-                    muteButton.setTextOn("MUTE");
-                    muteButton.setText("UNMUTE");
-                }
                 TextView userName = (TextView) convertView.findViewById(R.id.user_name_in_list);
                 if (user != null) {
                     userName.setText(user.getUsername());
@@ -183,14 +179,8 @@ public class RoomUserListActivity extends AppCompatActivity {
     }
 
     public void onMuteClick(View v) {
-        String name = Database.getUserUsername();
-        Context context = v.getContext();
-
-        if (MuteController.isMuted(v.getContext(), name)) {
-            MuteController.removeUserFromMuteList(context, name);
-        } else {
-            MuteController.addUserToMuteList(context, name);
-        }
+        String username = Database.getUserUsername();
+        MuteController.onMuteClick(username, getApplicationContext());
     }
 
     private static void trace(String message){

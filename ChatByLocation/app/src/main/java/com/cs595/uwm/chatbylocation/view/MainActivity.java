@@ -8,6 +8,7 @@ import android.util.Log;
 import android.view.View;
 
 import com.cs595.uwm.chatbylocation.R;
+import com.cs595.uwm.chatbylocation.controllers.MuteController;
 import com.cs595.uwm.chatbylocation.service.Database;
 
 import java.io.File;
@@ -36,7 +37,7 @@ public class MainActivity extends AppCompatActivity {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         prefs.edit().getString("user_icon", UserIcon.NONE).apply();
         //*/
-
+        MuteController.initMuteList(getApplicationContext());
 
         Database.initUsersListener();
         Database.initRoomsListener();
@@ -48,6 +49,8 @@ public class MainActivity extends AppCompatActivity {
 //                finish();
 //            }
 //        });
+
+        /*
         try {
             File file = new File(this.getCacheDir().toString() + MUTE_FILENAME);
             if(!file.exists()) {
@@ -60,6 +63,7 @@ public class MainActivity extends AppCompatActivity {
         catch (Exception e) {
             Log.d("MainActivity","Error initializing mute file");
         }
+        //*/
     }
 
     public void signIn(View v) {
