@@ -7,6 +7,7 @@ import com.cs595.uwm.chatbylocation.objModel.ChatMessage;
 import com.cs595.uwm.chatbylocation.objModel.RoomIdentity;
 import com.cs595.uwm.chatbylocation.objModel.UserIcon;
 import com.cs595.uwm.chatbylocation.objModel.UserIdentity;
+import com.cs595.uwm.chatbylocation.view.ChatActivity;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -31,6 +32,25 @@ public class Database {
 
     private static String currentRoomID;
     private static String removeFromRoom;
+
+    private static long joinTimeMillis;
+    private static ChildEventListener messageCountListener = new ChildEventListener() {
+        @Override
+        public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+            ChatMessage message = dataSnapshot.getValue(ChatMessage.class);
+            if (message.getMessageTime() < joinTimeMillis) {
+                ChatActivity.incrNumMessages();
+            }
+        }
+        @Override
+        public void onChildRemoved(DataSnapshot dataSnapshot) {}
+        @Override
+        public void onChildChanged(DataSnapshot dataSnapshot, String s) {}
+        @Override
+        public void onChildMoved(DataSnapshot dataSnapshot, String s) {}
+        @Override
+        public void onCancelled(DatabaseError databaseError) {}
+    };
 
     private static int textSize = 14;
     private static boolean listening = false;
@@ -210,6 +230,22 @@ public class Database {
 
     public static StorageReference getImageStorageReference(String userId) {
         return FirebaseStorage.getInstance().getReference().child(userId);
+    }
+
+    public static void initRoomMessagesListener(long joinTimeMillis) {
+        if (getCurrentRoomID() != null) {
+            Database.joinTimeMillis = joinTimeMillis;
+            getRoomMessagesReference().child(getCurrentRoomID())
+            .addChildEventListener(messageCountListener);
+            trace("Added room messages listener");
+        }
+    }
+
+    public static void removeRoomMessagesListener() {
+        if (getCurrentRoomID() != null) {
+            getRoomMessagesReference().child(getCurrentRoomID()).removeEventListener(messageCountListener);
+            trace("Removed room messages listener");
+        }
     }
 
     public static void initCurrentUserListeners() {

@@ -24,6 +24,7 @@ import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -40,7 +41,6 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.Date;
-import java.util.StringTokenizer;
 
 /**
  * Created by Nathan on 3/13/17.
@@ -48,6 +48,9 @@ import java.util.StringTokenizer;
 
 public class ChatActivity extends AppCompatActivity {
 
+    public static final int PAST_MESSAGES_LIMIT = 100;
+    public static final long TEN_MINUTES_IN_MILLIS = 10 * 60 * 1000;
+    
     public static final long ONE_DAY_IN_MILLIS = 24 * 60 * 60 * 1000;
     public static final long ONE_WEEK_IN_MILLIS = 7 * ONE_DAY_IN_MILLIS;
     public static final long ONE_YEAR_IN_MILLIS = 365 * ONE_DAY_IN_MILLIS;
@@ -62,10 +65,16 @@ public class ChatActivity extends AppCompatActivity {
     private Intent banUserIntent;
     Bundle args = new Bundle();
 
+    private static boolean shouldGetNumMessages = true;
+    private static long tenMinutesBeforeJoin;
+    private static int numMessagesAtJoin;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.chat_layout);
+
+        setTitle(Database.getCurrentRoomName());
 
         //construct objects
         banUserIntent = new Intent(this, SelectActivity.class);
@@ -92,8 +101,20 @@ public class ChatActivity extends AppCompatActivity {
             }
         });
 
-        setTitle(Database.getCurrentRoomName());
+        if (shouldGetNumMessages) {
+            trace("Setting join time and number of messages before join");
+            numMessagesAtJoin = 0;
+            long now = System.currentTimeMillis();
+            tenMinutesBeforeJoin = now - ChatActivity.TEN_MINUTES_IN_MILLIS;
+            Database.initRoomMessagesListener(now);
+            shouldGetNumMessages = false;
+        }
+
         displayChatMessages();
+    }
+
+    public static void incrNumMessages() {
+        numMessagesAtJoin++;
     }
 
     public void onMuteClick(View view) {
@@ -145,8 +166,7 @@ public class ChatActivity extends AppCompatActivity {
         // Nathan TODO: Use better ban method
         //block message and kick out user if banned from current room
         if(isUserBannedFromCurrentRoom()) {
-            Database.setUserRoom(null);
-            startActivity(new Intent(this, SelectActivity.class));
+            doLeaveRoom();
             finish();
         }
 
@@ -180,12 +200,41 @@ public class ChatActivity extends AppCompatActivity {
                             Database.getRoomMessagesReference().child(roomID)) {
                         @Override
                         protected void populateView(View view, ChatMessage chatMessage, int position) {
-                            String username = chatMessage.getMessageUser();
-                            if (username == null) username = "no name";
+                            //trace(position + ") " + chatMessage.getMessageText());
 
                             // Get reference to the views of message_item
                             final TextView messageText = (TextView) view.findViewById(R.id.messageText);
                             final ImageView userIcon = (ImageView) view.findViewById(R.id.userIcon);
+                            final RelativeLayout divider = (RelativeLayout) view.findViewById(R.id.messageDivider);
+
+                            String username = chatMessage.getMessageUser();
+                            if (username == null) username = "no name";
+
+                            // Show only last 10 minutes or 100 messages at join
+                            messageText.setVisibility(View.GONE);
+                            userIcon.setVisibility(View.GONE);
+                            divider.setVisibility(View.GONE);
+                            view.setVisibility(View.GONE);
+                            // Nathan TODO: If only muting future message
+                            if (MuteController.isMuted(getApplicationContext(), username)) {
+                                //trace(username + " is muted");
+                                //return;
+                            }
+                            // TODO: Change if only muting future messages
+                            if (position < numMessagesAtJoin - PAST_MESSAGES_LIMIT) {
+                                //trace("Too many messages: " + position + " < " + (numMessagesAtJoin - PAST_MESSAGES_LIMIT));
+                                return;
+                            }
+                            else if (chatMessage.getMessageTime() < tenMinutesBeforeJoin) {
+                                //trace("Message too old: " + chatMessage.getMessageTime() + " < " + (tenMinutesBeforeJoin));
+                                return;
+                            }
+                            else {
+                                messageText.setVisibility(View.VISIBLE);
+                                userIcon.setVisibility(View.VISIBLE);
+                                divider.setVisibility(View.VISIBLE);
+                                view.setVisibility(View.VISIBLE);
+                            }
 
                             // Use icon from corresponding user
                             String userId = Database.getUserId(username);
@@ -272,8 +321,7 @@ public class ChatActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
-                Database.setUserRoom(null);
-                startActivity(new Intent(this, SelectActivity.class));
+                doLeaveRoom();
                 break;
             case R.id.room_users:
                 Intent userIntent = new Intent(this, RoomUserListActivity.class);
@@ -285,14 +333,26 @@ public class ChatActivity extends AppCompatActivity {
                 startActivity(settingsIntent);
                 break;
             case R.id.menu_sign_out:
-                Database.signOutUser();
-                //return to sign in
-                startActivity(new Intent(this, MainActivity.class));
+                doSignOut();
                 break;
             default:
                 break;
         }
         return true;
+    }
+
+    private void doLeaveRoom() {
+        Database.setUserRoom(null);
+        Database.removeRoomMessagesListener();
+        shouldGetNumMessages = true;
+        startActivity(new Intent(this, SelectActivity.class));
+    }
+
+    private void doSignOut() {
+        Database.signOutUser();
+        Database.removeRoomMessagesListener();
+        shouldGetNumMessages = true;
+        startActivity(new Intent(this, MainActivity.class));
     }
 
     private String formatTimestamp(long timeMillis) {
@@ -318,11 +378,11 @@ public class ChatActivity extends AppCompatActivity {
         return dateFormatted;
     }
 
-    private static void trace(String message){
-        System.out.println("ChatActivity >> " + message); //todo android logger
-    }
-
     private boolean isUserBannedFromCurrentRoom() {
         return BanController.isCurrentUserBanned(Database.getCurrentRoomID());
+    }
+
+    private static void trace(String message){
+        System.out.println("ChatActivity >> " + message); //todo android logger
     }
 }

@@ -66,6 +66,8 @@ public class MessageDetailsDialog extends DialogFragment {
         //*
         if (Database.isCurrentUserAdminOfRoom(userId)) {
             banButton.setVisibility(Button.VISIBLE);
+        } else {
+            banButton.setVisibility(View.GONE);
         }
         //*/
 
