@@ -31,7 +31,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public class RoomUserListActivity extends AppCompatActivity {
-    ArrayList<UserIdentity> users = new ArrayList<>();
+    public ArrayList<UserIdentity> users = new ArrayList<>();
+    ArrayAdapter<UserIdentity> itemsAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,9 +63,10 @@ public class RoomUserListActivity extends AppCompatActivity {
             }
         });
         //*/
+
         displayUsers();
     }
-    
+
     private void displayUsers() {
 
         ListView lV = (ListView) findViewById(R.id.user_list_view);
@@ -72,7 +74,7 @@ public class RoomUserListActivity extends AppCompatActivity {
         //users.add(new UserIdentity("Mock User 1", 0));
         //TODO: order alphabetically by user name
 
-        ArrayAdapter<UserIdentity> itemsAdapter = new ArrayAdapter<UserIdentity>(this, R.layout.user_list_item, users) {
+        itemsAdapter = new ArrayAdapter<UserIdentity>(this, R.layout.user_list_item, users) {
             @Override
             public View getView(int position, View convertView, ViewGroup parent) {
 
@@ -134,7 +136,7 @@ public class RoomUserListActivity extends AppCompatActivity {
                 HashMap<String, Object> roomUsers = (HashMap<String, Object>) dataSnapshot.getValue();
 
                 for(String userID : roomUsers.keySet()){
-                    users.add(Database.getUserByID(userID));
+                    itemsAdapter.add(Database.getUserByID(userID));
                 }
 
 
