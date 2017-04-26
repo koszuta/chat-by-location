@@ -1,15 +1,19 @@
 package com.cs595.uwm.chatbylocation.view;
 
+import android.Manifest;
 import android.app.DialogFragment;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.database.DataSetObserver;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.res.ResourcesCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Spannable;
@@ -34,7 +38,12 @@ import com.cs595.uwm.chatbylocation.controllers.MuteController;
 import com.cs595.uwm.chatbylocation.objModel.ChatMessage;
 import com.cs595.uwm.chatbylocation.objModel.UserIcon;
 import com.cs595.uwm.chatbylocation.service.Database;
+import com.cs595.uwm.chatbylocation.service.GeofenceTransitionsIntentService;
 import com.firebase.ui.database.FirebaseListAdapter;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.Geofence;
+import com.google.android.gms.location.GeofencingRequest;
+import com.google.android.gms.location.LocationServices;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -59,6 +68,7 @@ public class ChatActivity extends AppCompatActivity {
     public static final String ICON_ARGUMENT = "iconForBundle";
     private static final String USER_ID_ARGUMENT = "userIdForBundle";
     private static final String ROOM_ID_ARGUMENT = "roomIdForBundle";
+    private static final long GEO_DURATION = 60 * 60 * 1000;
 
     private DialogFragment messageDialog;
     private ListView messageListView;
@@ -68,8 +78,11 @@ public class ChatActivity extends AppCompatActivity {
     private static boolean shouldGetNumMessages = true;
     private static long tenMinutesBeforeJoin;
     private static int numMessagesAtJoin;
+    private Geofence mGeofence;
     private static EditText textInput;
     private FirebaseListAdapter<ChatMessage> chatListAdapter;
+    private PendingIntent mGeofencePendingIntent;
+    private String GEOFENCE_REQ_ID = "Geofence";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -77,7 +90,8 @@ public class ChatActivity extends AppCompatActivity {
         setContentView(R.layout.chat_layout);
 
         setTitle(Database.getCurrentRoomName());
-
+        createGoogleApi();
+        buildGeofence();
         //construct objects
         banUserIntent = new Intent(this, SelectActivity.class);
         messageListView = (ListView) this.findViewById(R.id.messageList);
@@ -387,6 +401,67 @@ public class ChatActivity extends AppCompatActivity {
         dateFormatted = dateFormatted.replace("AM", "am").replace("PM", "pm");
 
         return dateFormatted;
+    }
+    private GoogleApiClient mGoogleApiClient;
+
+    private void createGoogleApi() {
+        if (mGoogleApiClient == null) {
+            mGoogleApiClient = new GoogleApiClient.Builder(this)
+                    .addConnectionCallbacks((GoogleApiClient.ConnectionCallbacks) this)
+                    .addApi(LocationServices.API)
+                    .build();
+        }
+    }
+
+    private void buildGeofence() {
+        mGeofence = createGeofence();
+        GeofencingRequest geofenceRequest = createGeofenceRequest(mGeofence);
+        addGeofence(geofenceRequest);
+    }
+
+    // Create a Geofence Request
+    private GeofencingRequest createGeofenceRequest(Geofence geofence) {
+        return new GeofencingRequest.Builder()
+                .setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER)
+                .addGeofence(geofence)
+                .build();
+    }
+
+    private Geofence createGeofence() {
+        return new Geofence.Builder()
+                .setRequestId(GEOFENCE_REQ_ID)
+                .setCircularRegion(19.8968, 155.58, 100)
+                .setExpirationDuration(GEO_DURATION)
+                .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER
+                        | Geofence.GEOFENCE_TRANSITION_EXIT)
+                .build();
+    }
+
+    private PendingIntent getGeofencePendingIntent() {
+        if (mGeofencePendingIntent != null) {
+            return mGeofencePendingIntent;
+        }
+        Intent intent = new Intent(this, GeofenceTransitionsIntentService.class);
+        return PendingIntent.getService(this, 0, intent, PendingIntent.
+                FLAG_UPDATE_CURRENT);
+    }
+
+    private void addGeofence(GeofencingRequest request) {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
+        LocationServices.GeofencingApi.addGeofences(
+                mGoogleApiClient,
+                request,
+                getGeofencePendingIntent()
+        );
+    }
+
+    private void removeGeofence(){
+        LocationServices.GeofencingApi.removeGeofences(
+                mGoogleApiClient,
+                getGeofencePendingIntent()
+        );
     }
 
     private boolean isUserBannedFromCurrentRoom() {
