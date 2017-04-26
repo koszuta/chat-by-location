@@ -69,6 +69,8 @@ public class ChatActivity extends AppCompatActivity {
     private static long tenMinutesBeforeJoin;
     private static int numMessagesAtJoin;
 
+    private static EditText textInput;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -131,20 +133,16 @@ public class ChatActivity extends AppCompatActivity {
 
 
     public void banUserClick(View view) {
-        String iD = args.getString(USER_ID_ARGUMENT);
+        String userId = args.getString(USER_ID_ARGUMENT);
         String roomID = Database.getCurrentRoomID();
         if(Database.isCurrentUserAdminOfRoom(roomID)) {
-            BanController.addToRoomBanList(view.getContext(), iD, roomID);
-            Toast.makeText(view.getContext(), "User has been banned from the room!", Toast.LENGTH_SHORT).show();
+            BanController.addToRoomBanList(view.getContext(), userId, roomID);
+            Toast.makeText(view.getContext(), "You have been banned from the room! Shame.", Toast.LENGTH_SHORT).show();
         }
         if(isUserBannedFromCurrentRoom()) {
             startActivity(banUserIntent);
             finish();
         }
-    }
-
-    public void imageClick(View view) {
-
     }
 
     public void toBottomClick(View view) {
@@ -167,20 +165,29 @@ public class ChatActivity extends AppCompatActivity {
         //block message and kick out user if banned from current room
         if(isUserBannedFromCurrentRoom()) {
             doLeaveRoom();
-            finish();
         }
 
+        // Get color for message from preferences
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        final EditText textInput = (EditText) findViewById(R.id.textInput);
+        int color = prefs.getInt("color1", Color.BLACK);
+
+        textInput = (EditText) findViewById(R.id.textInput);
         String message = String.valueOf(textInput.getText());
         String roomId = Database.getCurrentRoomID();
         if (roomId != null && !"".equals(message) && message != null) {
             Database.sendChatMessage(
-                    new ChatMessage(message, Database.getUserUsername(), prefs.getInt("color1", Color.BLACK)),
-                    roomId);
+                    new ChatMessage(message, Database.getUserUsername(), color),
+                    roomId,
+                    this);
         }
 
         textInput.setText("");
+    }
+
+    public static void setTextInput(String text) {
+        if (textInput != null) {
+            textInput.setText(text);
+        }
     }
 
     private void displayChatMessages() {
