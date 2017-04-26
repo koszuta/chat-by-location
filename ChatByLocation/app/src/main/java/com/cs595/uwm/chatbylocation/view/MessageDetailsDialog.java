@@ -55,7 +55,7 @@ public class MessageDetailsDialog extends DialogFragment {
             userImageView.setImageResource(userIcon);
         }
 
-        MuteController.toggleMuteButton(muteButton, userName);
+        MuteController.adjustMuteButton(muteButton, userName);
 
         // TODO: Make 'Ban' button visible when user is admin of current room
         //*

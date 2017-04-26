@@ -118,8 +118,8 @@ public class MuteController {
         }
     }
 
-    public static void toggleMuteButton(ToggleButton button, String username) {
-        if(MuteController.isMuted(username) != -1) {
+    public static void adjustMuteButton(ToggleButton button, String username) {
+        if(MuteController.isMuted(username) != -1 && !button.isChecked()) {
             trace("Toggled mute button on for " + username);
             button.setChecked(true);
         }

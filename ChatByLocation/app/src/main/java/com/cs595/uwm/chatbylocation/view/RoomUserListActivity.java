@@ -1,6 +1,5 @@
 package com.cs595.uwm.chatbylocation.view;
 
-import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
@@ -29,7 +28,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public class RoomUserListActivity extends AppCompatActivity {
-
+    ArrayList<UserIdentity> users = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,14 +59,13 @@ public class RoomUserListActivity extends AppCompatActivity {
             }
         });
         //*/
-
         displayUsers();
     }
     
     private void displayUsers() {
 
         ListView lV = (ListView) findViewById(R.id.user_list_view);
-        final ArrayList<UserIdentity> users = new ArrayList<>();
+
         //users.add(new UserIdentity("Mock User 1", 0));
         //TODO: order alphabetically by user name
 
@@ -82,17 +80,33 @@ public class RoomUserListActivity extends AppCompatActivity {
                 if (convertView == null) {
                     convertView = LayoutInflater.from(getContext()).inflate(R.layout.user_list_item, parent, false);
                 }
-                
+
+                String username = user.getUsername();
+
                 final ToggleButton muteButton = (ToggleButton) convertView.findViewById(R.id.mute_button_user);
-                MuteController.toggleMuteButton(muteButton, user.getUsername());
+                //MuteController.adjustMuteButton(muteButton, username);
+                muteButton.setTag(position);
 
                 TextView userName = (TextView) convertView.findViewById(R.id.user_name_in_list);
                 if (user != null) {
-                    userName.setText(user.getUsername());
+                    userName.setText(username);
+                    //set text to unmute is this user is muted
+                    //*
+                    if(MuteController.isMuted(username) != -1) {
+                        muteButton.setTextOff("UNMUTE");
+                        muteButton.setTextOn("MUTE");
+                        muteButton.setText("UNMUTE");
+                    }
+                    else {
+                        muteButton.setTextOff("MUTE");
+                        muteButton.setTextOn("UNMUTE");
+                        muteButton.setText("MUTE");
+                    }
+                    //*/
 
                     // Set list item icon
                     ImageView imageView = (ImageView) convertView.findViewById(R.id.icon_in_user_list);
-                    String userId = Database.getUserId(user.getUsername());
+                    String userId = Database.getUserId(username);
                     String icon = Database.getUserIcon(userId);
                     int iconRes = UserIcon.getIconResource(icon);
                     if (iconRes == 0) {
@@ -179,7 +193,7 @@ public class RoomUserListActivity extends AppCompatActivity {
     }
 
     public void onMuteClick(View v) {
-        String username = Database.getUserUsername();
+        String username = users.get((Integer) v.getTag()).getUsername();
         MuteController.onMuteClick(username, getApplicationContext());
     }
 
