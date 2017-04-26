@@ -68,8 +68,8 @@ public class ChatActivity extends AppCompatActivity {
     private static boolean shouldGetNumMessages = true;
     private static long tenMinutesBeforeJoin;
     private static int numMessagesAtJoin;
-
     private static EditText textInput;
+    private FirebaseListAdapter<ChatMessage> chatListAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -121,14 +121,8 @@ public class ChatActivity extends AppCompatActivity {
 
     public void onMuteClick(View view) {
         String name = messageDialog.getArguments().getString(NAME_ARGUMENT);
-
-        if(MuteController.isMuted(view.getContext(), name)) {
-            MuteController.removeUserFromMuteList(view.getContext(), name);
-        }
-        else {
-            MuteController.addUserToMuteList(view.getContext(), name);
-        }
-        displayChatMessages();
+        MuteController.onMuteClick(name, getApplicationContext());
+        chatListAdapter.notifyDataSetChanged();
     }
 
 
@@ -200,7 +194,7 @@ public class ChatActivity extends AppCompatActivity {
                     final String roomID = String.valueOf(dataSnapshot.getValue());
                     trace("roomIDListener sees roomid = " + roomID);
 
-                    FirebaseListAdapter<ChatMessage> chatMessageListener = new FirebaseListAdapter<ChatMessage>(
+                    chatListAdapter = new FirebaseListAdapter<ChatMessage>(
                             ChatActivity.this,
                             ChatMessage.class,
                             R.layout.message_item,
@@ -214,28 +208,28 @@ public class ChatActivity extends AppCompatActivity {
                             final ImageView userIcon = (ImageView) view.findViewById(R.id.userIcon);
                             final RelativeLayout divider = (RelativeLayout) view.findViewById(R.id.messageDivider);
 
-                            String username = chatMessage.getMessageUser();
-                            if (username == null) username = "no name";
-
-                            // Show only last 10 minutes or 100 messages at join
+                            // Decide whether message should be visible
                             messageText.setVisibility(View.GONE);
                             userIcon.setVisibility(View.GONE);
                             divider.setVisibility(View.GONE);
                             view.setVisibility(View.GONE);
-                            // Nathan TODO: If only muting future message
-                            if (MuteController.isMuted(getApplicationContext(), username)) {
-                                //trace(username + " is muted");
-                                //return;
+                            /*
+                            if (muteTime != -1 && muteTime < chatMessage.getMessageTime()) {
+                                //trace(username + " was muted at " + muteTime);
+                                return;
                             }
-                            // TODO: Change if only muting future messages
+                            //*/
+                            // Limit number of messages from before entering chat room
                             if (position < numMessagesAtJoin - PAST_MESSAGES_LIMIT) {
                                 //trace("Too many messages: " + position + " < " + (numMessagesAtJoin - PAST_MESSAGES_LIMIT));
                                 return;
                             }
+                            // Limit messages to within 10 minutes of entering chat room
                             else if (chatMessage.getMessageTime() < tenMinutesBeforeJoin) {
                                 //trace("Message too old: " + chatMessage.getMessageTime() + " < " + (tenMinutesBeforeJoin));
                                 return;
                             }
+                            // Otherwise show message
                             else {
                                 messageText.setVisibility(View.VISIBLE);
                                 userIcon.setVisibility(View.VISIBLE);
@@ -243,40 +237,50 @@ public class ChatActivity extends AppCompatActivity {
                                 view.setVisibility(View.VISIBLE);
                             }
 
-                            // Use icon from corresponding user
-                            String userId = Database.getUserId(username);
-                            int iconRes = UserIcon.getIconResource(Database.getUserIcon(userId));
-                            if (iconRes == 0) {
-                                Bitmap image = Database.getUserImage(userId);
-                                if (image != null) {
-                                    userIcon.setImageBitmap(image);
-                                } else {
-                                    userIcon.setImageResource(UserIcon.NONE_RESOURCE);
-                                }
-                            } else {
-                                userIcon.setImageResource(iconRes);
+                            String username = chatMessage.getMessageUser();
+                            if (username == null) username = "no name";
+
+                            SpannableString ss;
+
+                            // Check if user was muted when the message was sent
+                            long muteTime = MuteController.isMuted(username);
+                            if (muteTime != -1 && muteTime < chatMessage.getMessageTime()) {
+                                ss = new SpannableString("         This user is muted");
+                                userIcon.setVisibility(View.GONE);
                             }
-
-                            // Set their text
-                            String timestamp = formatTimestamp(chatMessage.getMessageTime());
-                            if (timestamp == null) timestamp = "";
-
-                            SpannableString ss = new SpannableString(timestamp + ' ' + username + ": " + chatMessage.getMessageText());
-                            if (MuteController.isMuted(view.getContext(), username)) {
-                                ss = new SpannableString("-- This user is muted --");
-                                //userIcon.setVisibility(View.GONE);
-                            } else {
-                                StyleSpan bold = new StyleSpan(android.graphics.Typeface.BOLD);
-                                RelativeSizeSpan timeSize = new RelativeSizeSpan(0.8f);
-                                ForegroundColorSpan timeColor = new ForegroundColorSpan(ResourcesCompat.getColor(getResources(), R.color.timestamp, null));
-
+                            else {
+                                // Format message text
+                                String timestamp = formatTimestamp(chatMessage.getMessageTime());
+                                if (timestamp == null) timestamp = "";
                                 int timeLength = timestamp.length() + 1;
+
+                                ss = new SpannableString(timestamp + ' ' + username + ": " + chatMessage.getMessageText());
+
+                                RelativeSizeSpan timeSize = new RelativeSizeSpan(0.8f);
                                 ss.setSpan(timeSize, 0, timeLength, Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
+
+                                ForegroundColorSpan timeColor = new ForegroundColorSpan(ResourcesCompat.getColor(getResources(), R.color.timestamp, null));
                                 ss.setSpan(timeColor, 0, timeLength, Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
+
+                                StyleSpan bold = new StyleSpan(android.graphics.Typeface.BOLD);
                                 ss.setSpan(bold, timeLength, timeLength + username.length(), Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
 
                                 ForegroundColorSpan textColor = new ForegroundColorSpan(chatMessage.getMessageColor());
                                 ss.setSpan(textColor, timeLength + username.length() + 1, ss.length(), Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
+
+                                // Use icon from corresponding user
+                                String userId = Database.getUserId(username);
+                                int iconRes = UserIcon.getIconResource(Database.getUserIcon(userId));
+                                if (iconRes == 0) {
+                                    Bitmap image = Database.getUserImage(userId);
+                                    if (image != null) {
+                                        userIcon.setImageBitmap(image);
+                                    } else {
+                                        userIcon.setImageResource(UserIcon.NONE_RESOURCE);
+                                    }
+                                } else {
+                                    userIcon.setImageResource(iconRes);
+                                }
                             }
 
                             messageText.setText(ss);
@@ -286,15 +290,15 @@ public class ChatActivity extends AppCompatActivity {
                     // Nathan TODO: Implement kicked from room using database listener
                     ListView listOfMessages = (ListView) findViewById(R.id.messageList);
                     if (roomID.equals("")) {
-                        chatMessageListener.cleanup();
+                        chatListAdapter.cleanup();
                         listOfMessages.setAdapter(null);
                         trace("roomIDListener removing adapter");
                     } else {
-                        listOfMessages.setAdapter(chatMessageListener);
+                        listOfMessages.setAdapter(chatListAdapter);
                         trace("roomIDListener setting adapter");
 
                     }
-                    chatMessageListener.registerDataSetObserver(new DataSetObserver()
+                    chatListAdapter.registerDataSetObserver(new DataSetObserver()
                     {
                         @Override
                         public void onChanged()
