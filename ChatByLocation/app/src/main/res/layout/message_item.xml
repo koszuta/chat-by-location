@@ -6,6 +6,13 @@
 
     android:id="@+id/messageLayout">
 
+    <RelativeLayout
+        android:id="@+id/messageDivider"
+        android:background="@color/listDivider"
+        android:layout_width="match_parent"
+        android:layout_height="1dp">
+    </RelativeLayout>
+
     <ImageView
         android:focusable="false"
         android:focusableInTouchMode="false"
@@ -16,7 +23,7 @@
         android:layout_height="35dp"
 
         android:layout_alignParentStart="true"
-        android:layout_alignParentTop="true"
+        android:layout_below="@id/messageDivider"
 
         android:id="@+id/userIcon"/>
 
@@ -29,7 +36,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
 
-        android:layout_alignParentTop="true"
+        android:layout_below="@id/messageDivider"
         android:layout_toEndOf="@id/userIcon"
 
         android:paddingStart="8dp"

@@ -30,7 +30,7 @@
         android:layout_above="@+id/bottomLayout"
 
         android:divider="@color/listDivider"
-        android:dividerHeight="1dp"
+        android:dividerHeight="0dp"
 
         android:stackFromBottom="true"
         android:transcriptMode="alwaysScroll"
