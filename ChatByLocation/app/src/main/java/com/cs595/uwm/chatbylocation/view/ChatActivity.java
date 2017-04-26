@@ -38,6 +38,7 @@ import com.firebase.ui.database.FirebaseListAdapter;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.Date;
@@ -69,12 +70,17 @@ public class ChatActivity extends AppCompatActivity {
     private static long tenMinutesBeforeJoin;
     private static int numMessagesAtJoin;
     private static EditText textInput;
+
     private FirebaseListAdapter<ChatMessage> chatListAdapter;
+    private ConnectivityManager connectivityManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.chat_layout);
+
+        // Get Connectivity Service
+        connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
 
         setTitle(Database.getCurrentRoomName());
 
@@ -103,6 +109,7 @@ public class ChatActivity extends AppCompatActivity {
             }
         });
 
+        // When entering room for first time, get join time and number of messages at join
         if (shouldGetNumMessages) {
             trace("Setting join time and number of messages before join");
             numMessagesAtJoin = 0;
@@ -110,6 +117,29 @@ public class ChatActivity extends AppCompatActivity {
             tenMinutesBeforeJoin = now - ChatActivity.TEN_MINUTES_IN_MILLIS;
             Database.initRoomMessagesListener(now);
             shouldGetNumMessages = false;
+        }
+
+        // Remove user from 'roomUsers' list when they disconnect from Firebase, but user still has network connectivity
+        // In other words, when the app closes before user leaves room or signs out
+        String roomId = Database.getCurrentRoomID(), userId = Database.getUserId();
+        if (doHasNetworkConnection() && roomId != null && userId != null) {
+            FirebaseDatabase.getInstance().getReference()
+                    .child("roomUsers").child(roomId).child(userId)
+                    .onDisconnect().removeValue(new DatabaseReference.CompletionListener() {
+                @Override
+                public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+                    if (doHasNetworkConnection()) {
+                        databaseReference.setValue(true);
+                    }
+                }
+            });
+            trace("Removed user from 'roomUsers' due to disconnect");
+            DatabaseReference currentUserRef = Database.getCurrentUserReference();
+            if (currentUserRef != null) {
+                currentUserRef.child("currentRoomID").onDisconnect().setValue("");
+                currentUserRef.child("removeFrom").onDisconnect().setValue("");
+                trace("Cleared user room values due to disconnect");
+            }
         }
 
         displayChatMessages();
@@ -145,8 +175,7 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     public void sendMessageClick(View view) {
-        ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-        if (connectivityManager.getActiveNetworkInfo() == null) {
+        if (!doHasNetworkConnection()) {
             Toast.makeText(this, "No network connectivity", Toast.LENGTH_LONG).show();
             return;
         }
@@ -289,7 +318,7 @@ public class ChatActivity extends AppCompatActivity {
 
                     // Nathan TODO: Implement kicked from room using database listener
                     ListView listOfMessages = (ListView) findViewById(R.id.messageList);
-                    if (roomID.equals("")) {
+                    if ("".equals(roomID)) {
                         chatListAdapter.cleanup();
                         listOfMessages.setAdapter(null);
                         trace("roomIDListener removing adapter");
@@ -364,6 +393,10 @@ public class ChatActivity extends AppCompatActivity {
         Database.removeRoomMessagesListener();
         shouldGetNumMessages = true;
         startActivity(new Intent(this, MainActivity.class));
+    }
+
+    private boolean doHasNetworkConnection() {
+        return connectivityManager.getActiveNetworkInfo() != null;
     }
 
     private String formatTimestamp(long timeMillis) {

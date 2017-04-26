@@ -77,6 +77,7 @@ public class Database {
 
             String userId = getUserId();
             if (userId != null) {
+                // Add user to current room's 'roomUser' list
                 getRoomUsersReference().child(roomID).child(userId).setValue(true);
             }
 
@@ -99,15 +100,16 @@ public class Database {
             String removeFrom = String.valueOf(dataSnapshot.getValue());
             trace("removeFromListener sees removeFrom: " + removeFrom);
 
-            String userId = getUserId();
-            if (!(removeFrom == null || removeFrom.equals(""))) {
-                // Remove user from roomUsers list
-                if (userId != null) {
-                    getRoomUsersReference().child(removeFrom).child(userId).removeValue();
-                    getCurrentUserReference().child("currentRoomID").setValue("");
-                }
+            DatabaseReference currentUserRef = getCurrentUserReference();
+            if (!"".equals(removeFrom) && currentUserRef != null) {
 
-                getCurrentUserReference().child("removeFrom").setValue("");
+                // Remove user from roomUsers list
+                String userId = getUserId();
+                if (userId != null && removeFrom != null) {
+                    getRoomUsersReference().child(removeFrom).child(userId).removeValue();
+                    currentUserRef.child("currentRoomID").setValue("");
+                }
+                currentUserRef.child("removeFrom").setValue("");
 
                 trace("removeFromListener has removed the user from their room");
             }
