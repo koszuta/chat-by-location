@@ -14,6 +14,7 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.cs595.uwm.chatbylocation.objModel.ChatMessage;
 import com.cs595.uwm.chatbylocation.view.ChatActivity;
 import com.cs595.uwm.chatbylocation.view.CreateRoomDialog;
 import com.cs595.uwm.chatbylocation.view.SelectActivity;
@@ -60,19 +61,23 @@ public class GeofenceTransitionsIntentService extends IntentService {
         switch (geofencingEvent.getGeofenceTransition()) {
 
             case Geofence.GEOFENCE_TRANSITION_ENTER:
-                // Send a welcome message
-                mHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        Toast.makeText(GeofenceTransitionsIntentService.this, "Welcome to the chat room!", Toast.LENGTH_LONG).show();
-                    }
-                });
+                // Give a warning if they cross the chat room's radius
+                if (!ChatActivity.isKicked()) {
+                    // Send a welcome message
+                    mHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(GeofenceTransitionsIntentService.this, "Welcome to the chat room!", Toast.LENGTH_LONG).show();
+                        }
+                    });
+                }
                 break;
 
             case Geofence.GEOFENCE_TRANSITION_EXIT:
                 for (Geofence g : triggeringGeofences) {
+                    trace("Exit: request id = " + g.getRequestId());
 
-                    // Give a warning if they cross the chat room's radius
+                    // Give a warning if they cross the warning radius
                     if (ChatActivity.WARN_GEOFENCE.equals(g.getRequestId())) {
                         mHandler.post(new Runnable() {
                             @Override
@@ -83,7 +88,7 @@ public class GeofenceTransitionsIntentService extends IntentService {
                         break;
                     }
 
-                    // Kick them out of the room if they leave the kick radius
+                    // Kick them if they leave the kick radius
                     if (ChatActivity.KICK_GEOFENCE.equals(g.getRequestId())) {
                         mHandler.post(new Runnable() {
                             @Override
@@ -91,6 +96,7 @@ public class GeofenceTransitionsIntentService extends IntentService {
                                 Toast.makeText(GeofenceTransitionsIntentService.this, "You wandered astray and were kicked from the chat room!", Toast.LENGTH_LONG).show();
                             }
                         });
+
                         // Tell ChatActivity to kick the user next chance it gets
                         ChatActivity.kickUser();
                         break;

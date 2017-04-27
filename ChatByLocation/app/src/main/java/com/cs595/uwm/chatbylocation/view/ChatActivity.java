@@ -49,7 +49,6 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
-import com.google.android.gms.location.FusedLocationProviderApi;
 import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.GeofencingRequest;
 import com.google.android.gms.location.LocationRequest;
@@ -59,7 +58,6 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 
-import java.security.Permission;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -105,7 +103,7 @@ public class ChatActivity extends AppCompatActivity
     // Create two geofences, one to warn (at room radius) and one to kick (beyond room radius)
     public static final String WARN_GEOFENCE = "warn";
     public static final String KICK_GEOFENCE = "kick";
-    public static final int KICK_DISTANCE = 20;
+    public static final int BOUNDARY_LEEWAY = 20;
 
     // Uses list of geofences for the two needed
     private List<Geofence> mGeofences = new ArrayList<>();
@@ -266,6 +264,10 @@ public class ChatActivity extends AppCompatActivity
     // Used by geofence service to kick user
     public static void kickUser() {
         shouldKickUser = true;
+    }
+
+    public static boolean isKicked() {
+        return shouldKickUser;
     }
 
     private void displayChatMessages() {
@@ -543,9 +545,13 @@ public class ChatActivity extends AppCompatActivity
         double lat = Database.getRoomLat(roomId);
         double lng = Database.getRoomLng(roomId);
         int radius = Database.getRoomRadius(roomId);
-        // Add 10 more meters to Kick Radius
+        // Warn the user a little inside the radius
+        if (WARN_GEOFENCE.equals(geofenceName)) {
+            radius -= BOUNDARY_LEEWAY;
+        }
+        // Kick the user a little outside the radius
         if (KICK_GEOFENCE.equals(geofenceName)) {
-            radius += KICK_DISTANCE;
+            radius += BOUNDARY_LEEWAY;
         }
         return new Geofence.Builder()
                 .setRequestId(geofenceName)
