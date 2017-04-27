@@ -4,6 +4,12 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
+        android:title="Set Location"
+        android:icon="@drawable/ic_my_location"
+        app:showAsAction="ifRoom"
+        android:id="@+id/set_location"/>
+
+    <item
         android:title="Users List"
         android:icon="@drawable/ic_users_list"
         app:showAsAction="always"

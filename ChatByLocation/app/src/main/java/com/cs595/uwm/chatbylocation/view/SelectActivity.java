@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
@@ -112,8 +113,8 @@ public class SelectActivity extends AppCompatActivity
     public void onConnected(@Nullable Bundle bundle) {
         trace("Connected to location api");
         LocationRequest locationRequest = new LocationRequest();
-        locationRequest.setInterval(0)
-                .setFastestInterval(0)
+        locationRequest.setInterval(5000)
+                .setFastestInterval(1000)
                 .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
@@ -133,6 +134,25 @@ public class SelectActivity extends AppCompatActivity
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
         trace("Failed to connect to location api");
+    }
+
+    public void useMockLocation(Location location) {
+        if (ContextCompat.checkSelfPermission(getApplicationContext(), Settings.Secure.ALLOW_MOCK_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            LocationServices.FusedLocationApi.setMockMode(googleApiClient, true);
+            LocationServices.FusedLocationApi.setMockLocation(googleApiClient, location);
+        }
+        else {
+            trace("No permission to use mock location");
+        }
+    }
+
+    public void useCurrentLocation() {
+        if (ContextCompat.checkSelfPermission(getApplicationContext(), Settings.Secure.ALLOW_MOCK_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            LocationServices.FusedLocationApi.setMockMode(googleApiClient, false);
+        }
+        else {
+            trace("No permission to use mock location");
+        }
     }
 
     public Location getLastLocation() {
@@ -201,7 +221,7 @@ public class SelectActivity extends AppCompatActivity
                 float lng = Float.valueOf(roomIdentity.getLongg());
 
                 if (!withinRoomRadius(lat, lng, roomIdentity.getRad())) {
-                    trace("Room " + roomIdentity.getName() + " is out of range");
+                    //trace("Room " + roomIdentity.getName() + " is out of range");
                     view.setPadding(0,0,0,0);
                     roomName.setVisibility(View.GONE);
                     roomCoords.setVisibility(View.GONE);
@@ -246,19 +266,28 @@ public class SelectActivity extends AppCompatActivity
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
+
+            case R.id.set_location:
+                DialogFragment locationDialog = new MockLocationDialog();
+                locationDialog.show(getFragmentManager(), "set location");
+                break;
+
             case R.id.menu_create_chatroom:
                 // TODO: Move create room button logic here
                 DialogFragment dialog = new CreateRoomDialog();
                 dialog.show(getFragmentManager(), "create room");
                 break;
+
             case R.id.menu_view_map:
                 // TODO: Set map view visible here
                 break;
+
             case R.id.menu_settings:
                 Intent settingsIntent = new Intent(this, SettingsActivity.class);
                 settingsIntent.putExtra("caller", SelectActivity.class.getName());
                 startActivity(settingsIntent);
                 break;
+
             case R.id.menu_sign_out:
                 Database.signOutUser();
                 //return to sign in
