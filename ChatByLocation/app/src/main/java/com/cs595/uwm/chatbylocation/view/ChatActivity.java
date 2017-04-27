@@ -109,6 +109,7 @@ public class ChatActivity extends AppCompatActivity
 
         createGoogleApi();
 
+        trace("Google Api Client is connected: " + mGoogleApiClient.isConnected());
         if (!mGoogleApiClient.isConnected()) {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
                 trace("Has permissions after location api connection");
@@ -158,12 +159,12 @@ public class ChatActivity extends AppCompatActivity
     @Override
     protected void onStop() {
         trace("onStop");
-        mGoogleApiClient.disconnect();
         super.onStop();
     }
     @Override
     protected void onDestroy() {
         trace("onDestroy");
+        mGoogleApiClient.disconnect();
         super.onDestroy();
     }
 
@@ -419,6 +420,7 @@ public class ChatActivity extends AppCompatActivity
         Database.removeRoomMessagesListener();
         shouldGetNumMessages = true;
         startActivity(new Intent(this, SelectActivity.class));
+        finish();
     }
 
     private void doSignOut() {
@@ -426,6 +428,7 @@ public class ChatActivity extends AppCompatActivity
         Database.removeRoomMessagesListener();
         shouldGetNumMessages = true;
         startActivity(new Intent(this, MainActivity.class));
+        finish();
     }
 
     private String formatTimestamp(long timeMillis) {
@@ -491,7 +494,7 @@ public class ChatActivity extends AppCompatActivity
             ).setResultCallback(new ResultCallback<Status>() {
                 @Override
                 public void onResult(@NonNull Status status) {
-                    trace("On addGeofence result: " + status.getStatusMessage());
+                    trace("On addGeofence result is success: " + status.isSuccess());
                 }
             });
         } else {
