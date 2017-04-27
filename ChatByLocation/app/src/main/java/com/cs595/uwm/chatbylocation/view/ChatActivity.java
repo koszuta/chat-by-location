@@ -60,7 +60,6 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -199,7 +198,7 @@ public class ChatActivity extends AppCompatActivity
     public void banUserClick(View view) {
         String userId = args.getString(USER_ID_ARGUMENT);
         String roomID = Database.getCurrentRoomID();
-        if(Database.isCurrentUserAdminOfRoom(roomID)) {
+        if(Database.isCurrentUserAdminOfRoom()) {
             BanController.addToRoomBanList(view.getContext(), userId, roomID);
             Toast.makeText(view.getContext(), "You have been banned from the room! Shame.", Toast.LENGTH_SHORT).show();
         }
@@ -279,6 +278,8 @@ public class ChatActivity extends AppCompatActivity
 
                     final String roomID = String.valueOf(dataSnapshot.getValue());
                     trace("roomIDListener sees roomid = " + roomID);
+
+                    Database.registerChangeOwnerListener(roomID);
 
                     chatListAdapter = new FirebaseListAdapter<ChatMessage>(
                             ChatActivity.this,

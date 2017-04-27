@@ -59,7 +59,7 @@ public class MessageDetailsDialog extends DialogFragment {
 
         // TODO: Make 'Ban' button visible when user is admin of current room
         //*
-        if (Database.isCurrentUserAdminOfRoom(userId)) {
+        if (Database.isCurrentUserAdminOfRoom()) {
             banButton.setVisibility(Button.VISIBLE);
         } else {
             banButton.setVisibility(View.GONE);

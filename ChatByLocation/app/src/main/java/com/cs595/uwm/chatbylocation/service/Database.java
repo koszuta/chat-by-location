@@ -56,6 +56,9 @@ public class Database {
         public void onCancelled(DatabaseError databaseError) {}
     };
 
+    private static ValueEventListener becomeOwnerListener;
+    private static boolean isOwner = false;
+
     private static boolean listening = false;
     private static boolean listeningToUsers = false;
     private static boolean shouldSignOut = false;
@@ -234,6 +237,34 @@ public class Database {
             .addChildEventListener(messageCountListener);
             trace("Added room messages listener");
         }
+    }
+
+    public static void registerChangeOwnerListener(final String roomID){
+
+        DatabaseReference ownerIDRef = getRoomIdentityReference().child(roomID).child("ownerID");
+        if(becomeOwnerListener != null) ownerIDRef.removeEventListener(becomeOwnerListener);
+
+        becomeOwnerListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                String ownerID = String.valueOf(dataSnapshot.getValue());
+                if(ownerID == null) return;
+                trace("OwnerID of room " + roomID + " changed to " + ownerID);
+                if(getUserId().equals(ownerID)) {
+                    isOwner = true;
+                } else if(isOwner){
+                    isOwner = false;
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        };
+
+        ownerIDRef.addValueEventListener(becomeOwnerListener);
+
     }
 
     public static void removeRoomMessagesListener() {
@@ -482,8 +513,7 @@ public class Database {
         System.out.println("Database >> " + message); //todo android logger
     }
 
-    public static boolean isCurrentUserAdminOfRoom(final String roomID) {
-        //TODO: compare current user with ownerID of specific room in database
-        return true;
+    public static boolean isCurrentUserAdminOfRoom() {
+        return isOwner;
     }
 }
