@@ -201,7 +201,7 @@ public class SelectActivity extends AppCompatActivity
                 float lng = Float.valueOf(roomIdentity.getLongg());
 
                 if (!withinRoomRadius(lat, lng, roomIdentity.getRad())) {
-                    trace("Room " + roomIdentity.getName() + " is out of range");
+                    //trace("Room " + roomIdentity.getName() + " is out of range");
                     view.setPadding(0,0,0,0);
                     roomName.setVisibility(View.GONE);
                     roomCoords.setVisibility(View.GONE);
