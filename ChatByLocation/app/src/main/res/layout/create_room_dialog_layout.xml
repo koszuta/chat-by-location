@@ -13,7 +13,7 @@
     <TextView
         android:id="@+id/createRoomLabel"
         android:text="Create a new chat room:"
-        android:textSize="20dp"
+        android:textSize="20sp"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
 
@@ -26,7 +26,7 @@
         android:id="@+id/createCurrentLocation"
 
         android:text="43° 03′ 8″ N, 87° 57′ 21″ W"
-        android:textSize="18dp"
+        android:textSize="18sp"
         android:textAlignment="center"
 
         android:layout_marginTop="8dp"
