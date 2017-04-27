@@ -168,10 +168,19 @@ public class ChatActivity extends AppCompatActivity
         ).setResultCallback(new ResultCallback<Status>() {
             @Override
             public void onResult(@NonNull Status status) {
+                trace("Disconnecting Google Api Client");
                 mGoogleApiClient.disconnect();
             }
         });
         super.onStop();
+    }
+
+    private void requestFineLocationPermission() {
+        trace("Asking for location permissions");
+        ActivityCompat.requestPermissions(
+                this,
+                new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                REQUEST_FINE_LOCATION_ACCESS);
     }
 
     public void onMuteClick(View view) {
@@ -389,18 +398,27 @@ public class ChatActivity extends AppCompatActivity
             case android.R.id.home:
                 doLeaveRoom();
                 break;
+
+            case R.id.set_location:
+                DialogFragment dialog = new MockLocationDialog();
+                dialog.show(getFragmentManager(), "set location");
+                break;
+
             case R.id.room_users:
                 Intent userIntent = new Intent(this, RoomUserListActivity.class);
                 startActivity(userIntent);
                 break;
+
             case R.id.menu_settings:
                 Intent settingsIntent = new Intent(this, SettingsActivity.class);
                 settingsIntent.putExtra("caller", ChatActivity.class.getName());
                 startActivity(settingsIntent);
                 break;
+
             case R.id.menu_sign_out:
                 doSignOut();
                 break;
+
             default:
                 break;
         }
@@ -418,6 +436,19 @@ public class ChatActivity extends AppCompatActivity
                 break;
             default:
                 break;
+        }
+    }
+
+    public void useMockLocation(Location location) {
+        if (ContextCompat.checkSelfPermission(getApplicationContext(), Settings.Secure.ALLOW_MOCK_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            LocationServices.FusedLocationApi.setMockMode(mGoogleApiClient, true);
+            LocationServices.FusedLocationApi.setMockLocation(mGoogleApiClient, location);
+        }
+    }
+
+    public void useCurrentLocation() {
+        if (ContextCompat.checkSelfPermission(getApplicationContext(), Settings.Secure.ALLOW_MOCK_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            LocationServices.FusedLocationApi.setMockMode(mGoogleApiClient, false);
         }
     }
 
@@ -557,14 +588,6 @@ public class ChatActivity extends AppCompatActivity
             trace("No permissions after location api connection");
             requestFineLocationPermission();
         }
-    }
-
-    private void requestFineLocationPermission() {
-        trace("Asking for location permissions");
-        ActivityCompat.requestPermissions(
-                this,
-                new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                REQUEST_FINE_LOCATION_ACCESS);
     }
     @Override
     public void onConnectionSuspended(int i) {

@@ -4,18 +4,24 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
+        android:title="Set Location"
+        android:icon="@drawable/ic_my_location"
+        app:showAsAction="ifRoom"
+        android:id="@+id/set_location"/>
+
+    <item
+        android:visible="false"
+        android:title="View Map"
+        android:icon="@drawable/ic_map"
+        app:showAsAction="ifRoom"
+        android:id="@+id/menu_view_map"/>
+
+    <item
         android:visible="true"
         android:title="Create Chatroom"
         android:icon="@drawable/ic_add_chatroom"
         app:showAsAction="always"
         android:id="@+id/menu_create_chatroom"/>
-
-    <item
-        android:visible="true"
-        android:title="View Map"
-        android:icon="@drawable/ic_map"
-        app:showAsAction="ifRoom"
-        android:id="@+id/menu_view_map"/>
 
     <item
         android:title="Preferences"
