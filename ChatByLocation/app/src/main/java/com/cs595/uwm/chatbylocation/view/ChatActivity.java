@@ -65,8 +65,7 @@ import java.util.Date;
 public class ChatActivity extends AppCompatActivity
         implements
         GoogleApiClient.ConnectionCallbacks,
-        GoogleApiClient.OnConnectionFailedListener,
-        LocationListener {
+        GoogleApiClient.OnConnectionFailedListener {
 
     public static final int REQUEST_FINE_LOCATION_ACCESS = 19;
 
@@ -109,7 +108,6 @@ public class ChatActivity extends AppCompatActivity
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             trace("Has permissions after location api connection");
             mGoogleApiClient.connect();
-            buildGeofence();
         } else {
             trace("No permissions after location api connection");
             requestFineLocationPermission();
@@ -552,7 +550,4 @@ public class ChatActivity extends AppCompatActivity
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
         trace("Failed to connect to location api");
     }
-
-    @Override
-    public void onLocationChanged(Location location) {}
 }
