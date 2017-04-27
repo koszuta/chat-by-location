@@ -38,6 +38,10 @@ public class GeofenceTransitionsIntentService extends IntentService {
 
     @Override
     protected void onHandleIntent(Intent intent) {
+        trace("Geofence transition");
+        Toast.makeText(getApplicationContext(), "Geofence transition happened", Toast.LENGTH_LONG).show();
+
+
         GeofencingEvent geofencingEvent = GeofencingEvent.fromIntent(intent);
         // Handling errors
         if ( geofencingEvent.hasError() ) {
@@ -125,5 +129,9 @@ public class GeofenceTransitionsIntentService extends IntentService {
             default:
                 return "Unknown error.";
         }
+    }
+
+    private static void trace(String message) {
+        System.out.println("GeofenceTIService >> " + message);
     }
 }

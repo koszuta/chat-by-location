@@ -43,12 +43,15 @@ import com.cs595.uwm.chatbylocation.objModel.ChatMessage;
 import com.cs595.uwm.chatbylocation.objModel.UserIcon;
 import com.cs595.uwm.chatbylocation.service.Database;
 import com.cs595.uwm.chatbylocation.service.GeofenceTransitionsIntentService;
+import com.facebook.internal.LockOnGetVariable;
 import com.firebase.ui.database.FirebaseListAdapter;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
+import com.google.android.gms.location.FusedLocationProviderApi;
 import com.google.android.gms.location.Geofence;
+import com.google.android.gms.location.GeofencingApi;
 import com.google.android.gms.location.GeofencingRequest;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
@@ -159,13 +162,16 @@ public class ChatActivity extends AppCompatActivity
     @Override
     protected void onStop() {
         trace("onStop");
+        LocationServices.GeofencingApi.removeGeofences(
+                mGoogleApiClient,
+                mGeofencePendingIntent
+        ).setResultCallback(new ResultCallback<Status>() {
+            @Override
+            public void onResult(@NonNull Status status) {
+                mGoogleApiClient.disconnect();
+            }
+        });
         super.onStop();
-    }
-    @Override
-    protected void onDestroy() {
-        trace("onDestroy");
-        mGoogleApiClient.disconnect();
-        super.onDestroy();
     }
 
     public void onMuteClick(View view) {
@@ -420,7 +426,6 @@ public class ChatActivity extends AppCompatActivity
         Database.removeRoomMessagesListener();
         shouldGetNumMessages = true;
         startActivity(new Intent(this, SelectActivity.class));
-        finish();
     }
 
     private void doSignOut() {
@@ -428,7 +433,6 @@ public class ChatActivity extends AppCompatActivity
         Database.removeRoomMessagesListener();
         shouldGetNumMessages = true;
         startActivity(new Intent(this, MainActivity.class));
-        finish();
     }
 
     private String formatTimestamp(long timeMillis) {
@@ -481,12 +485,14 @@ public class ChatActivity extends AppCompatActivity
                 .setRequestId(GEOFENCE_REQ_ID)
                 .setCircularRegion(lat, lng, radius)
                 .setExpirationDuration(ONE_DAY_IN_MILLIS)
-                .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_EXIT)
+                .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER
+                        | Geofence.GEOFENCE_TRANSITION_EXIT)
                 .build();
     }
 
     private void addGeofence() {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            trace("Google Api Client is connected before add geofence: " + mGoogleApiClient.isConnected());
             LocationServices.GeofencingApi.addGeofences(
                     mGoogleApiClient,
                     createGeofenceRequest(),
@@ -494,7 +500,12 @@ public class ChatActivity extends AppCompatActivity
             ).setResultCallback(new ResultCallback<Status>() {
                 @Override
                 public void onResult(@NonNull Status status) {
-                    trace("On addGeofence result is success: " + status.isSuccess());
+                    trace("Add geofence succeeded : " + status.isSuccess());
+                    trace("Add geofence status code: " + status.getStatusCode());
+                    if (!status.isSuccess()) {
+                        // TODO: Remove from room if no geofence is created
+                        //doLeaveRoom();
+                    }
                 }
             });
         } else {
@@ -506,7 +517,8 @@ public class ChatActivity extends AppCompatActivity
     private GeofencingRequest createGeofenceRequest() {
         trace("Creating geofenceRequest");
         return new GeofencingRequest.Builder()
-                .setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_EXIT)
+                .setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER
+                        | GeofencingRequest.INITIAL_TRIGGER_EXIT)
                 .addGeofence(mGeofence)
                 .build();
     }
@@ -534,8 +546,8 @@ public class ChatActivity extends AppCompatActivity
     public void onConnected(@Nullable Bundle bundle) {
         trace("Connected to location api");
         LocationRequest locationRequest = new LocationRequest();
-        locationRequest.setInterval(0)
-                .setFastestInterval(0)
+        locationRequest.setInterval(5000)
+                .setFastestInterval(1000)
                 .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
