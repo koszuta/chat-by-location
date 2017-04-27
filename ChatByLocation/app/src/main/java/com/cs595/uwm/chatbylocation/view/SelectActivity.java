@@ -113,7 +113,7 @@ public class SelectActivity extends AppCompatActivity
     public void onConnected(@Nullable Bundle bundle) {
         trace("Connected to location api");
         LocationRequest locationRequest = new LocationRequest();
-        locationRequest.setInterval(5000)
+        locationRequest.setInterval(3000)
                 .setFastestInterval(1000)
                 .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 
@@ -166,7 +166,7 @@ public class SelectActivity extends AppCompatActivity
         // Check if user is in radius (just to make sure)
         RoomIdentity room = Database.getRoomIdentity(roomId);
         if (!withinRoomRadius(Float.valueOf(room.getLat()), Float.valueOf(room.getLongg()), room.getRad())) {
-            Toast.makeText(this, "You must be within a room's area to enter", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "You must be within a room's radius to enter", Toast.LENGTH_LONG).show();
         }
         else if (BanController.isCurrentUserBanned(roomId)) {
             AlertDialog aD = new AlertDialog.Builder(view.getContext())

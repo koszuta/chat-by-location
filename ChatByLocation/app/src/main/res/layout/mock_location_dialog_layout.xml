@@ -5,20 +5,20 @@
     android:padding="30dp">
 
     <TextView
-        android:text="Enter coordinates:"
+        android:text="Enter mock coordinates:"
         android:textSize="20dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 
     <EditText
         android:id="@+id/mockLatitude"
-        android:hint="Mock latitude"
+        android:hint="latitude"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 
     <EditText
         android:id="@+id/mockLongitude"
-        android:hint="Mock longitude"
+        android:hint="longitude"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 

@@ -14,7 +14,6 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.cs595.uwm.chatbylocation.objModel.ChatMessage;
 import com.cs595.uwm.chatbylocation.view.ChatActivity;
 import com.cs595.uwm.chatbylocation.view.CreateRoomDialog;
 import com.cs595.uwm.chatbylocation.view.SelectActivity;
@@ -62,12 +61,13 @@ public class GeofenceTransitionsIntentService extends IntentService {
 
             case Geofence.GEOFENCE_TRANSITION_ENTER:
                 // Give a warning if they cross the chat room's radius
-                if (!ChatActivity.isKicked()) {
+                if (ChatActivity.shouldWelcomeUser()) {
                     // Send a welcome message
                     mHandler.post(new Runnable() {
                         @Override
                         public void run() {
                             Toast.makeText(GeofenceTransitionsIntentService.this, "Welcome to the chat room!", Toast.LENGTH_LONG).show();
+                            ChatActivity.setShouldWelcomeUser(false);
                         }
                     });
                 }
