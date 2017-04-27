@@ -105,7 +105,17 @@ public class ChatActivity extends AppCompatActivity
         setTitle(Database.getCurrentRoomName());
 
         createGoogleApi();
-        buildGeofence();
+
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            trace("Has permissions after location api connection");
+            mGoogleApiClient.connect();
+            buildGeofence();
+        } else {
+            trace("No permissions after location api connection");
+            requestFineLocationPermission();
+        }
+
+
 
         //construct objects
         banUserIntent = new Intent(this, SelectActivity.class);
@@ -520,7 +530,8 @@ public class ChatActivity extends AppCompatActivity
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             trace("Has permissions after location api connection");
-            LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, locationRequest, this);
+            //LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, locationRequest, this);
+            buildGeofence();
         } else {
             trace("No permissions after location api connection");
             requestFineLocationPermission();

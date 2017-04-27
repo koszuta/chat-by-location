@@ -11,6 +11,7 @@ import android.graphics.Color;
 import android.support.v4.app.NotificationCompat;
 import android.text.TextUtils;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.cs595.uwm.chatbylocation.view.CreateRoomDialog;
 import com.cs595.uwm.chatbylocation.view.SelectActivity;
@@ -44,12 +45,12 @@ public class GeofenceTransitionsIntentService extends IntentService {
             Log.e( TAG, errorMsg );
             return;
         }
-
+        Log.d("geofence", "enter handle intent");
         int geoFenceTransition = geofencingEvent.getGeofenceTransition();
         // Check if the transition type is of interest
-        if ( geoFenceTransition == Geofence.GEOFENCE_TRANSITION_ENTER ||
-                geoFenceTransition == Geofence.GEOFENCE_TRANSITION_EXIT ) {
+        if (geoFenceTransition == Geofence.GEOFENCE_TRANSITION_EXIT ) {
             // Get the geofence that were triggered
+            Toast.makeText(getApplicationContext(), "EXIT fired", Toast.LENGTH_LONG).show();
             List<Geofence> triggeringGeofences = geofencingEvent.getTriggeringGeofences();
 
             String geofenceTransitionDetails = getGeofenceTransitionDetails(geoFenceTransition, triggeringGeofences );
