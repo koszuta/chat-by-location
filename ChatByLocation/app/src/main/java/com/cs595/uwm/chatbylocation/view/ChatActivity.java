@@ -10,10 +10,14 @@ import android.content.pm.PackageManager;
 import android.database.DataSetObserver;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.location.Location;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.content.res.ResourcesCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Spannable;
@@ -40,9 +44,12 @@ import com.cs595.uwm.chatbylocation.objModel.UserIcon;
 import com.cs595.uwm.chatbylocation.service.Database;
 import com.cs595.uwm.chatbylocation.service.GeofenceTransitionsIntentService;
 import com.firebase.ui.database.FirebaseListAdapter;
+import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.GeofencingRequest;
+import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -55,7 +62,13 @@ import java.util.Date;
  * Created by Nathan on 3/13/17.
  */
 
-public class ChatActivity extends AppCompatActivity {
+public class ChatActivity extends AppCompatActivity
+        implements
+        GoogleApiClient.ConnectionCallbacks,
+        GoogleApiClient.OnConnectionFailedListener,
+        LocationListener {
+
+    public static final int REQUEST_FINE_LOCATION_ACCESS = 19;
 
     public static final int PAST_MESSAGES_LIMIT = 100;
     public static final long TEN_MINUTES_IN_MILLIS = 10 * 60 * 1000;
@@ -90,8 +103,10 @@ public class ChatActivity extends AppCompatActivity {
         setContentView(R.layout.chat_layout);
 
         setTitle(Database.getCurrentRoomName());
+
         createGoogleApi();
         buildGeofence();
+
         //construct objects
         banUserIntent = new Intent(this, SelectActivity.class);
         messageListView = (ListView) this.findViewById(R.id.messageList);
@@ -127,6 +142,11 @@ public class ChatActivity extends AppCompatActivity {
         }
 
         displayChatMessages();
+    }
+    @Override
+    protected void onStop() {
+        mGoogleApiClient.disconnect();
+        super.onStop();
     }
 
     public static void incrNumMessages() {
@@ -366,6 +386,20 @@ public class ChatActivity extends AppCompatActivity {
         return true;
     }
 
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], @NonNull int[] grantResults) {
+        switch (requestCode) {
+            case REQUEST_FINE_LOCATION_ACCESS:
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    mGoogleApiClient.connect();
+                }
+                break;
+            default:
+                break;
+        }
+    }
+
     private void doLeaveRoom() {
         Database.setUserRoom(null);
         Database.removeRoomMessagesListener();
@@ -407,7 +441,8 @@ public class ChatActivity extends AppCompatActivity {
     private void createGoogleApi() {
         if (mGoogleApiClient == null) {
             mGoogleApiClient = new GoogleApiClient.Builder(this)
-                    .addConnectionCallbacks((GoogleApiClient.ConnectionCallbacks) this)
+                    .addConnectionCallbacks(this)
+                    .addOnConnectionFailedListener(this)
                     .addApi(LocationServices.API)
                     .build();
         }
@@ -422,18 +457,21 @@ public class ChatActivity extends AppCompatActivity {
     // Create a Geofence Request
     private GeofencingRequest createGeofenceRequest(Geofence geofence) {
         return new GeofencingRequest.Builder()
-                .setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER)
+                .setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_EXIT)
                 .addGeofence(geofence)
                 .build();
     }
 
     private Geofence createGeofence() {
+        String roomId = Database.getCurrentRoomID();
+        double lat = Database.getRoomLat(roomId);
+        double lng = Database.getRoomLng(roomId);
+        int radius = Database.getRoomRadius(roomId);
         return new Geofence.Builder()
                 .setRequestId(GEOFENCE_REQ_ID)
-                .setCircularRegion(19.8968, 155.58, 100)
-                .setExpirationDuration(GEO_DURATION)
-                .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER
-                        | Geofence.GEOFENCE_TRANSITION_EXIT)
+                .setCircularRegion(lat, lng, radius)
+                .setExpirationDuration(ONE_DAY_IN_MILLIS)
+                .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_EXIT)
                 .build();
     }
 
@@ -442,19 +480,19 @@ public class ChatActivity extends AppCompatActivity {
             return mGeofencePendingIntent;
         }
         Intent intent = new Intent(this, GeofenceTransitionsIntentService.class);
-        return PendingIntent.getService(this, 0, intent, PendingIntent.
-                FLAG_UPDATE_CURRENT);
+        return PendingIntent.getService(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
     }
 
     private void addGeofence(GeofencingRequest request) {
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            return;
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            LocationServices.GeofencingApi.addGeofences(
+                    mGoogleApiClient,
+                    request,
+                    getGeofencePendingIntent()
+            );
+        } else {
+            requestFineLocationPermission();
         }
-        LocationServices.GeofencingApi.addGeofences(
-                mGoogleApiClient,
-                request,
-                getGeofencePendingIntent()
-        );
     }
 
     private void removeGeofence(){
@@ -471,4 +509,39 @@ public class ChatActivity extends AppCompatActivity {
     private static void trace(String message){
         System.out.println("ChatActivity >> " + message); //todo android logger
     }
+
+    @Override
+    public void onConnected(@Nullable Bundle bundle) {
+        trace("Connected to location api");
+        LocationRequest locationRequest = new LocationRequest();
+        locationRequest.setInterval(0)
+                .setFastestInterval(0)
+                .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            trace("Has permissions after location api connection");
+            LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, locationRequest, this);
+        } else {
+            trace("No permissions after location api connection");
+            requestFineLocationPermission();
+        }
+    }
+
+    private void requestFineLocationPermission() {
+        ActivityCompat.requestPermissions(
+                this,
+                new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                REQUEST_FINE_LOCATION_ACCESS);
+    }
+    @Override
+    public void onConnectionSuspended(int i) {
+        trace("Location api connection suspended");
+    }
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+        trace("Failed to connect to location api");
+    }
+
+    @Override
+    public void onLocationChanged(Location location) {}
 }

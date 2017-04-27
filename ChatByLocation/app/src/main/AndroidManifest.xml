@@ -20,6 +20,9 @@
         tools:replace="android:supportsRtl"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+
+        <service android:name=".service.GeofenceTransitionsIntentService" />
+
         <activity android:name=".view.MainActivity"
             android:screenOrientation="portrait" >
             <intent-filter>
