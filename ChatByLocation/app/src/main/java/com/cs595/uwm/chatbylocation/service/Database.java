@@ -56,7 +56,7 @@ public class Database {
         public void onCancelled(DatabaseError databaseError) {}
     };
 
-    private static ValueEventListener becomeOwnerListener;
+    private static ValueEventListener changeOwnerListener;
     private static boolean isOwner = false;
 
     private static boolean listening = false;
@@ -242,15 +242,22 @@ public class Database {
     public static void registerChangeOwnerListener(final String roomID){
 
         DatabaseReference ownerIDRef = getRoomIdentityReference().child(roomID).child("ownerID");
-        if(becomeOwnerListener != null) ownerIDRef.removeEventListener(becomeOwnerListener);
+        if(changeOwnerListener != null) ownerIDRef.removeEventListener(changeOwnerListener);
 
-        becomeOwnerListener = new ValueEventListener() {
+        changeOwnerListener = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 String ownerID = String.valueOf(dataSnapshot.getValue());
                 if(ownerID == null) return;
                 trace("OwnerID of room " + roomID + " changed to " + ownerID);
                 if(getUserId().equals(ownerID)) {
+                    if(isOwner) return;
+                    //do stuff in gui here if required
+                    
+                    //todo
+                    //listen to users list to get second oldest room user
+                        //create onDisconnect routine to make that user owner
+
                     isOwner = true;
                 } else if(isOwner){
                     isOwner = false;
@@ -263,7 +270,7 @@ public class Database {
             }
         };
 
-        ownerIDRef.addValueEventListener(becomeOwnerListener);
+        ownerIDRef.addValueEventListener(changeOwnerListener);
 
     }
 
