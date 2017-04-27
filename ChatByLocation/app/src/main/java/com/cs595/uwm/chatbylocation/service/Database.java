@@ -81,6 +81,7 @@ public class Database {
             String userId = getUserId();
             if (userId != null) {
                 getRoomUsersReference().child(roomID).child(userId).setValue(true);
+                getCurrentUserReference().child("roomJoinTime").setValue(System.currentTimeMillis());
             }
 
             // Sign out user
@@ -108,6 +109,21 @@ public class Database {
                 if (userId != null) {
                     getRoomUsersReference().child(removeFrom).child(userId).removeValue();
                     getCurrentUserReference().child("currentRoomID").setValue("");
+
+                    //todo lowell
+                    if(isOwner){
+                        if(getCurrentRoomUsers().size() == 1){
+                            //destroy room
+
+                        } else {
+                            //change room ownership
+
+                        }
+
+                        //destroy onDisconnect task
+
+                    }
+
                 }
 
                 getCurrentUserReference().child("removeFrom").setValue("");
@@ -135,6 +151,11 @@ public class Database {
 
     public static String getCurrentRoomName() {
         return (rooms.containsKey(currentRoomID)) ? rooms.get(currentRoomID).getName() : null;
+    }
+
+    public static Map<String, UserIdentity> getCurrentRoomUsers(){
+        //todo lowell
+        return new HashMap<>();
     }
 
     public static RoomIdentity getRoomIdentity(final String roomId) {
@@ -253,8 +274,8 @@ public class Database {
                 if(getUserId().equals(ownerID)) {
                     if(isOwner) return;
                     //do stuff in gui here if required
-                    
-                    //todo
+
+                    //todo lowell
                     //listen to users list to get second oldest room user
                         //create onDisconnect routine to make that user owner
 
