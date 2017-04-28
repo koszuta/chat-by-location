@@ -279,6 +279,7 @@ public class ChatActivity extends AppCompatActivity
                     trace("roomIDListener sees roomid = " + roomID);
 
                     Database.registerChangeOwnerListener(roomID);
+                    Database.registerRoomUsersListener(roomID);
 
                     chatListAdapter = new FirebaseListAdapter<ChatMessage>(
                             ChatActivity.this,
