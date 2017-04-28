@@ -19,20 +19,6 @@
         android:divider="@color/listDivider"
         android:dividerHeight="0dp"
 
-        android:background="@color/background"
-
         android:id="@+id/roomList"/>
-
-    <Button
-        android:visibility="gone"
-        android:text="Create New"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-
-        android:onClick="createRoomClick"
-        android:id="@+id/createRoomButton"/>
 
 </RelativeLayout>

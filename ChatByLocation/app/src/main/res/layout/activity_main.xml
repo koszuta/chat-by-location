@@ -4,17 +4,14 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.cs595.uwm.chatbylocation.view.MainActivity"
-    tools:layout_editor_absoluteX="0dp"
-    tools:layout_editor_absoluteY="81dp">
+    tools:context="com.cs595.uwm.chatbylocation.view.MainActivity">
 
     <ImageView
-        android:id="@+id/imageView"
-        android:layout_width="255dp"
-        android:layout_height="328dp"
-        android:layout_marginLeft="8dp"
-        android:layout_marginRight="8dp"
-        android:layout_marginTop="50dp"
+        android:id="@+id/logo"
+        android:layout_width="250dp"
+        android:layout_height="300dp"
+
+        android:layout_marginTop="70dp"
 
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
@@ -24,34 +21,30 @@
 
     <Button
         android:id="@+id/login_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-
-        android:layout_marginLeft="8dp"
-        android:layout_marginRight="8dp"
-        android:layout_marginTop="13dp"
-
         android:onClick="signIn"
         android:text="Sign In"
 
+        android:layout_width="260dp"
+        android:layout_height="50dp"
+
+        android:layout_marginBottom="5dp"
+
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/imageView" />
+        app:layout_constraintBottom_toTopOf="@+id/main_reg_button" />
 
     <Button
         android:id="@+id/main_reg_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
-        android:layout_marginTop="8dp"
         android:onClick="register"
         android:text="REGISTER"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/login_button"
-        app:layout_constraintVertical_bias="0.0"
-        android:layout_marginLeft="8dp"
+
+        android:layout_width="260dp"
+        android:layout_height="50dp"
+
+        android:layout_marginBottom="70dp"
+
+        app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
-        android:layout_marginRight="8dp"
-        app:layout_constraintRight_toRightOf="parent" />
+        app:layout_constraintBottom_toBottomOf="parent" />
 
 </android.support.constraint.ConstraintLayout>

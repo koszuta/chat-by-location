@@ -92,19 +92,9 @@ public class RoomUserListActivity extends AppCompatActivity {
                 TextView userName = (TextView) convertView.findViewById(R.id.user_name_in_list);
                 if (user != null) {
                     userName.setText(username);
-                    //set text to unmute is this user is muted
-                    //*
-                    if(MuteController.isMuted(username) != -1) {
-                        muteButton.setTextOff("UNMUTE");
-                        muteButton.setTextOn("MUTE");
-                        muteButton.setText("UNMUTE");
-                    }
-                    else {
-                        muteButton.setTextOff("MUTE");
-                        muteButton.setTextOn("UNMUTE");
-                        muteButton.setText("MUTE");
-                    }
-                    //*/
+
+                    // Make sure mute button reflects user's muted status
+                    MuteController.adjustMuteButton(muteButton, username);
 
                     // Set list item icon
                     ImageView imageView = (ImageView) convertView.findViewById(R.id.icon_in_user_list);
@@ -123,6 +113,7 @@ public class RoomUserListActivity extends AppCompatActivity {
                     } else {
                         // Otherwise set icon to ImageView
                         imageView.setImageResource(iconRes);
+                        imageView.setPadding(15,15,15,15);
                     }
                 }
 

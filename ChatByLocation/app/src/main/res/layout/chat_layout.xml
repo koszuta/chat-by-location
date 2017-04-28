@@ -10,6 +10,9 @@
     android:id="@+id/chatLayout">
 
     <android.support.design.widget.FloatingActionButton
+
+        android:visibility="gone"
+
         android:id="@+id/toBottomButton"
         android:src="@drawable/ic_arrow_downward_24dp"
         android:onClick="toBottomClick"
@@ -47,7 +50,7 @@
         android:background="@color/bottomLayout"
 
         android:orientation="horizontal"
-        android:padding="5dp">
+        android:padding="6dp">
 
         <EditText
             android:id="@+id/textInput"

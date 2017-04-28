@@ -197,12 +197,7 @@ public class SelectActivity extends AppCompatActivity
             startActivity(new Intent(this, ChatActivity.class));
         }
     }
-    /*
-    public void createRoomClick(View view) {
-        DialogFragment dialog = new CreateRoomDialog();
-        dialog.show(getFragmentManager(), "create room");
-    }
-    //*/
+
     private void displayRoomList() {
         final ListView listOfRooms = (ListView) findViewById(R.id.roomList);
         DatabaseReference currentUserRef = Database.getRoomIdentityReference();
@@ -219,28 +214,30 @@ public class SelectActivity extends AppCompatActivity
                             Database.getRoomIdentityReference()) {
                         @Override
                         protected void populateView(View view, RoomIdentity roomIdentity, int position) {
+                            trace("All items enabled: " + this.areAllItemsEnabled());
+
                             final TextView roomName = (TextView) view.findViewById(R.id.roomName);
                             final TextView roomCoords = (TextView) view.findViewById(R.id.roomCoords);
                             final TextView roomRadius = (TextView) view.findViewById(R.id.roomRadius);
                             final ImageView roomIsPrivate = (ImageView) view.findViewById(R.id.roomIsPrivate);
                             final Button joinButton = (Button) view.findViewById(R.id.joinButton);
-                            final RelativeLayout divider = (RelativeLayout) view.findViewById(R.id.customDivider);
+                            final TextView divider = (TextView) view.findViewById(R.id.roomDivider);
 
 
-                            // Nathan TODO: Check if user is within room radius (with math)
+                            // Check if user is within room radius (with math)
                             float lat = Float.valueOf(roomIdentity.getLat());
                             float lng = Float.valueOf(roomIdentity.getLongg());
 
                             if (!withinRoomRadius(lat, lng, roomIdentity.getRad())) {
                                 //trace("Room " + roomIdentity.getName() + " is out of range");
-                                view.setPadding(0, 0, 0, 0);
+
                                 roomName.setVisibility(View.GONE);
                                 roomCoords.setVisibility(View.GONE);
                                 roomRadius.setVisibility(View.GONE);
                                 roomIsPrivate.setVisibility(View.GONE);
                                 joinButton.setVisibility(View.GONE);
-                                joinButton.setVisibility(View.GONE);
                                 divider.setVisibility(View.GONE);
+
                                 return;
                             } else {
                                 roomName.setVisibility(View.VISIBLE);
@@ -250,6 +247,7 @@ public class SelectActivity extends AppCompatActivity
                                 divider.setVisibility(View.VISIBLE);
                             }
 
+                            // If room is private, show lock icon
                             if (roomIdentity.getPassword() != null) {
                                 roomIsPrivate.setVisibility(View.VISIBLE);
                             } else {
@@ -267,11 +265,9 @@ public class SelectActivity extends AppCompatActivity
                     };
                     listOfRooms.setAdapter(roomListAdapter);
                 }
-
-
                 @Override
                 public void onCancelled(DatabaseError databaseError) {
-
+                    
                 }
             });
         }
