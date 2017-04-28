@@ -41,6 +41,7 @@ import com.cs595.uwm.chatbylocation.R;
 import com.cs595.uwm.chatbylocation.controllers.BanController;
 import com.cs595.uwm.chatbylocation.controllers.MuteController;
 import com.cs595.uwm.chatbylocation.objModel.ChatMessage;
+import com.cs595.uwm.chatbylocation.objModel.RoomIdentity;
 import com.cs595.uwm.chatbylocation.objModel.UserIcon;
 import com.cs595.uwm.chatbylocation.service.Database;
 import com.cs595.uwm.chatbylocation.service.GeofenceTransitionsIntentService;
@@ -51,6 +52,8 @@ import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.GeofencingRequest;
+import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -69,7 +72,8 @@ import java.util.Map;
 public class ChatActivity extends AppCompatActivity
         implements
         GoogleApiClient.ConnectionCallbacks,
-        GoogleApiClient.OnConnectionFailedListener {
+        GoogleApiClient.OnConnectionFailedListener,
+        LocationListener {
 
     public static final int REQUEST_FINE_LOCATION_ACCESS = 19;
 
@@ -91,8 +95,9 @@ public class ChatActivity extends AppCompatActivity
     private Intent banUserIntent;
     Bundle args = new Bundle();
 
-    private static boolean shouldKickUser = false;
     private static boolean shouldWelcomeUser = true;
+    private static boolean shouldWarnUser = false;
+    private static boolean shouldKickUser = false;
 
     private static boolean shouldGetNumMessages = true;
     private static long tenMinutesBeforeJoin;
@@ -111,6 +116,7 @@ public class ChatActivity extends AppCompatActivity
     private static PendingIntent mGeofencePendingIntent;
     // Uses list of geofences for the two needed
     private static Map<String, Geofence> mGeofences = new HashMap<>();
+    private Location location;
 
 
     @Override
@@ -221,10 +227,6 @@ public class ChatActivity extends AppCompatActivity
             Toast.makeText(this, "No network connectivity", Toast.LENGTH_LONG).show();
             return;
         }
-
-
-        // TODO: User exited Geofence can't send message
-
 
         // Nathan TODO: Use better ban method
         //block message and kick out user if banned from current room
@@ -648,9 +650,72 @@ public class ChatActivity extends AppCompatActivity
     }
 
     @Override
+    public void onLocationChanged(Location pLocation) {
+        trace("Location updated");
+        location = pLocation;
+        RoomIdentity room = Database.getRoomIdentity(Database.getCurrentRoomID());
+        if (room != null) {
+            double lat = Double.valueOf(room.getLat());
+            double lng = Double.valueOf(room.getLongg());
+            boolean withinWarn = withinRoomRadius(lat, lng, room.getRad() - BOUNDARY_LEEWAY);
+            boolean withinKick = withinRoomRadius(lat, lng, room.getRad() + BOUNDARY_LEEWAY);
+
+            // Welcome user if they are within the radius and haven't been welcomed yet
+            if (withinWarn && withinKick) {
+                Toast.makeText(ChatActivity.this, "Welcome to the chat room!", Toast.LENGTH_LONG).show();
+                shouldWelcomeUser = false;
+            }
+            // Kick user if they are outside the kick radius
+            else if (!withinKick) {
+                Toast.makeText(ChatActivity.this, "You wandered astray and were kicked from the chat room!", Toast.LENGTH_LONG).show();
+                shouldKickUser = true;
+            }
+            // Warn the user if they left the warn radius
+            else if (!withinWarn && shouldWarnUser) {
+                Toast.makeText(ChatActivity.this, "Turn back! You're getting too far away!", Toast.LENGTH_LONG).show();
+                shouldWarnUser = false;
+            } else {
+                shouldWarnUser = true;
+            }
+        }
+    }
+
+    private boolean withinRoomRadius(double oLat, double oLon, int radius) {
+        if (location == null) {
+            trace("Null location");
+            return false;
+        }
+        double myLat = location.getLatitude();
+        double myLng = location.getLongitude();
+        double meanLat = Math.toRadians(myLat + oLat / 2);
+        double kpdLat = 111.13209 - 0.56605*Math.cos(2*meanLat) + 0.00120*Math.cos(4*meanLat);
+        double kpdLon = 111.41513*Math.cos(meanLat) - 0.09455*Math.cos(3*meanLat) + 0.00012*Math.cos(5*meanLat);
+        double dNS = kpdLat*(myLat - oLat);
+        double dEW = kpdLon*(myLng - oLon);
+        double distance = 1000 * Math.sqrt(Math.pow(dNS, 2) + Math.pow(dEW, 2));
+        //trace("Distance = " + distance + " m");
+        return distance  <= radius;
+    }
+
+    @Override
     public void onConnected(@Nullable Bundle bundle) {
         trace("Connected to location api");
-        buildGeofence();
+        //buildGeofence();
+
+        // Get location updates
+        LocationRequest locationRequest = new LocationRequest();
+        locationRequest.setInterval(3000)
+                .setFastestInterval(1000)
+                .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, locationRequest, this);
+            location = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+        }
+        else {
+            trace("No permissions after location api connection");
+            requestFineLocationPermission();
+        }
     }
     @Override
     public void onConnectionSuspended(int i) {

@@ -178,7 +178,6 @@ public class SelectActivity extends AppCompatActivity
                 .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            trace("Has permissions after location api connection");
             LocationServices.FusedLocationApi.requestLocationUpdates(googleApiClient, locationRequest, this);
             location = LocationServices.FusedLocationApi.getLastLocation(googleApiClient);
             roomListAdapter.notifyDataSetChanged();
