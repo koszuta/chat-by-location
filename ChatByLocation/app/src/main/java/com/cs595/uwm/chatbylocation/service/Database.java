@@ -292,6 +292,7 @@ public class Database {
         roomUsersListener = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
+                if(dataSnapshot.getValue() == null) return;
                 for(String userID : ((HashMap<String, Object>) dataSnapshot.getValue()).keySet())
                     roomUsers.put(userID, Database.getUserByID(userID));
 
