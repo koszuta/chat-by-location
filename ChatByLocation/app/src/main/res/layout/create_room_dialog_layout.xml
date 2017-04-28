@@ -27,6 +27,8 @@
         android:id="@+id/roomName"
         android:hint="Enter a name"
         android:maxLength="24"
+        android:inputType="textNoSuggestions"
+        android:imeOptions="actionDone"
 
         android:layout_width="0dp"
         android:layout_height="wrap_content"

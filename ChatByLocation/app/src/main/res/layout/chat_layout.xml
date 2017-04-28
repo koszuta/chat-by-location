@@ -54,6 +54,9 @@
 
         <EditText
             android:id="@+id/textInput"
+            android:background="@color/background"
+            android:hint="@string/inputHint"
+            android:imeOptions="actionDone"
 
             android:layout_width="0dp"
             android:layout_height="24dp"
@@ -62,15 +65,12 @@
             android:layout_marginEnd="4dp"
 
             android:layout_weight="1"
-            android:background="@color/inputBackground"
-            android:hint="@string/inputHint"
 
             android:inputType="text"
             android:maxLength="140"
             android:paddingEnd="4dp"
 
             android:paddingStart="8dp"
-            android:textColorHint="@color/inputHint"
 
             android:textCursorDrawable="@color/colorPrimary" />
 
