@@ -9,7 +9,7 @@ public class UserIdentity {
     private String username;
     private String currentRoomID;
     private String removeFrom;
-    private String roomJoinTime;
+    private Long roomJoinTime;
 
     public UserIdentity(){
         icon = UserIcon.NONE;
@@ -52,11 +52,11 @@ public class UserIdentity {
         this.removeFrom = removeFrom;
     }
 
-    public String getRoomJoinTime() {
+    public Long getRoomJoinTime() {
         return roomJoinTime;
     }
 
-    public void setRoomJoinTime(String roomJoinTime) {
+    public void setRoomJoinTime(Long roomJoinTime) {
         this.roomJoinTime = roomJoinTime;
     }
 }
