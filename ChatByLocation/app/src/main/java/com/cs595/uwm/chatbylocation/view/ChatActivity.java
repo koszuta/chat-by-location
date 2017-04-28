@@ -194,7 +194,6 @@ public class ChatActivity extends AppCompatActivity
         chatListAdapter.notifyDataSetChanged();
     }
 
-
     public void banUserClick(View view) {
         String userId = args.getString(USER_ID_ARGUMENT);
         String roomID = Database.getCurrentRoomID();
@@ -280,6 +279,7 @@ public class ChatActivity extends AppCompatActivity
                     trace("roomIDListener sees roomid = " + roomID);
 
                     Database.registerChangeOwnerListener(roomID);
+                    Database.registerRoomUsersListener(roomID);
 
                     chatListAdapter = new FirebaseListAdapter<ChatMessage>(
                             ChatActivity.this,
@@ -299,7 +299,7 @@ public class ChatActivity extends AppCompatActivity
                             // Get reference to the views of message_item
                             final TextView messageText = (TextView) view.findViewById(R.id.messageText);
                             final ImageView userIcon = (ImageView) view.findViewById(R.id.userIcon);
-                            final RelativeLayout divider = (RelativeLayout) view.findViewById(R.id.messageDivider);
+                            final TextView divider = (TextView) view.findViewById(R.id.messageDivider);
 
                             // Decide whether message should be visible
                             messageText.setVisibility(View.GONE);
@@ -373,6 +373,7 @@ public class ChatActivity extends AppCompatActivity
                                     }
                                 } else {
                                     userIcon.setImageResource(iconRes);
+                                    userIcon.setPadding(8,8,8,8);
                                 }
                             }
 
@@ -509,6 +510,8 @@ public class ChatActivity extends AppCompatActivity
                     finish();
                 }
             });
+        } else {
+            startSelectActivity();
         }
     }
 
@@ -538,6 +541,8 @@ public class ChatActivity extends AppCompatActivity
                     startMainActivity();
                 }
             });
+        } else {
+            startMainActivity();
         }
     }
 

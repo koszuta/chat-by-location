@@ -50,7 +50,7 @@ import static com.facebook.FacebookSdk.getApplicationContext;
 public class CreateRoomDialog extends DialogFragment {
 
     public static final int MIN_RADIUS = 100;
-    public static final int MAX_RADIUS = 5000;
+    public static final int MAX_RADIUS = 1000;
     public static final int RADIUS_INCREMENT = 10;
 
     @Override
@@ -138,7 +138,6 @@ public class CreateRoomDialog extends DialogFragment {
                             location = ((SelectActivity) activity).getLastLocation();
                         }
 
-                        // Nathan TODO: Figure out how to return input values to SelectActivity and join room from there
                         if (location != null) {
                             Database.setUserRoom(Database.createRoom(
                                     Database.getUserId(),

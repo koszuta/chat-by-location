@@ -59,9 +59,64 @@ public class SelectActivity extends AppCompatActivity
 
     private GoogleApiClient googleApiClient;
     public static Location location;
+    
+    private FirebaseListAdapter<RoomIdentity> roomListAdapter =
+            new FirebaseListAdapter<RoomIdentity>(
+                    SelectActivity.this,
+                    RoomIdentity.class,
+                    R.layout.room_list_item,
+                    Database.getRoomIdentityReference()) {
+                @Override
+                protected void populateView(View view, RoomIdentity roomIdentity, int position) {
+                    //trace("All items enabled: " + this.areAllItemsEnabled());
 
-    private FirebaseListAdapter<RoomIdentity> roomListAdapter;
-    Activity activity = this;
+                    final TextView roomName = (TextView) view.findViewById(R.id.roomName);
+                    final TextView roomCoords = (TextView) view.findViewById(R.id.roomCoords);
+                    final TextView roomRadius = (TextView) view.findViewById(R.id.roomRadius);
+                    final ImageView roomIsPrivate = (ImageView) view.findViewById(R.id.roomIsPrivate);
+                    final Button joinButton = (Button) view.findViewById(R.id.joinButton);
+                    final TextView divider = (TextView) view.findViewById(R.id.roomDivider);
+
+
+                    // Check if user is within room radius (with math)
+                    float lat = Float.valueOf(roomIdentity.getLat());
+                    float lng = Float.valueOf(roomIdentity.getLongg());
+
+                    if (!withinRoomRadius(lat, lng, roomIdentity.getRad())) {
+                        //trace("Room " + roomIdentity.getName() + " is out of range");
+
+                        roomName.setVisibility(View.GONE);
+                        roomCoords.setVisibility(View.GONE);
+                        roomRadius.setVisibility(View.GONE);
+                        roomIsPrivate.setVisibility(View.GONE);
+                        joinButton.setVisibility(View.GONE);
+                        divider.setVisibility(View.GONE);
+
+                        return;
+                    } else {
+                        roomName.setVisibility(View.VISIBLE);
+                        roomCoords.setVisibility(View.VISIBLE);
+                        roomRadius.setVisibility(View.VISIBLE);
+                        joinButton.setVisibility(View.VISIBLE);
+                        divider.setVisibility(View.VISIBLE);
+                    }
+
+                    // If room is private, show lock icon
+                    if (roomIdentity.getPassword() != null) {
+                        roomIsPrivate.setVisibility(View.VISIBLE);
+                    } else {
+                        roomIsPrivate.setVisibility(View.GONE);
+                    }
+                    //create a ban database listener for the room
+                    BanController.addRoom(getRef(position).getKey());
+
+                    roomName.setText(roomIdentity.getName());
+                    roomCoords.setText(formatCoords(roomIdentity.getLat(), roomIdentity.getLongg()));
+                    roomRadius.setText("Radius: " + roomIdentity.getRad() + "m");
+
+                    joinButton.setTag(getRef(position).getKey());
+                }
+            };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -205,97 +260,23 @@ public class SelectActivity extends AppCompatActivity
             startActivity(new Intent(this, ChatActivity.class));
         }
     }
-    /*
-    public void createRoomClick(View view) {
-        DialogFragment dialog = new CreateRoomDialog();
-        dialog.show(getFragmentManager(), "create room");
-    }
-    //*/
+
     private void displayRoomList() {
         final ListView listOfRooms = (ListView) findViewById(R.id.roomList);
-        DatabaseReference currentUserRef = Database.getRoomIdentityReference();
-        if (currentUserRef != null) {
 
-            currentUserRef.child("roomIdentity").addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
+        listOfRooms.setAdapter(roomListAdapter);
 
-                    roomListAdapter = new FirebaseListAdapter<RoomIdentity>(
-                            SelectActivity.this,
-                            RoomIdentity.class,
-                            R.layout.room_list_item,
-                            Database.getRoomIdentityReference()) {
-                        @Override
-                        protected void populateView(View view, RoomIdentity roomIdentity, int position) {
+        Database.getRoomIdentityReference().child("roomIdentity").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                // Notify list adapter to update when data changes
+                roomListAdapter.notifyDataSetChanged();
+            }
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
 
-
-                            final TextView roomName = (TextView) view.findViewById(R.id.roomName);
-                            final TextView roomCoords = (TextView) view.findViewById(R.id.roomCoords);
-                            final TextView roomRadius = (TextView) view.findViewById(R.id.roomRadius);
-                            final ImageView roomIsPrivate = (ImageView) view.findViewById(R.id.roomIsPrivate);
-                            final Button joinButton = (Button) view.findViewById(R.id.joinButton);
-                            final RelativeLayout divider = (RelativeLayout) view.findViewById(R.id.customDivider);
-
-                            if(roomIdentity.getLat() == null || roomIdentity.getLongg() == null || roomIdentity.getName() == null
-                                     || roomIdentity.getOwnerID() == null)  {
-                                roomName.setVisibility(View.GONE);
-                                roomCoords.setVisibility(View.GONE);
-                                roomRadius.setVisibility(View.GONE);
-                                roomIsPrivate.setVisibility(View.GONE);
-                                joinButton.setVisibility(View.GONE);
-                                joinButton.setVisibility(View.GONE);
-                                divider.setVisibility(View.GONE);
-                                return;
-                            }
-
-
-                            float lat = Float.valueOf(roomIdentity.getLat());
-                            float lng = Float.valueOf(roomIdentity.getLongg());
-
-                            if (!withinRoomRadius(lat, lng, roomIdentity.getRad())) {
-                                //trace("Room " + roomIdentity.getName() + " is out of range");
-                                view.setPadding(0, 0, 0, 0);
-                                roomName.setVisibility(View.GONE);
-                                roomCoords.setVisibility(View.GONE);
-                                roomRadius.setVisibility(View.GONE);
-                                roomIsPrivate.setVisibility(View.GONE);
-                                joinButton.setVisibility(View.GONE);
-                                joinButton.setVisibility(View.GONE);
-                                divider.setVisibility(View.GONE);
-                                return;
-                            } else {
-                                roomName.setVisibility(View.VISIBLE);
-                                roomCoords.setVisibility(View.VISIBLE);
-                                roomRadius.setVisibility(View.VISIBLE);
-                                joinButton.setVisibility(View.VISIBLE);
-                                divider.setVisibility(View.VISIBLE);
-                            }
-
-                            if (roomIdentity.getPassword() != null) {
-                                roomIsPrivate.setVisibility(View.VISIBLE);
-                            } else {
-                                roomIsPrivate.setVisibility(View.GONE);
-                            }
-                            //create a ban database listener for the room
-                            BanController.addRoom(getRef(position).getKey());
-
-                            roomName.setText(roomIdentity.getName());
-                            roomCoords.setText(formatCoords(roomIdentity.getLat(), roomIdentity.getLongg()));
-                            roomRadius.setText("Radius: " + roomIdentity.getRad() + "m");
-
-                            joinButton.setTag(getRef(position).getKey());
-                        }
-                    };
-                    listOfRooms.setAdapter(roomListAdapter);
-                }
-
-
-                @Override
-                public void onCancelled(DatabaseError databaseError) {
-
-                }
-            });
-        }
+            }
+        });
     }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -385,7 +366,7 @@ public class SelectActivity extends AppCompatActivity
                 lngDegree + "\u00b0 " + lngMinute + "\' " + String.format(Locale.getDefault(), "%.0f", lngSecond) + "\" " + ew;
     }
 
-    private void trace(String message) {
+    private static void trace(String message) {
         System.out.println("SelectActivity >> " + message);
     }
 }

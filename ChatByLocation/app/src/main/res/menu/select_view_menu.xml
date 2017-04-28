@@ -10,10 +10,10 @@
         android:id="@+id/set_location"/>
 
     <item
-        android:visible="false"
+        android:visible="true"
         android:title="View Map"
         android:icon="@drawable/ic_map"
-        app:showAsAction="ifRoom"
+        app:showAsAction="never"
         android:id="@+id/menu_view_map"/>
 
     <item
