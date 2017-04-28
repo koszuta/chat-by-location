@@ -53,18 +53,18 @@ public class MessageDetailsDialog extends DialogFragment {
             }
         } else {
             userImageView.setImageResource(userIcon);
+            userImageView.setPadding(35,35,35,35);
         }
 
+        // Make sure mute button reflects user's muted status
         MuteController.adjustMuteButton(muteButton, userName);
 
-        // TODO: Make 'Ban' button visible when user is admin of current room
-        //*
+        // Make 'Ban' button visible when user is admin of current room
         if (Database.isCurrentUserAdminOfRoom()) {
             banButton.setVisibility(Button.VISIBLE);
         } else {
             banButton.setVisibility(View.GONE);
         }
-        //*/
 
         return builder.create();
     }
