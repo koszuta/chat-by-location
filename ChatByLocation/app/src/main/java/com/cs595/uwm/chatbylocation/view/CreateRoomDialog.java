@@ -147,6 +147,7 @@ public class CreateRoomDialog extends DialogFragment {
                                     String.valueOf(location.getLatitude()),
                                     radius,
                                     password));
+
                             startActivity(new Intent(getActivity(), ChatActivity.class));
                             getActivity().finish();
                         } else {

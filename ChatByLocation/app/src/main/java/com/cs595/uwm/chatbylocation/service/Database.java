@@ -482,14 +482,12 @@ public class Database {
 
         DatabaseReference roomIDRef = getRoomIdentityReference();
         String roomID = roomIDRef.push().getKey();
-
-        DatabaseReference roomIDInst = roomIDRef.child(roomID);
-        roomIDInst.child("ownerID").setValue(ownerID);
-        roomIDInst.child("name").setValue(name);
-        roomIDInst.child("longg").setValue(longg);
-        roomIDInst.child("lat").setValue(lat);
-        roomIDInst.child("rad").setValue(rad);
-        roomIDInst.child("password").setValue(password);
+        roomIDRef.child(roomID).child("rad").setValue(rad);
+        roomIDRef.child(roomID).child("ownerID").setValue(ownerID);
+        roomIDRef.child(roomID).child("name").setValue(name);
+        roomIDRef.child(roomID).child("longg").setValue(longg);
+        roomIDRef.child(roomID).child("lat").setValue(lat);
+        roomIDRef.child(roomID).child("password").setValue(password);
 
         return roomID;
 

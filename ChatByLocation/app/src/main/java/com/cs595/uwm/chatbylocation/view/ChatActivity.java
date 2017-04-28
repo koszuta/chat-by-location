@@ -505,6 +505,8 @@ public class ChatActivity extends AppCompatActivity
 
                     // Go to select screen after geofences are destroyed
                     startSelectActivity();
+                    //destroy chat room activity
+                    finish();
                 }
             });
         }
