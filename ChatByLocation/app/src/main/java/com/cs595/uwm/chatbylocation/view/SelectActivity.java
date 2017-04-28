@@ -77,6 +77,18 @@ public class SelectActivity extends AppCompatActivity
                     final Button joinButton = (Button) view.findViewById(R.id.joinButton);
                     final TextView divider = (TextView) view.findViewById(R.id.roomDivider);
 
+                    if(roomIdentity.getLat() == null || roomIdentity.getLongg() == null || roomIdentity.getName() == null
+                            || roomIdentity.getOwnerID() == null)  {
+                        roomName.setVisibility(View.GONE);
+                        roomCoords.setVisibility(View.GONE);
+                        roomRadius.setVisibility(View.GONE);
+                        roomIsPrivate.setVisibility(View.GONE);
+                        joinButton.setVisibility(View.GONE);
+                        joinButton.setVisibility(View.GONE);
+                        divider.setVisibility(View.GONE);
+                        return;
+                    }
+
 
                     // Check if user is within room radius (with math)
                     float lat = Float.valueOf(roomIdentity.getLat());
