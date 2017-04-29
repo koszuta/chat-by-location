@@ -491,6 +491,9 @@ public class ChatActivity extends AppCompatActivity
     private void doLeaveRoom() {
         Database.setUserRoom(null);
         Database.removeRoomMessagesListener();
+        mGoogleApiClient.disconnect();
+
+        // Reset location check values
         shouldGetNumMessages = true;
         shouldWelcomeUser = true;
         shouldWarnUser = true;
@@ -507,6 +510,9 @@ public class ChatActivity extends AppCompatActivity
     private void doSignOut() {
         Database.signOutUser();
         Database.removeRoomMessagesListener();
+        mGoogleApiClient.disconnect();
+
+        // Reset location check values
         shouldGetNumMessages = true;
         shouldWelcomeUser = true;
         shouldWarnUser = true;
@@ -647,8 +653,7 @@ public class ChatActivity extends AppCompatActivity
             if (!withinKick) {
                 shouldKickUser = true;
                 Toast.makeText(ChatActivity.this, "You wandered astray and were kicked from the chat room!", Toast.LENGTH_LONG).show();
-                // TODO: Check if this will work
-                //mGoogleApiClient.disconnect();
+                doLeaveRoom();
             } else {
                 // Within kick radius
                 // Welcome user if they haven't been welcomed yet
@@ -668,6 +673,10 @@ public class ChatActivity extends AppCompatActivity
                     shouldWarnUser = true;
                 }
             }
+        }
+        // Kick user if they haven't been
+        else {
+            doLeaveRoom();
         }
     }
 
@@ -695,8 +704,8 @@ public class ChatActivity extends AppCompatActivity
 
         // Get location updates
         LocationRequest locationRequest = new LocationRequest();
-        locationRequest.setInterval(3000)
-                .setFastestInterval(1000)
+        locationRequest.setInterval(0)
+                .setFastestInterval(0)
                 .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {

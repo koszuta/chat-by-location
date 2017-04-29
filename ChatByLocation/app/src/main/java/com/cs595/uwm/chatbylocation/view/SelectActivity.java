@@ -189,8 +189,8 @@ public class SelectActivity extends AppCompatActivity
     public void onConnected(@Nullable Bundle bundle) {
         trace("Connected to location api");
         LocationRequest locationRequest = new LocationRequest();
-        locationRequest.setInterval(3000)
-                .setFastestInterval(1000)
+        locationRequest.setInterval(0)
+                .setFastestInterval(0)
                 .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
