@@ -161,7 +161,6 @@ public class GeofenceTransitionsIntentService extends IntentService {
     // Create notification
     private Notification createNotification(String msg, PendingIntent notificationPendingIntent) {
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this);
-        //Todo find better Icon
         notificationBuilder
                 .setColor(Color.RED)
                 .setContentTitle(msg)

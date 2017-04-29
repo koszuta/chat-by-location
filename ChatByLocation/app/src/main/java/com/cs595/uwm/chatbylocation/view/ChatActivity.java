@@ -605,6 +605,6 @@ public class ChatActivity extends AppCompatActivity
     }
 
     private static void trace(String message){
-        System.out.println("ChatActivity >> " + message); //todo android logger
+        System.out.println("ChatActivity >> " + message);
     }
 }

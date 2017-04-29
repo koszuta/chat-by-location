@@ -594,7 +594,7 @@ public class Database {
     }
 
     private static void trace(final String message) {
-        System.out.println("Database >> " + message); //todo android logger
+        System.out.println("Database >> " + message);
     }
 
     public static boolean isCurrentUserAdminOfRoom() {

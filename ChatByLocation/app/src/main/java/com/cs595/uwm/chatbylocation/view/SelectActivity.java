@@ -311,7 +311,6 @@ public class SelectActivity extends AppCompatActivity
                 break;
 
             case R.id.menu_create_chatroom:
-                // TODO: Move create room button logic here
                 DialogFragment dialog = new CreateRoomDialog();
                 dialog.show(getFragmentManager(), "create room");
                 break;

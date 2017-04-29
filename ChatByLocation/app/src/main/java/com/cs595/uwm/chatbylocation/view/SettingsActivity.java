@@ -230,22 +230,22 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
 
             SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
 
-            final ListPreference iconPref = (ListPreference) findPreference("user_icon");
-            ColorPickerPreference colorPref = (ColorPickerPreference) findPreference("color1");
-
             // Set 'Display Name' summary to Username
-            EditTextPreference namePref = (EditTextPreference) findPreference("example_text");
+            final EditTextPreference namePref = (EditTextPreference) findPreference("example_text");
             namePref.setSummary(Database.getUserUsername());
 
-            // Bind the summaries of EditText/List/Dialog/Ringtone preferences
-            // to their values. When their values change, their summaries are
-            // updated to reflect the new value, per the Android Design
-            // guidelines.
-            //bindPreferenceSummaryToValue(findPreference("example_list"));
 
-            // User icon setting
-            // Nathan TODO: Set pref icon to user icon saved in DB
-            String icon = Database.getCurrentUserIcon();//prefs.getString("user_icon", UserIcon.NONE);
+            final ListPreference iconPref = (ListPreference) findPreference("user_icon");
+
+            // Set pref icon to user icon saved in DB
+            String icon = Database.getCurrentUserIcon();
+            if (icon != null) {
+                iconPref.setValue(icon);
+            }
+            else {
+                iconPref.setValue(UserIcon.NONE);
+            }
+            // Set user icon preference icon
             int iconRes = UserIcon.getIconResource(icon);
             if (iconRes == 0) {
                 trace("Set 'user icon' setting icon as custom photo");
@@ -285,6 +285,9 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                 }
             });
 
+
+            final ColorPickerPreference colorPref = (ColorPickerPreference) findPreference("color1");
+
             // Message color setting
             int color = prefs.getInt("color1", Color.BLACK);
             colorPref.setSummary(ColorPickerPreference.convertToRGB(color));
@@ -297,21 +300,6 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                     return true;
                 }
             });
-
-            // Text size setting
-            /*
-            ListPreference textSize = (ListPreference) findPreference("msg_font_size");
-            textSize.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
-                @Override
-                public boolean onPreferenceChange(Preference preference, Object newValue) {
-                    String sizeString = String.valueOf(newValue);
-                    int sizeInt = Integer.valueOf(String.valueOf(newValue));
-                    preference.setSummary(sizeString);
-
-                    return true;
-                }
-            });
-            //*/
         }
 
         @Override
@@ -346,16 +334,16 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
 
                         // Upload image bytes to Firebase Storage
                         Database.getImageStorageReference(userId)
-                        .putBytes(imageBytes)
-                        .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                            @Override
-                            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                                trace("Upload success");
+                                .putBytes(imageBytes)
+                                .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                                    @Override
+                                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                                        trace("Upload success");
 
-                                // When image is successfully uploaded, update local list of images
-                                Database.updateUserImage(userId);
-                            }
-                        });
+                                        // When image is successfully uploaded, update local list of images
+                                        Database.updateUserImage(userId);
+                                    }
+                                });
                     }
                 }
             }
