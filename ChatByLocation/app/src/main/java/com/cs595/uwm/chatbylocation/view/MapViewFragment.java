@@ -28,6 +28,8 @@ import java.util.Map;
 
 public class MapViewFragment extends FragmentActivity implements OnMapReadyCallback {
 
+    public static final double MKE_LAT = 43.052222;
+    public static final double MKE_LNG = -87.955833;
     public static final LatLng CENTER_OF_USA = new LatLng(39.83333, -98.58333);
     private GoogleMap mMap;
     private LatLng myLatLng;
@@ -38,8 +40,8 @@ public class MapViewFragment extends FragmentActivity implements OnMapReadyCallb
         setContentView(R.layout.map_layout);
 
         // Get location from activity
-        double lat = getIntent().getDoubleExtra("myLat",  43.052222);
-        double lng = getIntent().getDoubleExtra("myLng", -87.955833);
+        double lat = getIntent().getDoubleExtra("myLat", MKE_LAT);
+        double lng = getIntent().getDoubleExtra("myLng", MKE_LNG);
         myLatLng = new LatLng(lat, lng);
 
         // Get the SupportMapFragment and request notification
@@ -48,7 +50,7 @@ public class MapViewFragment extends FragmentActivity implements OnMapReadyCallb
         if (mapFragment != null) {
             mapFragment.getMapAsync(this);
         } else {
-            System.out.println("\n\nNull map fragment\n\n");
+            trace("Null map fragment");
         }
     }
 
@@ -86,5 +88,9 @@ public class MapViewFragment extends FragmentActivity implements OnMapReadyCallb
                     .fillColor(R.color.colorPrimaryLight)
             );
         }
+    }
+
+    private static void trace(String message) {
+        System.out.println("MapViewFragment >> " + message);
     }
 }
