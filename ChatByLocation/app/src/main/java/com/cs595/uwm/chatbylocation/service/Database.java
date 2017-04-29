@@ -181,6 +181,11 @@ public class Database {
 
             if(userEntry.getKey().equals(currentOwnerID)) continue;
 
+            //TODO @Lowell this prevents crashes upon room creation/join...review for possible side effects
+            if(userEntry.getValue().getRoomJoinTime() == null) {
+                userEntry.getValue().setRoomJoinTime(System.currentTimeMillis());
+            }
+
             if(Long.valueOf(userEntry.getValue().getRoomJoinTime())
                     < Long.valueOf(nextOwner.getValue().getRoomJoinTime())){
                 nextOwner = userEntry;
