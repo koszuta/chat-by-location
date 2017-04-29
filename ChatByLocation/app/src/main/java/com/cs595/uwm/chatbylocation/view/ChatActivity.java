@@ -190,9 +190,11 @@ public class ChatActivity extends AppCompatActivity
         String roomID = Database.getCurrentRoomID();
         if(Database.isCurrentUserAdminOfRoom()) {
             BanController.addToRoomBanList(view.getContext(), userId, roomID);
-            Toast.makeText(view.getContext(), "You have been banned from the room! Shame.", Toast.LENGTH_SHORT).show();
         }
         if(isUserBannedFromCurrentRoom()) {
+            Toast.makeText(ChatActivity.this,
+                    "You have been banned from the room! Shame.",
+                    Toast.LENGTH_SHORT).show();
             startActivity(banUserIntent);
             finish();
         }
@@ -206,14 +208,18 @@ public class ChatActivity extends AppCompatActivity
     public void sendMessageClick(View view) {
         ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         if (connectivityManager.getActiveNetworkInfo() == null) {
-            Toast.makeText(this, "No network connectivity", Toast.LENGTH_LONG).show();
+            Toast.makeText(ChatActivity.this, "No network connectivity", Toast.LENGTH_LONG).show();
             return;
         }
 
         // Nathan TODO: Use better ban method
         //block message and kick out user if banned from current room
         if(isUserBannedFromCurrentRoom()) {
+            Toast.makeText(ChatActivity.this,
+                    "You have been banned from the room! Shame.",
+                    Toast.LENGTH_SHORT).show();
             doLeaveRoom();
+            return;
         }
 
         // Get color for message from preferences
@@ -227,7 +233,7 @@ public class ChatActivity extends AppCompatActivity
         message = message.trim();
 
         String roomId = Database.getCurrentRoomID();
-        if (roomId != null && !"".equals(message) && message != null) {
+        if (roomId != null && !"".equals(message)) {
             Database.sendChatMessage(
                     new ChatMessage(message, Database.getUserUsername(), color),
                     roomId,
@@ -348,7 +354,7 @@ public class ChatActivity extends AppCompatActivity
                     };
 
                     // Nathan TODO: Implement kicked from room using database listener
-                    ListView listOfMessages = (ListView) findViewById(R.id.messageList);
+                    final ListView listOfMessages = (ListView) findViewById(R.id.messageList);
                     if (roomID.equals("")) {
                         chatListAdapter.cleanup();
                         listOfMessages.setAdapter(null);
@@ -366,7 +372,9 @@ public class ChatActivity extends AppCompatActivity
                             //block message and kick out user if banned from current room
                             //TODO:add a method delay to prevent spamming this method call on every message
                             if(isUserBannedFromCurrentRoom()) {
-                                Toast.makeText(getApplicationContext(), "You have been banned from the room!", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(ChatActivity.this,
+                                        "You have been banned from the room! Shame.",
+                                        Toast.LENGTH_SHORT).show();
                                 startActivity(banUserIntent);
                                 finish();
                             }
