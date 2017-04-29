@@ -475,6 +475,7 @@ public class ChatActivity extends AppCompatActivity
         if (ContextCompat.checkSelfPermission(getApplicationContext(), Settings.Secure.ALLOW_MOCK_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             LocationServices.FusedLocationApi.setMockMode(mGoogleApiClient, true);
             LocationServices.FusedLocationApi.setMockLocation(mGoogleApiClient, location);
+            location = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
         }
     }
 
@@ -547,79 +548,6 @@ public class ChatActivity extends AppCompatActivity
         dateFormatted = dateFormatted.replace("AM", "am").replace("PM", "pm");
 
         return dateFormatted;
-    }
-
-    private void buildGeofence() {
-        trace("Building geofences");
-        // Create two geofences, a warning with the rooms radius and a kick 10 meters beyond
-        mGeofences.put(WARN_GEOFENCE, createGeofence(WARN_GEOFENCE));
-        mGeofences.put(KICK_GEOFENCE, createGeofence(KICK_GEOFENCE));
-        trace("Created geofences");
-        addGeofences();
-        trace("Added geofences");
-    }
-
-    private Geofence createGeofence(String geofenceName) {
-        String roomId = Database.getCurrentRoomID();
-        double lat = Database.getRoomLat(roomId);
-        double lng = Database.getRoomLng(roomId);
-        int radius = Database.getRoomRadius(roomId);
-        // Warn the user a little inside the radius
-        if (WARN_GEOFENCE.equals(geofenceName)) {
-            radius -= BOUNDARY_LEEWAY;
-        }
-        // Kick the user a little outside the radius
-        if (KICK_GEOFENCE.equals(geofenceName)) {
-            radius += BOUNDARY_LEEWAY;
-        }
-        return new Geofence.Builder()
-                .setRequestId(geofenceName)
-                .setCircularRegion(lat, lng, radius)
-                .setExpirationDuration(ONE_DAY_IN_MILLIS)
-                .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER
-                        | Geofence.GEOFENCE_TRANSITION_EXIT)
-                .build();
-    }
-
-    private void addGeofences() {
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            trace("Google Api Client is connected before add geofence: " + mGoogleApiClient.isConnected());
-            LocationServices.GeofencingApi.addGeofences(
-                    mGoogleApiClient,
-                    createGeofenceRequest(),
-                    getGeofencePendingIntent()
-            ).setResultCallback(new ResultCallback<Status>() {
-                @Override
-                public void onResult(@NonNull Status status) {
-                    trace("Add geofence succeeded : " + status.isSuccess());
-                    trace("Add geofence status code: " + status.getStatusCode());
-                    if (!status.isSuccess()) {
-                        // TODO: Remove from room if no geofence is created
-                        //doLeaveRoom();
-                    }
-                }
-            });
-        } else {
-            requestFineLocationPermission();
-        }
-    }
-
-    // Create a Geofence Request
-    private GeofencingRequest createGeofenceRequest() {
-        trace("Creating geofenceRequest");
-        return new GeofencingRequest.Builder()
-                .setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_EXIT
-                        | GeofencingRequest.INITIAL_TRIGGER_ENTER)
-                .addGeofences(new ArrayList<Geofence>(mGeofences.values()))
-                .build();
-    }
-
-    private PendingIntent getGeofencePendingIntent() {
-        if (mGeofencePendingIntent == null) {
-            Intent intent = new Intent(this, GeofenceTransitionsIntentService.class);
-            mGeofencePendingIntent = PendingIntent.getService(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-        }
-        return mGeofencePendingIntent;
     }
 
     private boolean isUserBannedFromCurrentRoom() {
@@ -700,7 +628,6 @@ public class ChatActivity extends AppCompatActivity
     @Override
     public void onConnected(@Nullable Bundle bundle) {
         trace("Connected to location api");
-        //buildGeofence();
 
         // Get location updates
         LocationRequest locationRequest = new LocationRequest();
@@ -729,4 +656,79 @@ public class ChatActivity extends AppCompatActivity
     private static void trace(String message){
         System.out.println("ChatActivity >> " + message); //todo android logger
     }
+
+    /*
+    private void buildGeofence() {
+        trace("Building geofences");
+        // Create two geofences, a warning with the rooms radius and a kick 10 meters beyond
+        mGeofences.put(WARN_GEOFENCE, createGeofence(WARN_GEOFENCE));
+        mGeofences.put(KICK_GEOFENCE, createGeofence(KICK_GEOFENCE));
+        trace("Created geofences");
+        addGeofences();
+        trace("Added geofences");
+    }
+
+    private Geofence createGeofence(String geofenceName) {
+        String roomId = Database.getCurrentRoomID();
+        double lat = Database.getRoomLat(roomId);
+        double lng = Database.getRoomLng(roomId);
+        int radius = Database.getRoomRadius(roomId);
+        // Warn the user a little inside the radius
+        if (WARN_GEOFENCE.equals(geofenceName)) {
+            radius -= BOUNDARY_LEEWAY;
+        }
+        // Kick the user a little outside the radius
+        if (KICK_GEOFENCE.equals(geofenceName)) {
+            radius += BOUNDARY_LEEWAY;
+        }
+        return new Geofence.Builder()
+                .setRequestId(geofenceName)
+                .setCircularRegion(lat, lng, radius)
+                .setExpirationDuration(ONE_DAY_IN_MILLIS)
+                .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER
+                        | Geofence.GEOFENCE_TRANSITION_EXIT)
+                .build();
+    }
+
+    private void addGeofences() {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            trace("Google Api Client is connected before add geofence: " + mGoogleApiClient.isConnected());
+            LocationServices.GeofencingApi.addGeofences(
+                    mGoogleApiClient,
+                    createGeofenceRequest(),
+                    getGeofencePendingIntent()
+            ).setResultCallback(new ResultCallback<Status>() {
+                @Override
+                public void onResult(@NonNull Status status) {
+                    trace("Add geofence succeeded : " + status.isSuccess());
+                    trace("Add geofence status code: " + status.getStatusCode());
+                    if (!status.isSuccess()) {
+                        // TODO: Remove from room if no geofence is created
+                        //doLeaveRoom();
+                    }
+                }
+            });
+        } else {
+            requestFineLocationPermission();
+        }
+    }
+
+    // Create a Geofence Request
+    private GeofencingRequest createGeofenceRequest() {
+        trace("Creating geofenceRequest");
+        return new GeofencingRequest.Builder()
+                .setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_EXIT
+                        | GeofencingRequest.INITIAL_TRIGGER_ENTER)
+                .addGeofences(new ArrayList<Geofence>(mGeofences.values()))
+                .build();
+    }
+
+    private PendingIntent getGeofencePendingIntent() {
+        if (mGeofencePendingIntent == null) {
+            Intent intent = new Intent(this, GeofenceTransitionsIntentService.class);
+            mGeofencePendingIntent = PendingIntent.getService(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        }
+        return mGeofencePendingIntent;
+    }
+    */
 }

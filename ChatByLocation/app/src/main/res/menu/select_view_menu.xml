@@ -4,6 +4,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
+        android:visible="false"
         android:title="Set Location"
         android:icon="@drawable/ic_my_location"
         app:showAsAction="ifRoom"

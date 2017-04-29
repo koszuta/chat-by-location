@@ -63,6 +63,7 @@ public class GeofenceTransitionsIntentService extends IntentService {
         trace("Geofence transition: " + getGeofenceTransitionDetails(geofencingEvent.getGeofenceTransition(), triggeringGeofences));
 
         // Do somethine based on the transition type
+        /*
         switch (geofencingEvent.getGeofenceTransition()) {
 
             case Geofence.GEOFENCE_TRANSITION_ENTER:
@@ -115,6 +116,7 @@ public class GeofenceTransitionsIntentService extends IntentService {
             default:
                 break;
         }
+        */
     }
 
 
