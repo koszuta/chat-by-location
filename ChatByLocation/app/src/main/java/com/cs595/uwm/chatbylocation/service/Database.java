@@ -179,24 +179,23 @@ public class Database {
         Log.d("UsersInEntrySet", users.entrySet().toString());
 
         for(Map.Entry<String, UserIdentity> userEntry : users.entrySet() ){
-            /*don't set current owner as next owner
-            if(nextOwner == null) nextOwner = userEntry;
-            */
+            //don't set current owner as next owner
+            if(nextOwner == null && userEntry.getValue().getUsername() != getUserUsername()) nextOwner = userEntry;
+
 
             //skip current user and users not in the room
-            if(userEntry.getKey().equals(currentOwnerID) ||
-                    userEntry.getValue().getCurrentRoomID().equals(getCurrentRoomID())) continue;
+            if(userEntry.getKey().equals(currentOwnerID)) continue;
+            if((userEntry.getValue().getCurrentRoomID() != null &&
+                    userEntry.getValue().getCurrentRoomID().equals(getCurrentRoomID()))) continue;
 
             //set a roomjointime if the database hasnt obtained on yet (shouldnt matter as the time difference is small)
             if(userEntry.getValue().getRoomJoinTime() == null) {
                 userEntry.getValue().setRoomJoinTime(System.currentTimeMillis());
             }
 
-            //next owner found and set - end method
             if(Long.valueOf(userEntry.getValue().getRoomJoinTime())
                     < Long.valueOf(nextOwner.getValue().getRoomJoinTime())){
                 nextOwner = userEntry;
-                break;
             }
 
         }
