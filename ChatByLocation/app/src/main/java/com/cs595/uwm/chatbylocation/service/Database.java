@@ -5,6 +5,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.cs595.uwm.chatbylocation.objModel.ChatMessage;
@@ -175,20 +176,27 @@ public class Database {
     public static String getNextOwnerID(String currentOwnerID){
 
         Map.Entry<String, UserIdentity> nextOwner = null;
+        Log.d("UsersInEntrySet", users.entrySet().toString());
 
         for(Map.Entry<String, UserIdentity> userEntry : users.entrySet() ){
+            /*don't set current owner as next owner
             if(nextOwner == null) nextOwner = userEntry;
+            */
 
-            if(userEntry.getKey().equals(currentOwnerID)) continue;
+            //skip current user and users not in the room
+            if(userEntry.getKey().equals(currentOwnerID) ||
+                    userEntry.getValue().getCurrentRoomID().equals(getCurrentRoomID())) continue;
 
-            //TODO @Lowell this prevents crashes upon room creation/join...review for possible side effects
+            //set a roomjointime if the database hasnt obtained on yet (shouldnt matter as the time difference is small)
             if(userEntry.getValue().getRoomJoinTime() == null) {
                 userEntry.getValue().setRoomJoinTime(System.currentTimeMillis());
             }
 
+            //next owner found and set - end method
             if(Long.valueOf(userEntry.getValue().getRoomJoinTime())
                     < Long.valueOf(nextOwner.getValue().getRoomJoinTime())){
                 nextOwner = userEntry;
+                break;
             }
 
         }
