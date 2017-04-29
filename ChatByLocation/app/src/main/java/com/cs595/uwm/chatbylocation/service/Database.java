@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.widget.Toast;
 
 import com.cs595.uwm.chatbylocation.objModel.ChatMessage;
@@ -14,6 +15,7 @@ import com.cs595.uwm.chatbylocation.view.ChatActivity;
 import com.firebase.ui.auth.ui.User;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.ChildEventListener;
@@ -29,6 +31,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Executor;
 
 /**
  * Created by Lowell on 3/21/2017.
@@ -62,7 +65,7 @@ public class Database {
     private static ValueEventListener changeOwnerListener;
     private static ValueEventListener roomUsersListener;
     private static boolean isOwner = false;
-    private static int ownerTransferTask;
+    private static Task<Void> ownerTransferTask;
 
     private static boolean listening = false;
     private static boolean listeningToUsers = false;
@@ -124,8 +127,7 @@ public class Database {
                             setRoomOwner(currentRoomID, nextOwnerID);
                         }
 
-                        //todo lowell
-                        //destroy onDisconnect task
+                        getRoomIdentityReference().child(currentRoomID).child("ownerID").onDisconnect().cancel();
 
                     }
 
@@ -322,11 +324,10 @@ public class Database {
                     if(isOwner) return;
                     //do stuff in gui here if required
 
-                    //todo lowell
-                    //listen to nextOwnerID value
-                        //inside listener: create onDisconnect task that makes nextOwnerID the owner
-
+                    getRoomIdentityReference().child(roomID).child("ownerID").onDisconnect().cancel();
+                    getRoomIdentityReference().child(roomID).child("ownerID").onDisconnect().setValue(getNextOwnerID(getUserId()));
                     isOwner = true;
+
                 } else if(isOwner){
                     isOwner = false;
                 }
