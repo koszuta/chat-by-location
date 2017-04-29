@@ -281,6 +281,7 @@ public class ChatActivity extends AppCompatActivity
                     trace("roomIDListener sees roomid = " + roomID);
 
                     Database.registerChangeOwnerListener(roomID);
+                    Database.registerRoomUsersListener(roomID);
 
                     chatListAdapter = new FirebaseListAdapter<ChatMessage>(
                             ChatActivity.this,
@@ -507,6 +508,8 @@ public class ChatActivity extends AppCompatActivity
 
                     // Go to select screen after geofences are destroyed
                     startSelectActivity();
+                    //destroy chat room activity
+                    finish();
                 }
             });
         } else {
