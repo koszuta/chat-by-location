@@ -640,6 +640,7 @@ public class ChatActivity extends AppCompatActivity
         boolean withinWarn = withinRoomRadius(lat, lng, roomRad - BOUNDARY_LEEWAY);
         boolean withinKick = withinRoomRadius(lat, lng, roomRad + BOUNDARY_LEEWAY);
 
+        // Skip if user is already kicked
         if (!shouldKickUser) {
 
             // Kick user if they are outside the kick radius

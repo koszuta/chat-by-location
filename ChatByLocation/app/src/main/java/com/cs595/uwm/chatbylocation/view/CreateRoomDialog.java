@@ -49,7 +49,7 @@ import static com.facebook.FacebookSdk.getApplicationContext;
 
 public class CreateRoomDialog extends DialogFragment {
 
-    public static final int MIN_RADIUS = 20;
+    public static final int MIN_RADIUS = 100;
     public static final int MAX_RADIUS = 1000;
     public static final int RADIUS_INCREMENT = 10;
 
