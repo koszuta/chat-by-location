@@ -327,18 +327,19 @@ public class ChatActivity extends AppCompatActivity
                                 ss.setSpan(textColor, timeLength + username.length() + 1, ss.length(), Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
 
                                 // Use icon from corresponding user
+                                userIcon.setPadding(8,8,8,8);
                                 String userId = Database.getUserId(username);
                                 int iconRes = UserIcon.getIconResource(Database.getUserIcon(userId));
                                 if (iconRes == 0) {
                                     Bitmap image = Database.getUserImage(userId);
                                     if (image != null) {
                                         userIcon.setImageBitmap(image);
+                                        userIcon.setPadding(0,0,0,0);
                                     } else {
                                         userIcon.setImageResource(UserIcon.NONE_RESOURCE);
                                     }
                                 } else {
                                     userIcon.setImageResource(iconRes);
-                                    userIcon.setPadding(8,8,8,8);
                                 }
                             }
 
