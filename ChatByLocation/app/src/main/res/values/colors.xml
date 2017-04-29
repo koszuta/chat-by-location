@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimaryLight">#B3E5FC</color>
+    <color name="colorPrimaryLight">#E1F5FE</color>
     <color name="colorPrimary">#03A9F4</color>
     <color name="colorPrimaryDark">#0277BD</color>
-    <color name="colorAccent">#FFEA00</color>
+    <color name="colorAccent">#FFEE58</color>
 
     <color name="transparent">#0000</color>
 
     <color name="black">#000000</color>
 
-    <color name="background">#FAFAFA</color>
+    <color name="background">#FFFCFA</color>
     <color name="listDivider">#DADADA</color>
 
     <color name="inputHint">#888888</color>
@@ -17,5 +17,5 @@
     <color name="bottomLayout">#EEEEEE</color>
 
     <color name="timestamp">#666666</color>
-    <color name="messageText">#000000</color>
+    <color name="text">#303030</color>
 </resources>
