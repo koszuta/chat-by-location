@@ -1,12 +1,14 @@
 package com.cs595.uwm.chatbylocation.view;
 
 import android.Manifest;
+import android.app.Activity;
 import android.app.DialogFragment;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
@@ -14,6 +16,7 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -34,8 +37,13 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.Locale;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by Nathan on 3/13/17.
@@ -52,8 +60,75 @@ public class SelectActivity extends AppCompatActivity
 
     private GoogleApiClient googleApiClient;
     public static Location location;
+    
+    private FirebaseListAdapter<RoomIdentity> roomListAdapter =
+            new FirebaseListAdapter<RoomIdentity>(
+                    SelectActivity.this,
+                    RoomIdentity.class,
+                    R.layout.room_list_item,
+                    Database.getRoomIdentityReference()) {
+                @Override
+                protected void populateView(View view, RoomIdentity roomIdentity, int position) {
+                    //trace("All items enabled: " + this.areAllItemsEnabled());
 
-    private FirebaseListAdapter<RoomIdentity> roomListAdapter;
+                    // Get all list item components
+                    final TextView roomName = (TextView) view.findViewById(R.id.roomName);
+                    final TextView roomCoords = (TextView) view.findViewById(R.id.roomCoords);
+                    final TextView roomRadius = (TextView) view.findViewById(R.id.roomRadius);
+                    final ImageView roomIsPrivate = (ImageView) view.findViewById(R.id.roomIsPrivate);
+                    final Button joinButton = (Button) view.findViewById(R.id.joinButton);
+                    final TextView divider = (TextView) view.findViewById(R.id.roomDivider);
+
+                    // Pre-hide them before deciding whether to show room in list
+                    roomName.setVisibility(View.GONE);
+                    roomCoords.setVisibility(View.GONE);
+                    roomRadius.setVisibility(View.GONE);
+                    roomIsPrivate.setVisibility(View.GONE);
+                    joinButton.setVisibility(View.GONE);
+                    divider.setVisibility(View.GONE);
+
+                    // If room has bad values leave it hidden and return
+                    if (roomIdentity.getLat() == null
+                     || roomIdentity.getLongg() == null
+                     || roomIdentity.getRad() < 0
+                     || roomIdentity.getName() == null
+                     || roomIdentity.getOwnerID() == null) {
+                        return;
+                    }
+                    // Check if user is within room radius (with math)
+                    float lat = Float.valueOf(roomIdentity.getLat());
+                    float lng = Float.valueOf(roomIdentity.getLongg());
+
+                    // If user is outside room radius keep it hidden
+                    if (!withinRoomRadius(lat, lng, roomIdentity.getRad())) {
+                        //trace("Room " + roomIdentity.getName() + " is out of range");
+                        return;
+                    }
+                    // Otherwise show it in the room list
+                    else {
+                        roomName.setVisibility(View.VISIBLE);
+                        roomCoords.setVisibility(View.VISIBLE);
+                        roomRadius.setVisibility(View.VISIBLE);
+                        joinButton.setVisibility(View.VISIBLE);
+                        divider.setVisibility(View.VISIBLE);
+                    }
+
+                    // If room is private, show lock icon
+                    if (roomIdentity.getPassword() != null) {
+                        roomIsPrivate.setVisibility(View.VISIBLE);
+                    } else {
+                        roomIsPrivate.setVisibility(View.GONE);
+                    }
+                    //create a ban database listener for the room
+                    BanController.addRoom(getRef(position).getKey());
+
+                    roomName.setText(roomIdentity.getName());
+                    roomCoords.setText(formatCoords(roomIdentity.getLat(), roomIdentity.getLongg()));
+                    roomRadius.setText("Radius: " + roomIdentity.getRad() + "m");
+
+                    joinButton.setTag(getRef(position).getKey());
+                }
+            };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -106,7 +181,9 @@ public class SelectActivity extends AppCompatActivity
     public void onLocationChanged(Location pLocation) {
         trace("Location changed");
         location = pLocation;
-        roomListAdapter.notifyDataSetChanged();
+        if(roomListAdapter != null) {
+            roomListAdapter.notifyDataSetChanged();
+        }
     }
 
     @Override
@@ -118,10 +195,11 @@ public class SelectActivity extends AppCompatActivity
                 .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            trace("Has permissions after location api connection");
             LocationServices.FusedLocationApi.requestLocationUpdates(googleApiClient, locationRequest, this);
             location = LocationServices.FusedLocationApi.getLastLocation(googleApiClient);
-            roomListAdapter.notifyDataSetChanged();
+            if(roomListAdapter != null) {
+                roomListAdapter.notifyDataSetChanged();
+            }
         } else {
             trace("No permissions after location api connection");
             requestFineLocationPermission();
@@ -136,6 +214,25 @@ public class SelectActivity extends AppCompatActivity
         trace("Failed to connect to location api");
     }
 
+    public void useMockLocation(Location location) {
+        if (ContextCompat.checkSelfPermission(getApplicationContext(), Settings.Secure.ALLOW_MOCK_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            LocationServices.FusedLocationApi.setMockMode(googleApiClient, true);
+            LocationServices.FusedLocationApi.setMockLocation(googleApiClient, location);
+        }
+        else {
+            trace("No permission to use mock location");
+        }
+    }
+
+    public void useCurrentLocation() {
+        if (ContextCompat.checkSelfPermission(getApplicationContext(), Settings.Secure.ALLOW_MOCK_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            LocationServices.FusedLocationApi.setMockMode(googleApiClient, false);
+        }
+        else {
+            trace("No permission to use mock location");
+        }
+    }
+
     public Location getLastLocation() {
         return location;
     }
@@ -144,10 +241,17 @@ public class SelectActivity extends AppCompatActivity
         String roomId = String.valueOf(view.getTag());
         System.out.println("roomId = " + roomId);
 
-        // Check if user is in radius (just to make sure)
         RoomIdentity room = Database.getRoomIdentity(roomId);
-        if (!withinRoomRadius(Float.valueOf(room.getLat()), Float.valueOf(room.getLongg()), room.getRad())) {
-            Toast.makeText(this, "You must be within a room's area to enter", Toast.LENGTH_LONG).show();
+        if (room == null) return;
+
+        String roomLat = room.getLat();
+        String roomLng = room.getLongg();
+        int roomRad = room.getRad();
+        // Make sure room has good values first
+        if (roomLat == null || roomLng == null || roomRad < 0
+                // Check if user is within room radius
+                || !withinRoomRadius(Float.valueOf(roomLat), Float.valueOf(roomLng), roomRad)) {
+            Toast.makeText(this, "You must be within a room's radius to enter", Toast.LENGTH_LONG).show();
         }
         else if (BanController.isCurrentUserBanned(roomId)) {
             AlertDialog aD = new AlertDialog.Builder(view.getContext())
@@ -174,70 +278,24 @@ public class SelectActivity extends AppCompatActivity
             startActivity(new Intent(this, ChatActivity.class));
         }
     }
-    /*
-    public void createRoomClick(View view) {
-        DialogFragment dialog = new CreateRoomDialog();
-        dialog.show(getFragmentManager(), "create room");
-    }
-    //*/
+
     private void displayRoomList() {
         final ListView listOfRooms = (ListView) findViewById(R.id.roomList);
-        roomListAdapter = new FirebaseListAdapter<RoomIdentity>(
-                this,
-                RoomIdentity.class,
-                R.layout.room_list_item,
-                Database.getRoomIdentityReference()) {
-            @Override
-            protected void populateView(View view, RoomIdentity roomIdentity, int position) {
-                final TextView roomName = (TextView) view.findViewById(R.id.roomName);
-                final TextView roomCoords = (TextView) view.findViewById(R.id.roomCoords);
-                final TextView roomRadius = (TextView) view.findViewById(R.id.roomRadius);
-                final ImageView roomIsPrivate = (ImageView) view.findViewById(R.id.roomIsPrivate);
-                final Button joinButton = (Button) view.findViewById(R.id.joinButton);
-                final RelativeLayout divider = (RelativeLayout) view.findViewById(R.id.customDivider);
 
-
-                // Nathan TODO: Check if user is within room radius (with math)
-                float lat = Float.valueOf(roomIdentity.getLat());
-                float lng = Float.valueOf(roomIdentity.getLongg());
-
-                if (!withinRoomRadius(lat, lng, roomIdentity.getRad())) {
-                    trace("Room " + roomIdentity.getName() + " is out of range");
-                    view.setPadding(0,0,0,0);
-                    roomName.setVisibility(View.GONE);
-                    roomCoords.setVisibility(View.GONE);
-                    roomRadius.setVisibility(View.GONE);
-                    roomIsPrivate.setVisibility(View.GONE);
-                    joinButton.setVisibility(View.GONE);
-                    joinButton.setVisibility(View.GONE);
-                    divider.setVisibility(View.GONE);
-                    return;
-                } else {
-                    roomName.setVisibility(View.VISIBLE);
-                    roomCoords.setVisibility(View.VISIBLE);
-                    roomRadius.setVisibility(View.VISIBLE);
-                    joinButton.setVisibility(View.VISIBLE);
-                    divider.setVisibility(View.VISIBLE);
-                }
-
-                if (roomIdentity.getPassword() != null) {
-                    roomIsPrivate.setVisibility(View.VISIBLE);
-                } else {
-                    roomIsPrivate.setVisibility(View.GONE);
-                }
-                //create a ban database listener for the room
-                BanController.addRoom(getRef(position).getKey());
-
-                roomName.setText(roomIdentity.getName());
-                roomCoords.setText(formatCoords(roomIdentity.getLat(), roomIdentity.getLongg()));
-                roomRadius.setText("Radius: " + roomIdentity.getRad() + "m");
-
-                joinButton.setTag(getRef(position).getKey());
-            }
-        };
         listOfRooms.setAdapter(roomListAdapter);
-    }
 
+        Database.getRoomIdentityReference().child("roomIdentity").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                // Notify list adapter to update when data changes
+                roomListAdapter.notifyDataSetChanged();
+            }
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.select_view_menu, menu);
@@ -247,11 +305,18 @@ public class SelectActivity extends AppCompatActivity
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
+
+            case R.id.set_location:
+                DialogFragment locationDialog = new MockLocationDialog();
+                locationDialog.show(getFragmentManager(), "set location");
+                break;
+
             case R.id.menu_create_chatroom:
                 // TODO: Move create room button logic here
                 DialogFragment dialog = new CreateRoomDialog();
                 dialog.show(getFragmentManager(), "create room");
                 break;
+
             case R.id.menu_view_map:
                 // TODO: Set map view visible here
                 Intent intent = new Intent(this, MapViewFragment.class);
@@ -259,11 +324,13 @@ public class SelectActivity extends AppCompatActivity
                 intent.putExtra("myLng", location.getLongitude());
                 startActivity(intent);
                 break;
+
             case R.id.menu_settings:
                 Intent settingsIntent = new Intent(this, SettingsActivity.class);
                 settingsIntent.putExtra("caller", SelectActivity.class.getName());
                 startActivity(settingsIntent);
                 break;
+
             case R.id.menu_sign_out:
                 Database.signOutUser();
                 //return to sign in
@@ -321,7 +388,7 @@ public class SelectActivity extends AppCompatActivity
                 lngDegree + "\u00b0 " + lngMinute + "\' " + String.format(Locale.getDefault(), "%.0f", lngSecond) + "\" " + ew;
     }
 
-    private void trace(String message) {
+    private static void trace(String message) {
         System.out.println("SelectActivity >> " + message);
     }
 }

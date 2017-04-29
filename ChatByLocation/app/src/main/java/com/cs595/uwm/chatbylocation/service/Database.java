@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.widget.Toast;
 
 import com.cs595.uwm.chatbylocation.objModel.ChatMessage;
@@ -11,8 +12,10 @@ import com.cs595.uwm.chatbylocation.objModel.RoomIdentity;
 import com.cs595.uwm.chatbylocation.objModel.UserIcon;
 import com.cs595.uwm.chatbylocation.objModel.UserIdentity;
 import com.cs595.uwm.chatbylocation.view.ChatActivity;
+import com.firebase.ui.auth.ui.User;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.ChildEventListener;
@@ -25,7 +28,10 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.Executor;
 
 /**
  * Created by Lowell on 3/21/2017.
@@ -56,12 +62,18 @@ public class Database {
         public void onCancelled(DatabaseError databaseError) {}
     };
 
+    private static ValueEventListener changeOwnerListener;
+    private static ValueEventListener roomUsersListener;
+    private static boolean isOwner = false;
+    private static Task<Void> ownerTransferTask;
+
     private static boolean listening = false;
     private static boolean listeningToUsers = false;
     private static boolean shouldSignOut = false;
 
     private static Map<String, UserIdentity> users = new HashMap<>();
     private static Map<String, RoomIdentity> rooms = new HashMap<>();
+    private static Map<String, UserIdentity> roomUsers = new HashMap<>();
 
     private static Map<String, Bitmap> userImages = new HashMap<>();
 
@@ -78,6 +90,7 @@ public class Database {
             String userId = getUserId();
             if (userId != null) {
                 getRoomUsersReference().child(roomID).child(userId).setValue(true);
+                getCurrentUserReference().child("roomJoinTime").setValue(System.currentTimeMillis());
             }
 
             // Sign out user
@@ -105,6 +118,19 @@ public class Database {
                 if (userId != null) {
                     getRoomUsersReference().child(removeFrom).child(userId).removeValue();
                     getCurrentUserReference().child("currentRoomID").setValue("");
+
+                    if(isOwner){
+                        if(roomUsers.size() <= 1){
+                            destroyRoom(removeFrom);
+                        } else {
+                            String nextOwnerID = getNextOwnerID(userId);
+                            setRoomOwner(currentRoomID, nextOwnerID);
+                        }
+
+                        getRoomIdentityReference().child(currentRoomID).child("ownerID").onDisconnect().cancel();
+
+                    }
+
                 }
 
                 getCurrentUserReference().child("removeFrom").setValue("");
@@ -144,6 +170,25 @@ public class Database {
 
     public static String getRoomPassword(final String roomId) {
         return (rooms.containsKey(roomId)) ? rooms.get(roomId).getPassword() : null;
+    }
+
+    public static String getNextOwnerID(String currentOwnerID){
+
+        Map.Entry<String, UserIdentity> nextOwner = null;
+
+        for(Map.Entry<String, UserIdentity> userEntry : users.entrySet() ){
+            if(nextOwner == null) nextOwner = userEntry;
+
+            if(userEntry.getKey().equals(currentOwnerID)) continue;
+
+            if(Long.valueOf(userEntry.getValue().getRoomJoinTime())
+                    < Long.valueOf(nextOwner.getValue().getRoomJoinTime())){
+                nextOwner = userEntry;
+            }
+
+        }
+
+        return nextOwner.getKey();
     }
 
     public static int getRoomRadius(final String roomId) {
@@ -238,6 +283,68 @@ public class Database {
             .addChildEventListener(messageCountListener);
             trace("Added room messages listener");
         }
+    }
+
+    public static void registerRoomUsersListener(String roomID){
+
+        //DatabaseReference roomUsersRef = getRoomUsersReference().child("roomID").child("users");
+        DatabaseReference roomUsersRef = getRoomUsersReference().child("roomID");
+
+        if(roomUsersListener != null) {
+            roomUsersRef.removeEventListener(roomUsersListener);
+            roomUsers = new HashMap<>();
+        }
+
+        roomUsersListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if(dataSnapshot.getValue() == null) return;
+                for(String userID : ((HashMap<String, Object>) dataSnapshot.getValue()).keySet())
+                    roomUsers.put(userID, Database.getUserByID(userID));
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        };
+
+        Database.getRoomUsersReference().child(roomID).addValueEventListener(roomUsersListener);
+    }
+
+    public static void registerChangeOwnerListener(final String roomID){
+
+        DatabaseReference ownerIDRef = getRoomIdentityReference().child(roomID).child("ownerID");
+        if(changeOwnerListener != null) ownerIDRef.removeEventListener(changeOwnerListener);
+
+        changeOwnerListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                String ownerID = String.valueOf(dataSnapshot.getValue());
+                if(ownerID == null) return;
+                trace("OwnerID of room " + roomID + " changed to " + ownerID);
+                if(getUserId().equals(ownerID)) { // the owner is this client
+                    if(isOwner) return;
+                    //do stuff in gui here if required
+
+                    getRoomIdentityReference().child(roomID).child("ownerID").onDisconnect().cancel();
+                    getRoomIdentityReference().child(roomID).child("ownerID").onDisconnect().setValue(getNextOwnerID(getUserId()));
+                    isOwner = true;
+
+                } else if(isOwner){
+                    isOwner = false;
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        };
+
+        ownerIDRef.addValueEventListener(changeOwnerListener);
+
     }
 
     public static void removeRoomMessagesListener() {
@@ -404,6 +511,10 @@ public class Database {
         }
     }
 
+    public static void setRoomOwner(String roomID, String userID){
+        getRoomIdentityReference().child(roomID).child("ownerID").setValue(userID);
+    }
+
     public static void signOutUser() {
         shouldSignOut = true;
         removeCurrentUserListeners();
@@ -427,17 +538,21 @@ public class Database {
 
         DatabaseReference roomIDRef = getRoomIdentityReference();
         String roomID = roomIDRef.push().getKey();
-
-        DatabaseReference roomIDInst = roomIDRef.child(roomID);
-        roomIDInst.child("ownerID").setValue(ownerID);
-        roomIDInst.child("name").setValue(name);
-        roomIDInst.child("longg").setValue(longg);
-        roomIDInst.child("lat").setValue(lat);
-        roomIDInst.child("rad").setValue(rad);
-        roomIDInst.child("password").setValue(password);
+        roomIDRef.child(roomID).child("rad").setValue(rad);
+        roomIDRef.child(roomID).child("ownerID").setValue(ownerID);
+        roomIDRef.child(roomID).child("name").setValue(name);
+        roomIDRef.child(roomID).child("longg").setValue(longg);
+        roomIDRef.child(roomID).child("lat").setValue(lat);
+        roomIDRef.child(roomID).child("password").setValue(password);
 
         return roomID;
 
+    }
+
+    public static void destroyRoom(String roomID){
+        getRoomIdentityReference().child(roomID).setValue(null);
+        getRoomMessagesReference().child(roomID).setValue(null);
+        getRoomUsersReference().child(roomID).setValue(null);
     }
 
     public static void sendChatMessage(final ChatMessage chatMessage, final String roomID, final Activity activity) {
@@ -486,8 +601,7 @@ public class Database {
         System.out.println("Database >> " + message); //todo android logger
     }
 
-    public static boolean isCurrentUserAdminOfRoom(final String roomID) {
-        //TODO: compare current user with ownerID of specific room in database
-        return true;
+    public static boolean isCurrentUserAdminOfRoom() {
+        return isOwner;
     }
 }

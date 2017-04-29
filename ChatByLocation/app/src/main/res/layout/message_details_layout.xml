@@ -8,15 +8,11 @@
 
     <ImageView
         android:id="@+id/userImage"
+        app:srcCompat="@drawable/ic_default_icon"
+        android:background="@color/colorAccent"
 
-        android:clickable="true"
-        android:onClick="imageClick"
-
-        app:srcCompat="@color/colorAccent"
-
-        android:layout_width="120dp"
-        android:layout_height="120dp"
-        android:layout_margin="10dp"
+        android:layout_width="135dp"
+        android:layout_height="135dp"
 
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
@@ -27,14 +23,14 @@
         android:text="Username"
         android:textSize="22sp"
         android:textAlignment="center"
+        android:textColor="@color/text"
 
         android:background="#EAEAEA"
 
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:layout_marginBottom="20dp"
-        android:padding="4dp"
+        android:paddingTop="5dp"
+        android:paddingBottom="6dp"
 
         app:layout_constraintTop_toBottomOf="@+id/userImage"
         app:layout_constraintLeft_toLeftOf="parent"
@@ -43,39 +39,35 @@
     <ToggleButton
         android:id="@+id/blockUser"
         style="@style/colorThemeButton"
-        android:layout_width="70dp"
-        android:layout_height="31dp"
-        android:layout_marginRight="0dp"
-        android:layout_marginTop="10dp"
         android:background="@color/transparent"
+
         android:onClick="onMuteClick"
         android:textOff="@string/mute"
         android:textOn="@string/unmute"
-        app:layout_constraintRight_toRightOf="@+id/userName"
-        app:layout_constraintTop_toBottomOf="@+id/userImage" />
+
+        android:layout_width="70dp"
+        android:layout_height="wrap_content"
+
+        android:layout_marginRight="8dp"
+
+        app:layout_constraintTop_toTopOf="@+id/userName"
+        app:layout_constraintBottom_toBottomOf="@+id/userName"
+        app:layout_constraintRight_toRightOf="parent" />
 
     <Button
         android:id="@+id/banUser"
         android:text="@string/ban"
-        android:textAllCaps="false"
-
         android:onClick="banUserClick"
-
         style="@style/colorThemeButton"
         android:background="@color/transparent"
-        android:visibility="visible"
 
-        android:layout_width="45dp"
-        android:layout_height="36dp"
+        android:layout_width="70dp"
+        android:layout_height="wrap_content"
 
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/userName" />
+        android:layout_marginLeft="4dp"
 
-    <TextView
-        android:id="@+id/space"
-        android:layout_marginTop="10dp"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        app:layout_constraintTop_toBottomOf="@+id/userName" />
+        app:layout_constraintTop_toTopOf="@+id/userName"
+        app:layout_constraintBottom_toBottomOf="@+id/userName"
+        app:layout_constraintLeft_toLeftOf="parent" />
 
 </android.support.constraint.ConstraintLayout>
