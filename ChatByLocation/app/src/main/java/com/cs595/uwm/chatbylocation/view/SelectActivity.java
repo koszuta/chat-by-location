@@ -70,6 +70,7 @@ public class SelectActivity extends AppCompatActivity
                 protected void populateView(View view, RoomIdentity roomIdentity, int position) {
                     //trace("All items enabled: " + this.areAllItemsEnabled());
 
+                    // Get all list item components
                     final TextView roomName = (TextView) view.findViewById(R.id.roomName);
                     final TextView roomCoords = (TextView) view.findViewById(R.id.roomCoords);
                     final TextView roomRadius = (TextView) view.findViewById(R.id.roomRadius);
@@ -77,35 +78,33 @@ public class SelectActivity extends AppCompatActivity
                     final Button joinButton = (Button) view.findViewById(R.id.joinButton);
                     final TextView divider = (TextView) view.findViewById(R.id.roomDivider);
 
-                    if(roomIdentity.getLat() == null || roomIdentity.getLongg() == null || roomIdentity.getName() == null
-                            || roomIdentity.getOwnerID() == null)  {
-                        roomName.setVisibility(View.GONE);
-                        roomCoords.setVisibility(View.GONE);
-                        roomRadius.setVisibility(View.GONE);
-                        roomIsPrivate.setVisibility(View.GONE);
-                        joinButton.setVisibility(View.GONE);
-                        joinButton.setVisibility(View.GONE);
-                        divider.setVisibility(View.GONE);
+                    // Pre-hide them before deciding whether to show room in list
+                    roomName.setVisibility(View.GONE);
+                    roomCoords.setVisibility(View.GONE);
+                    roomRadius.setVisibility(View.GONE);
+                    roomIsPrivate.setVisibility(View.GONE);
+                    joinButton.setVisibility(View.GONE);
+                    divider.setVisibility(View.GONE);
+
+                    // If room has bad values leave it hidden and return
+                    if (roomIdentity.getLat() == null
+                     || roomIdentity.getLongg() == null
+                     || roomIdentity.getRad() < 0
+                     || roomIdentity.getName() == null
+                     || roomIdentity.getOwnerID() == null) {
                         return;
                     }
-
-
                     // Check if user is within room radius (with math)
                     float lat = Float.valueOf(roomIdentity.getLat());
                     float lng = Float.valueOf(roomIdentity.getLongg());
 
+                    // If user is outside room radius keep it hidden
                     if (!withinRoomRadius(lat, lng, roomIdentity.getRad())) {
                         //trace("Room " + roomIdentity.getName() + " is out of range");
-
-                        roomName.setVisibility(View.GONE);
-                        roomCoords.setVisibility(View.GONE);
-                        roomRadius.setVisibility(View.GONE);
-                        roomIsPrivate.setVisibility(View.GONE);
-                        joinButton.setVisibility(View.GONE);
-                        divider.setVisibility(View.GONE);
-
                         return;
-                    } else {
+                    }
+                    // Otherwise show it in the room list
+                    else {
                         roomName.setVisibility(View.VISIBLE);
                         roomCoords.setVisibility(View.VISIBLE);
                         roomRadius.setVisibility(View.VISIBLE);
@@ -242,9 +241,16 @@ public class SelectActivity extends AppCompatActivity
         String roomId = String.valueOf(view.getTag());
         System.out.println("roomId = " + roomId);
 
-        // Check if user is in radius (just to make sure)
         RoomIdentity room = Database.getRoomIdentity(roomId);
-        if (!withinRoomRadius(Float.valueOf(room.getLat()), Float.valueOf(room.getLongg()), room.getRad())) {
+        if (room == null) return;
+
+        String roomLat = room.getLat();
+        String roomLng = room.getLongg();
+        int roomRad = room.getRad();
+        // Make sure room has good values first
+        if (roomLat == null || roomLng == null || roomRad < 0
+                // Check if user is within room radius
+                || !withinRoomRadius(Float.valueOf(roomLat), Float.valueOf(roomLng), roomRad)) {
             Toast.makeText(this, "You must be within a room's radius to enter", Toast.LENGTH_LONG).show();
         }
         else if (BanController.isCurrentUserBanned(roomId)) {
