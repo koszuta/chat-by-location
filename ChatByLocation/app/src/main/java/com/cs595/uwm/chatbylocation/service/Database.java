@@ -201,7 +201,7 @@ public class Database {
 
         }
 
-        return nextOwner.getKey();
+        return nextOwner != null ? nextOwner.getKey() : null;
     }
 
     public static int getRoomRadius(final String roomId) {
