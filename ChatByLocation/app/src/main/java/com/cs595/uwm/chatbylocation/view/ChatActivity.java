@@ -222,6 +222,10 @@ public class ChatActivity extends AppCompatActivity
 
         textInput = (EditText) findViewById(R.id.textInput);
         String message = String.valueOf(textInput.getText());
+
+        // Prevent user from sending only whitespace
+        message = message.trim();
+
         String roomId = Database.getCurrentRoomID();
         if (roomId != null && !"".equals(message) && message != null) {
             Database.sendChatMessage(
