@@ -53,10 +53,17 @@ public class GeofenceTransitionsIntentService extends IntentService {
 
         Log.d("geofence", "handle intent");
 
+        // If the user is not in the room, don't do anything
+        if (Database.getCurrentRoomID() == null) {
+            trace("Geofence triggered, but user is not in a room");
+            return;
+        }
+
         List<Geofence> triggeringGeofences = geofencingEvent.getTriggeringGeofences();
         trace("Geofence transition: " + getGeofenceTransitionDetails(geofencingEvent.getGeofenceTransition(), triggeringGeofences));
 
         // Do somethine based on the transition type
+        /*
         switch (geofencingEvent.getGeofenceTransition()) {
 
             case Geofence.GEOFENCE_TRANSITION_ENTER:
@@ -109,6 +116,7 @@ public class GeofenceTransitionsIntentService extends IntentService {
             default:
                 break;
         }
+        */
     }
 
 
@@ -131,13 +139,13 @@ public class GeofenceTransitionsIntentService extends IntentService {
         Log.i(TAG, "sendNotification: " + msg );
 
         // Intent to start the main Activity
-        Intent notificationIntent = CreateRoomDialog.makeNotificationIntent(
-                getApplicationContext(), msg
-        );
+        //Intent notificationIntent = CreateRoomDialog.makeNotificationIntent(
+             //   getApplicationContext(), msg
+        //);
 
         TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
         stackBuilder.addParentStack(SelectActivity.class);
-        stackBuilder.addNextIntent(notificationIntent);
+        //stackBuilder.addNextIntent(notificationIntent);
         PendingIntent notificationPendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
 
 
