@@ -110,7 +110,7 @@ public class ChatActivity extends AppCompatActivity
     // Create two geofences, one to warn (at room radius) and one to kick (beyond room radius)
     public static final String WARN_GEOFENCE = "warn";
     public static final String KICK_GEOFENCE = "kick";
-    public static final int BOUNDARY_LEEWAY = 20;
+    public static final int BOUNDARY_LEEWAY = 10;
 
     private static GoogleApiClient mGoogleApiClient;
     private static PendingIntent mGeofencePendingIntent;
@@ -493,28 +493,11 @@ public class ChatActivity extends AppCompatActivity
         Database.removeRoomMessagesListener();
         shouldGetNumMessages = true;
         shouldWelcomeUser = true;
+        shouldWarnUser = true;
         shouldKickUser = false;
 
-        // Destroy geofences on exit
-        if (mGoogleApiClient.isConnected()) {
-            LocationServices.GeofencingApi.removeGeofences(
-                    mGoogleApiClient,
-                    mGeofencePendingIntent
-            ).setResultCallback(new ResultCallback<Status>() {
-                @Override
-                public void onResult(@NonNull Status status) {
-                    trace("Disconnecting Google Api Client");
-                    mGoogleApiClient.disconnect();
-
-                    // Go to select screen after geofences are destroyed
-                    startSelectActivity();
-                    //destroy chat room activity
-                    finish();
-                }
-            });
-        } else {
-            startSelectActivity();
-        }
+        startSelectActivity();
+        finish();
     }
 
     private void startSelectActivity() {
@@ -526,26 +509,11 @@ public class ChatActivity extends AppCompatActivity
         Database.removeRoomMessagesListener();
         shouldGetNumMessages = true;
         shouldWelcomeUser = true;
+        shouldWarnUser = true;
         shouldKickUser = false;
 
-        // Destroy geofences on exit
-        if (mGoogleApiClient.isConnected()) {
-            LocationServices.GeofencingApi.removeGeofences(
-                    mGoogleApiClient,
-                    mGeofencePendingIntent
-            ).setResultCallback(new ResultCallback<Status>() {
-                @Override
-                public void onResult(@NonNull Status status) {
-                    trace("Disconnecting Google Api Client");
-                    mGoogleApiClient.disconnect();
-
-                    // Go to main activity after geofences are destroyed
-                    startMainActivity();
-                }
-            });
-        } else {
-            startMainActivity();
-        }
+        startMainActivity();
+        finish();
     }
 
     private void startMainActivity() {
@@ -656,29 +624,48 @@ public class ChatActivity extends AppCompatActivity
     public void onLocationChanged(Location pLocation) {
         trace("Location updated");
         location = pLocation;
-        RoomIdentity room = Database.getRoomIdentity(Database.getCurrentRoomID());
-        if (room != null) {
-            double lat = Double.valueOf(room.getLat());
-            double lng = Double.valueOf(room.getLongg());
-            boolean withinWarn = withinRoomRadius(lat, lng, room.getRad() - BOUNDARY_LEEWAY);
-            boolean withinKick = withinRoomRadius(lat, lng, room.getRad() + BOUNDARY_LEEWAY);
 
-            // Welcome user if they are within the radius and haven't been welcomed yet
-            if (withinWarn && withinKick) {
-                Toast.makeText(ChatActivity.this, "Welcome to the chat room!", Toast.LENGTH_LONG).show();
-                shouldWelcomeUser = false;
-            }
+        // Get current room and return if it's null
+        RoomIdentity room = Database.getRoomIdentity(Database.getCurrentRoomID());
+        if (room == null) return;
+
+        // Return if null room values
+        String roomLat = room.getLat();
+        String roomLng = room.getLongg();
+        int roomRad = room.getRad();
+        if (roomLat == null || roomLng == null || roomRad  < 0) return;
+
+        double lat = Double.valueOf(roomLat);
+        double lng = Double.valueOf(roomLng);
+        boolean withinWarn = withinRoomRadius(lat, lng, roomRad - BOUNDARY_LEEWAY);
+        boolean withinKick = withinRoomRadius(lat, lng, roomRad + BOUNDARY_LEEWAY);
+
+        if (!shouldKickUser) {
+
             // Kick user if they are outside the kick radius
-            else if (!withinKick) {
-                Toast.makeText(ChatActivity.this, "You wandered astray and were kicked from the chat room!", Toast.LENGTH_LONG).show();
+            if (!withinKick) {
                 shouldKickUser = true;
-            }
-            // Warn the user if they left the warn radius
-            else if (!withinWarn && shouldWarnUser) {
-                Toast.makeText(ChatActivity.this, "Turn back! You're getting too far away!", Toast.LENGTH_LONG).show();
-                shouldWarnUser = false;
+                Toast.makeText(ChatActivity.this, "You wandered astray and were kicked from the chat room!", Toast.LENGTH_LONG).show();
+                // TODO: Check if this will work
+                //mGoogleApiClient.disconnect();
             } else {
-                shouldWarnUser = true;
+                // Within kick radius
+                // Welcome user if they haven't been welcomed yet
+                if (shouldWelcomeUser) {
+                    Toast.makeText(ChatActivity.this, "Welcome to the chat room!", Toast.LENGTH_LONG).show();
+                    shouldWelcomeUser = false;
+                }
+                // Warn user if outside of warn radius
+                if (!withinWarn) {
+                    if (shouldWarnUser) {
+                        Toast.makeText(ChatActivity.this, "Turn back! You're getting too far away!", Toast.LENGTH_LONG).show();
+                        shouldWarnUser = false;
+                    }
+                }
+                // Otherwise reset warning
+                else {
+                    shouldWarnUser = true;
+                }
             }
         }
     }
@@ -697,7 +684,7 @@ public class ChatActivity extends AppCompatActivity
         double dEW = kpdLon*(myLng - oLon);
         double distance = 1000 * Math.sqrt(Math.pow(dNS, 2) + Math.pow(dEW, 2));
         //trace("Distance = " + distance + " m");
-        return distance  <= radius;
+        return distance <= radius;
     }
 
     @Override

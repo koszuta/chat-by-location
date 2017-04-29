@@ -137,13 +137,13 @@ public class GeofenceTransitionsIntentService extends IntentService {
         Log.i(TAG, "sendNotification: " + msg );
 
         // Intent to start the main Activity
-        Intent notificationIntent = CreateRoomDialog.makeNotificationIntent(
-                getApplicationContext(), msg
-        );
+        //Intent notificationIntent = CreateRoomDialog.makeNotificationIntent(
+             //   getApplicationContext(), msg
+        //);
 
         TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
         stackBuilder.addParentStack(SelectActivity.class);
-        stackBuilder.addNextIntent(notificationIntent);
+        //stackBuilder.addNextIntent(notificationIntent);
         PendingIntent notificationPendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
 
 
