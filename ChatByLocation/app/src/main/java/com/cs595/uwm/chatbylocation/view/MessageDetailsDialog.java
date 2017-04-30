@@ -1,5 +1,6 @@
 package com.cs595.uwm.chatbylocation.view;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
@@ -53,18 +54,30 @@ public class MessageDetailsDialog extends DialogFragment {
             }
         } else {
             userImageView.setImageResource(userIcon);
+            userImageView.setPadding(35,35,35,35);
         }
 
+        // Make sure mute button reflects user's muted status
         MuteController.adjustMuteButton(muteButton, userName);
 
-        // TODO: Make 'Ban' button visible when user is admin of current room
-        //*
-        if (Database.isCurrentUserAdminOfRoom(userId)) {
+        // Make 'Ban' button visible when user is admin of current room
+        if (Database.isCurrentUserAdminOfRoom()) {
             banButton.setVisibility(Button.VISIBLE);
         } else {
             banButton.setVisibility(View.GONE);
         }
-        //*/
+
+        // Close message details dialog on ban click
+        banButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Activity activity = getActivity();
+                if (activity instanceof ChatActivity) {
+                    ((ChatActivity) activity).banUserClick(v);
+                }
+                getDialog().cancel();
+            }
+        });
 
         return builder.create();
     }

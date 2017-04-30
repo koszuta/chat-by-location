@@ -4,6 +4,7 @@
     package="com.cs595.uwm.chatbylocation">
 
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_MOCK_LOCATION" />
 
     <uses-feature android:name="android.hardware.camera"
         android:required="true" />
@@ -14,12 +15,16 @@
 
     <application
         android:allowBackup="true"
+        android:debuggable="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         tools:replace="android:supportsRtl"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+
+        <service android:name=".service.GeofenceTransitionsIntentService" />
+
         <activity android:name=".view.MainActivity"
             android:screenOrientation="portrait" >
             <intent-filter>
