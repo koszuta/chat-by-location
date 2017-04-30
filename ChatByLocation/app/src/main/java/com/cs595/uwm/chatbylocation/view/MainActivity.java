@@ -10,6 +10,7 @@ import android.view.View;
 import com.cs595.uwm.chatbylocation.R;
 import com.cs595.uwm.chatbylocation.controllers.MuteController;
 import com.cs595.uwm.chatbylocation.service.Database;
+import com.google.firebase.auth.FirebaseAuth;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -35,6 +36,11 @@ public class MainActivity extends AppCompatActivity {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         prefs.edit().getString("user_icon", UserIcon.NONE).apply();
         //*/
+
+        //clear disk cache of current user if not logged out so it doesn't populate in database;
+        if(FirebaseAuth.getInstance().getCurrentUser() != null) {
+            FirebaseAuth.getInstance().signOut();
+        }
 
         MuteController.initMuteList(getApplicationContext());
         Database.initUsersListener();
