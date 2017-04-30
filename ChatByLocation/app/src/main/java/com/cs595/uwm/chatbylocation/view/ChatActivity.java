@@ -101,6 +101,15 @@ public class ChatActivity extends AppCompatActivity
     private static boolean shouldWelcomeUser = true;
     private static boolean shouldWarnUser = true;
 
+    private DataSetObserver banObserver = new DataSetObserver() {
+        @Override
+        public void onChanged() {
+            //block message and kick out user if banned from current room
+            //TODO:add a method delay to prevent spamming this method call on every message
+            checkIfBanned();
+        }
+    };
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -350,16 +359,7 @@ public class ChatActivity extends AppCompatActivity
                         trace("roomIDListener setting adapter");
 
                     }
-                    chatListAdapter.registerDataSetObserver(new DataSetObserver()
-                    {
-                        @Override
-                        public void onChanged()
-                        {
-                            //block message and kick out user if banned from current room
-                            //TODO:add a method delay to prevent spamming this method call on every message
-                            checkIfBanned();
-                        }
-                    });
+                    chatListAdapter.registerDataSetObserver(banObserver);
                 }
 
                 @Override
@@ -490,7 +490,11 @@ public class ChatActivity extends AppCompatActivity
 
     private void doLeaveRoom() {
         Database.setUserRoom(null);
+        // Clean up listeners
         Database.removeRoomMessagesListener();
+        // Remove ban listener
+        chatListAdapter.unregisterDataSetObserver(banObserver);
+        // Disconnect location updates
         mGoogleApiClient.disconnect();
 
         resetBooleans();
@@ -505,7 +509,11 @@ public class ChatActivity extends AppCompatActivity
 
     private void doSignOut() {
         Database.signOutUser();
+        // Clean up listeners
         Database.removeRoomMessagesListener();
+        // Remove ban listener
+        chatListAdapter.unregisterDataSetObserver(banObserver);
+        // Disconnect location updates
         mGoogleApiClient.disconnect();
 
         resetBooleans();
