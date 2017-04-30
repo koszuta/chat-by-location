@@ -85,7 +85,6 @@ public class ChatActivity extends AppCompatActivity
 
     private DialogFragment messageDialog;
     private ListView messageListView;
-    private Intent banUserIntent;
     Bundle args = new Bundle();
 
     private static boolean shouldGetNumMessages = true;
@@ -125,7 +124,6 @@ public class ChatActivity extends AppCompatActivity
         }
 
         //construct objects
-        banUserIntent = new Intent(this, SelectActivity.class);
         messageListView = (ListView) this.findViewById(R.id.messageList);
         messageListView.setItemsCanFocus(false);
         messageDialog = new MessageDetailsDialog();
@@ -191,13 +189,7 @@ public class ChatActivity extends AppCompatActivity
         if(Database.isCurrentUserAdminOfRoom()) {
             BanController.addToRoomBanList(view.getContext(), userId, roomID);
         }
-        if(isUserBannedFromCurrentRoom()) {
-            Toast.makeText(ChatActivity.this,
-                    "You have been banned from the room! Shame.",
-                    Toast.LENGTH_SHORT).show();
-            startActivity(banUserIntent);
-            finish();
-        }
+        checkIfBanned();
     }
 
     public void toBottomClick(View view) {
@@ -214,13 +206,7 @@ public class ChatActivity extends AppCompatActivity
 
         // Nathan TODO: Use better ban method
         //block message and kick out user if banned from current room
-        if(isUserBannedFromCurrentRoom()) {
-            Toast.makeText(ChatActivity.this,
-                    "You have been banned from the room! Shame.",
-                    Toast.LENGTH_SHORT).show();
-            doLeaveRoom();
-            return;
-        }
+        if(checkIfBanned()) return;
 
         // Get color for message from preferences
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
@@ -371,13 +357,7 @@ public class ChatActivity extends AppCompatActivity
                         {
                             //block message and kick out user if banned from current room
                             //TODO:add a method delay to prevent spamming this method call on every message
-                            if(isUserBannedFromCurrentRoom()) {
-                                Toast.makeText(ChatActivity.this,
-                                        "You have been banned from the room! Shame.",
-                                        Toast.LENGTH_SHORT).show();
-                                startActivity(banUserIntent);
-                                finish();
-                            }
+                            checkIfBanned();
                         }
                     });
                 }
@@ -545,6 +525,21 @@ public class ChatActivity extends AppCompatActivity
         shouldWarnUser = true;
     }
 
+    private boolean checkIfBanned() {
+        if(isUserBannedFromCurrentRoom()) {
+            Toast.makeText(ChatActivity.this,
+                    "You have been banned from the room! Shame.",
+                    Toast.LENGTH_SHORT).show();
+            doLeaveRoom();
+            return true;
+        }
+        return false;
+    }
+
+    private boolean isUserBannedFromCurrentRoom() {
+        return BanController.isCurrentUserBanned(Database.getCurrentRoomID());
+    }
+
     private String formatTimestamp(long timeMillis) {
         String format = "h:mma";
 
@@ -566,10 +561,6 @@ public class ChatActivity extends AppCompatActivity
         dateFormatted = dateFormatted.replace("AM", "am").replace("PM", "pm");
 
         return dateFormatted;
-    }
-
-    private boolean isUserBannedFromCurrentRoom() {
-        return BanController.isCurrentUserBanned(Database.getCurrentRoomID());
     }
 
     private boolean withinRoomRadius(double oLat, double oLon, int radius) {
