@@ -19,6 +19,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -75,6 +76,7 @@ public class SelectActivity extends AppCompatActivity
                     final TextView roomCoords = (TextView) view.findViewById(R.id.roomCoords);
                     final TextView roomRadius = (TextView) view.findViewById(R.id.roomRadius);
                     final ImageView roomIsPrivate = (ImageView) view.findViewById(R.id.roomIsPrivate);
+                    final ImageView enterSymbol = (ImageView) view.findViewById(R.id.roomEnterSymbol);
                     final Button joinButton = (Button) view.findViewById(R.id.joinButton);
                     final TextView divider = (TextView) view.findViewById(R.id.roomDivider);
 
@@ -83,7 +85,8 @@ public class SelectActivity extends AppCompatActivity
                     roomCoords.setVisibility(View.GONE);
                     roomRadius.setVisibility(View.GONE);
                     roomIsPrivate.setVisibility(View.GONE);
-                    joinButton.setVisibility(View.GONE);
+                    enterSymbol.setVisibility(View.GONE);
+                    //joinButton.setVisibility(View.GONE);
                     divider.setVisibility(View.GONE);
 
                     // If room has bad values leave it hidden and return
@@ -97,10 +100,10 @@ public class SelectActivity extends AppCompatActivity
                     // Check if user is within room radius (with math)
                     float lat = Float.valueOf(roomIdentity.getLat());
                     float lng = Float.valueOf(roomIdentity.getLongg());
-
-                    // If user is outside room radius keep it hidden
                     if (!withinRoomRadius(lat, lng, roomIdentity.getRad())) {
                         //trace("Room " + roomIdentity.getName() + " is out of range");
+
+                        // If user is outside room radius keep it hidden in list
                         return;
                     }
                     // Otherwise show it in the room list
@@ -108,7 +111,8 @@ public class SelectActivity extends AppCompatActivity
                         roomName.setVisibility(View.VISIBLE);
                         roomCoords.setVisibility(View.VISIBLE);
                         roomRadius.setVisibility(View.VISIBLE);
-                        joinButton.setVisibility(View.VISIBLE);
+                        enterSymbol.setVisibility(View.VISIBLE);
+                        //joinButton.setVisibility(View.VISIBLE);
                         divider.setVisibility(View.VISIBLE);
                     }
 
@@ -151,6 +155,17 @@ public class SelectActivity extends AppCompatActivity
             trace("Location permissions denied at start");
             requestFineLocationPermission();
         }
+
+        ListView roomList = (ListView) this.findViewById(R.id.roomList);
+        roomList.setItemsCanFocus(false);
+        roomList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                trace("Click item " + parent.getItemAtPosition(position));
+                Button joinButton = (Button) view.findViewById(R.id.joinButton);
+                joinRoomClick(joinButton);
+            }
+        });
 
         displayRoomList();
     }
