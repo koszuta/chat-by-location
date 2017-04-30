@@ -193,7 +193,7 @@ public class Database {
                 userEntry.getValue().setRoomJoinTime(System.currentTimeMillis());
             }
 
-            if(Long.valueOf(userEntry.getValue().getRoomJoinTime())
+            if(nextOwner != null && Long.valueOf(userEntry.getValue().getRoomJoinTime())
                     < Long.valueOf(nextOwner.getValue().getRoomJoinTime())){
                 nextOwner = userEntry;
             }
