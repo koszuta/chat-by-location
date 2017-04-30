@@ -84,6 +84,7 @@
             android:layout_gravity="center_vertical"
 
             style="@style/colorThemeButton"
+            android:textColor="@color/colorPrimaryDark"
             android:background="@color/transparent"
 
             android:onClick="sendMessageClick" />

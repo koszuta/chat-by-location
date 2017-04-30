@@ -23,7 +23,7 @@
         android:text="Username"
         android:textSize="22sp"
         android:textAlignment="center"
-        android:textColor="@color/text"
+        android:textColor="@color/darkText"
 
         android:background="#EAEAEA"
 

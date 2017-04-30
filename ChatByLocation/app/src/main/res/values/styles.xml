@@ -25,7 +25,7 @@
     </style>
 
     <style name="colorThemeButton" parent="Widget.AppCompat.Button.Colored">
-        <item name="android:textColor">@color/colorPrimaryDark</item>
+        <item name="android:textColor">@color/darkGrayText</item>
         <item name="android:textSize">16sp</item>
     </style>
 

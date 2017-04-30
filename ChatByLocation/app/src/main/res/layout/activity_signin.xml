@@ -10,11 +10,10 @@
     <TextView
         android:id="@+id/signInTitle"
 
-        android:text="Welcome back to ChatByLocation!"
+        android:text="Welcome back!"
         android:textAlignment="center"
-        android:textSize="20sp"
-        android:textStyle="bold"
-        android:textColor="@color/text"
+        android:textSize="28sp"
+        android:textColor="@color/colorPrimaryDark"
 
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -32,7 +31,7 @@
 
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="12dp"
 
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
@@ -59,12 +58,12 @@
         android:text="Sign In"
         android:onClick="onSignInClick"
 
-        android:layout_width="100dp"
+        android:layout_width="135dp"
         android:layout_height="50dp"
+        android:layout_marginTop="30dp"
 
-        android:layout_marginTop="25dp"
-
+        app:layout_constraintTop_toBottomOf="@+id/sign_password"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/sign_password" />
+        app:layout_constraintLeft_toLeftOf="parent" />
 
 </android.support.constraint.ConstraintLayout>

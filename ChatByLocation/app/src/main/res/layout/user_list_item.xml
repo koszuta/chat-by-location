@@ -21,7 +21,7 @@
         android:id="@+id/user_name_in_list"
         tools:text="User Name"
         android:textSize="24sp"
-        android:textColor="@color/text"
+        android:textColor="@color/darkText"
 
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

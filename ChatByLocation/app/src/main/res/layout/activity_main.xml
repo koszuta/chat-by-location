@@ -8,26 +8,23 @@
 
     <ImageView
         android:id="@+id/logo"
-        android:layout_width="250dp"
-        android:layout_height="300dp"
+        android:src="@drawable/ic_chatapp_logo"
 
-        android:layout_marginTop="70dp"
+        android:layout_width="300dp"
+        android:layout_height="350dp"
+        android:layout_marginTop="10dp"
 
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-
-        app:srcCompat="@drawable/chat_logo_no_back" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <Button
         android:id="@+id/login_button"
         android:onClick="signIn"
         android:text="Sign In"
 
-        android:layout_width="260dp"
+        android:layout_width="250dp"
         android:layout_height="50dp"
-
-        android:layout_marginBottom="0dp"
 
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
@@ -38,10 +35,9 @@
         android:onClick="register"
         android:text="REGISTER"
 
-        android:layout_width="260dp"
+        android:layout_width="250dp"
         android:layout_height="50dp"
-
-        android:layout_marginBottom="70dp"
+        android:layout_marginBottom="65dp"
 
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"

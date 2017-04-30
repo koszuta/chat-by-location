@@ -2,7 +2,6 @@ package com.cs595.uwm.chatbylocation.view;
 
 import android.Manifest;
 import android.app.DialogFragment;
-import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -46,7 +45,6 @@ import com.cs595.uwm.chatbylocation.service.Database;
 import com.firebase.ui.database.FirebaseListAdapter;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
@@ -56,8 +54,6 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Created by Nathan on 3/13/17.
@@ -318,7 +314,7 @@ public class ChatActivity extends AppCompatActivity
                                 RelativeSizeSpan timeSize = new RelativeSizeSpan(0.8f);
                                 ss.setSpan(timeSize, 0, timeLength, Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
 
-                                ForegroundColorSpan timeColor = new ForegroundColorSpan(ResourcesCompat.getColor(getResources(), R.color.timestamp, null));
+                                ForegroundColorSpan timeColor = new ForegroundColorSpan(ResourcesCompat.getColor(getResources(), R.color.darkGrayText, null));
                                 ss.setSpan(timeColor, 0, timeLength, Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
 
                                 StyleSpan bold = new StyleSpan(android.graphics.Typeface.BOLD);

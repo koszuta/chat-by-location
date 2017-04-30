@@ -14,7 +14,7 @@
         android:id="@+id/createRoomLabel"
         android:text="Create a new chat room:"
         android:textSize="22sp"
-        android:textColor="@color/text"
+        android:textColor="@color/darkText"
 
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -43,7 +43,7 @@
         android:id="@+id/radiusValue"
         android:text="Radius: 100 m"
         android:textSize="18sp"
-        android:textColor="@color/text"
+        android:textColor="@color/darkText"
 
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -72,7 +72,7 @@
         android:id="@+id/privateText"
         android:text="Private?"
         android:textSize="18sp"
-        android:textColor="@color/text"
+        android:textColor="@color/darkText"
 
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

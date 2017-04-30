@@ -7,7 +7,7 @@
     <TextView
         android:text="Enter mock coordinates:"
         android:textSize="20dp"
-        android:textColor="@color/text"
+        android:textColor="@color/darkText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 
