@@ -37,11 +37,6 @@ public class MainActivity extends AppCompatActivity {
         prefs.edit().getString("user_icon", UserIcon.NONE).apply();
         //*/
 
-        //clear disk cache of current user if not logged out so it doesn't populate in database;
-        if(FirebaseAuth.getInstance().getCurrentUser() != null) {
-            FirebaseAuth.getInstance().signOut();
-        }
-
         MuteController.initMuteList(getApplicationContext());
         Database.initUsersListener();
         Database.initRoomsListener();
