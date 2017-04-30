@@ -365,6 +365,7 @@ public class Database {
     public static void initCurrentUserListeners() {
         DatabaseReference userRef = getCurrentUserReference();
         if (userRef != null) {
+            userRef.child("username").setValue(getUserUsername());
             userRef.child("currentRoomID").addValueEventListener(cridListener);
             userRef.child("removeFrom").addValueEventListener(rfrListener);
 
@@ -382,11 +383,6 @@ public class Database {
 
     public static void initUsersListener() {
         if (listeningToUsers) return;
-
-        String userId = getUserId();
-        if (userId != null) {
-            getUsersReference().child(userId).child("username").setValue(getUserUsername());
-        }
 
         getUsersReference().addChildEventListener(new ChildEventListener() {
             @Override

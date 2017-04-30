@@ -10,6 +10,7 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.cs595.uwm.chatbylocation.R;
+import com.cs595.uwm.chatbylocation.service.Database;
 import com.cs595.uwm.chatbylocation.service.Registration;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -63,6 +64,8 @@ public class SignInActivity extends AppCompatActivity {
                                 Log.d("SignIn", "createUserWithEmail:onComplete:" + task.isSuccessful());
 
                                 if (task.isSuccessful()) {
+                                    // Initialize current user name in database and set listeners
+                                    Database.initCurrentUserListeners();
                                     startActivity(new Intent(v.getContext(), SelectActivity.class));
                                 }
                             }

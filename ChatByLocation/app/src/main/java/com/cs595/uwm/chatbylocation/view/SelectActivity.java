@@ -134,8 +134,6 @@ public class SelectActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.select_layout);
 
-        Database.initCurrentUserListeners();
-
         // Make new api client for location api
         if (googleApiClient == null) {
             googleApiClient = new GoogleApiClient.Builder(this)
