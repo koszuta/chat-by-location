@@ -9,6 +9,8 @@
     <TextView
         android:id="@+id/roomName"
         android:text="Room name"
+        android:textSize="24sp"
+        android:paddingTop="4dp"
 
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
