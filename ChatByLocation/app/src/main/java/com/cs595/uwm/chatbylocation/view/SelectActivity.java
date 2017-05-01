@@ -93,7 +93,7 @@ public class SelectActivity extends AppCompatActivity
                     // Check if user is within room radius (with math)
                     float lat = Float.valueOf(roomIdentity.getLat());
                     float lng = Float.valueOf(roomIdentity.getLongg());
-                    if (!withinRoomRadius(lat, lng, roomIdentity.getRad())) {
+                    if (!withinRoomRadius(location, lat, lng, roomIdentity.getRad())) {
                         //trace("Room " + roomIdentity.getName() + " is out of range");
 
                         // If user is outside room radius keep it hidden in list
@@ -122,7 +122,7 @@ public class SelectActivity extends AppCompatActivity
                     //roomBearing.setText(formatCoords(roomIdentity.getLat(), roomIdentity.getLongg()));
                     roomRadius.setText("Radius: " + roomIdentity.getRad() + "m");
                     trace('\n' + roomIdentity.getName());
-                    float distance = (int) (distanceToCenter(lat, lng) * 100) / 100.0f;
+                    float distance = (int) (distanceToPoint(location, lat, lng) * 100) / 100.0f;
                     roomBearing.setText("Center: " + distance + " m,  " + getBearingName(lat, lng));
 
                     joinButton.setTag(getRef(position).getKey());
@@ -281,7 +281,7 @@ public class SelectActivity extends AppCompatActivity
         // Make sure room has good values first
         if (roomLat == null || roomLng == null || roomRad < 0
                 // Check if user is within room radius
-                || !withinRoomRadius(Float.valueOf(roomLat), Float.valueOf(roomLng), roomRad)) {
+                || !withinRoomRadius(location, Float.valueOf(roomLat), Float.valueOf(roomLng), roomRad)) {
             Toast.makeText(this, "You must be within a room's radius to enter", Toast.LENGTH_LONG).show();
         }
         else if (BanController.isCurrentUserBanned(roomId)) {
@@ -377,34 +377,36 @@ public class SelectActivity extends AppCompatActivity
                 REQUEST_FINE_LOCATION_ACCESS);
     }
 
-    private float distanceToCenter(float oLat, float oLng) {
-        if (location == null) return Float.MAX_VALUE;
-        float results[] = { 0.0f };
-        Location.distanceBetween(oLat, oLng, location.getLatitude(), location.getLongitude(), results);
-        return results[0];
-    }
-
-    private boolean withinRoomRadius(float oLat, float oLng, int radius) {
-        if (location == null) return false;
-        double myLat = location.getLatitude();
-        double myLng = location.getLongitude();
+    private float distanceToPoint(Location myLocation, float oLat, float oLng) {
+        if (myLocation == null) return Float.MAX_VALUE;
+        double myLat = myLocation.getLatitude();
+        double myLng = myLocation.getLongitude();
         double meanLat = Math.toRadians(myLat + oLat / 2);
         double kpdLat = 111.13209 - 0.56605*Math.cos(2*meanLat) + 0.00120*Math.cos(4*meanLat);
         double kpdLon = 111.41513*Math.cos(meanLat) - 0.09455*Math.cos(3*meanLat) + 0.00012*Math.cos(5*meanLat);
         double dNS = kpdLat*(myLat - oLat);
         double dEW = kpdLon*(myLng - oLng);
-        double distance = 1000 * Math.sqrt(Math.pow(dNS, 2) + Math.pow(dEW, 2));
-        trace("distance: difference = " + (distance - distanceToCenter(oLat, oLng)));
-        return distance <= radius;
+        return (float) (1000 * Math.sqrt(Math.pow(dNS, 2) + Math.pow(dEW, 2)));
+    }
+
+    private boolean withinRoomRadius(Location myLocation, float oLat, float oLng, int radius) {
+        return myLocation != null && distanceToPoint(myLocation, oLat, oLng) <= radius;
+    }
+
+    private float bearingToPoint(Location myLocation, float oLat, float oLng) {
+        if (myLocation == null) return 0;
+        double myLat = myLocation.getLatitude() / distanceToPoint(myLocation, oLat, oLng);
+        double myLng = myLocation.getLongitude();
+        trace("East/West of North = " + (myLng / Math.abs(myLng)));
+        return (float) Math.toDegrees(Math.acos(myLat) * (myLng / Math.abs(myLng)));
     }
 
     private String getBearingName(float oLat, float oLng) {
         if (location == null) return "";
-        Location origin = new Location("");
-        origin.setLatitude(oLat);
-        origin.setLongitude(oLng);
-        float bearing = location.bearingTo(origin) % 360;
-        trace("bearing = " + bearing);
+        Location roomCenter = new Location("");
+        roomCenter.setLatitude(oLat);
+        roomCenter.setLongitude(oLng);
+        float bearing = location.bearingTo(roomCenter);
         if ( -157.5 > bearing || bearing > 157.5) {
             return "S";
         }
