@@ -203,11 +203,6 @@ public class SelectActivity extends AppCompatActivity
 
     @Override
     public void onConnected(@Nullable Bundle bundle) {
-        updateLocation();
-
-    }
-
-    private void updateLocation() {
         trace("Connected to location api");
         LocationRequest locationRequest = new LocationRequest();
         locationRequest.setInterval(0)
@@ -255,8 +250,7 @@ public class SelectActivity extends AppCompatActivity
     }
 
     public Location getLastLocation() {
-        updateLocation();
-        return location;
+        return (location != null) ? location : LocationServices.FusedLocationApi.getLastLocation(googleApiClient);
     }
 
     public void joinRoomClick(View view) {
