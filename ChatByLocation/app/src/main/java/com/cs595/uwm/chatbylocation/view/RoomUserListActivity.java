@@ -76,7 +76,14 @@ public class RoomUserListActivity extends AppCompatActivity {
             public View getView(int position, View convertView, ViewGroup parent) {
 
                 UserIdentity user = getItem(position);
-                if (user == null) return convertView;
+                if (user == null) {
+                    //convertView is null here for a banned user and causes crash
+
+                    //hack for presentation - create a view, set it to gone, and return it. banned User still shows in userlist but no crash.
+                    View v = new View(getContext());
+                    v.setVisibility(View.GONE);
+                    return v;
+                }
 
                 //create new view if not yet created
                 if (convertView == null) {
