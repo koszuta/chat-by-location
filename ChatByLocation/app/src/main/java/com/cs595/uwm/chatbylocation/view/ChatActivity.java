@@ -25,6 +25,7 @@ import android.text.SpannableString;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.RelativeSizeSpan;
 import android.text.style.StyleSpan;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -501,7 +502,7 @@ public class ChatActivity extends AppCompatActivity
         // Clean up listeners
         Database.removeRoomMessagesListener();
         // Remove ban listener
-        chatListAdapter.unregisterDataSetObserver(banObserver);
+        doUnregisterObserver();
         // Disconnect location updates
         mGoogleApiClient.disconnect();
 
@@ -520,7 +521,7 @@ public class ChatActivity extends AppCompatActivity
         // Clean up listeners
         Database.removeRoomMessagesListener();
         // Remove ban listener
-        chatListAdapter.unregisterDataSetObserver(banObserver);
+        doUnregisterObserver();
         // Disconnect location updates
         mGoogleApiClient.disconnect();
 
@@ -528,6 +529,14 @@ public class ChatActivity extends AppCompatActivity
 
         startMainActivity();
         finish();
+    }
+
+    private void doUnregisterObserver() {
+        try {
+            chatListAdapter.unregisterDataSetObserver(banObserver);
+        } catch (IllegalStateException e) {
+            Log.d(e.getLocalizedMessage(), "doLeaveRoom");
+        }
     }
 
     private void startMainActivity() {

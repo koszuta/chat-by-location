@@ -14,6 +14,7 @@ import com.cs595.uwm.chatbylocation.objModel.UserIcon;
 import com.cs595.uwm.chatbylocation.objModel.UserIdentity;
 import com.cs595.uwm.chatbylocation.view.ChatActivity;
 import com.firebase.ui.auth.ui.User;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
@@ -24,6 +25,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
@@ -560,9 +562,14 @@ public class Database {
     }
 
     public static void sendChatMessage(final ChatMessage chatMessage, final String roomID, final Activity activity) {
-        getRoomMessagesReference()
-                .child(roomID).push()
-                .setValue(chatMessage)
+        final String messageId = getRoomMessagesReference().child(roomID).push().getKey();
+        getRoomMessagesReference().child(roomID).child(messageId).setValue(chatMessage)
+                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        getRoomMessagesReference().child(roomID).child(messageId).child("messageTime").setValue(ServerValue.TIMESTAMP);
+                    }
+                })
                 .addOnFailureListener(activity, new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception e) {

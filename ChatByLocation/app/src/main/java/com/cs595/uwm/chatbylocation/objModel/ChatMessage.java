@@ -17,8 +17,8 @@ public class ChatMessage {
         this.messageUser = messageUser;
         this.messageColor = messageColor;
 
-        // Initialize to current time
-        messageTime = new Date().getTime();
+        // Initialize to zero for placeholder value from database
+        messageTime = 0;
     }
 
     public ChatMessage(){
