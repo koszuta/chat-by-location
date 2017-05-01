@@ -35,7 +35,6 @@
         android:text="@string/dummyMessage"
         android:textSize="18sp"
         android:lineSpacingMultiplier="1.1"
-        android:textColor="@color/darkText"
 
         android:layout_width="0dp"
         android:layout_height="wrap_content"

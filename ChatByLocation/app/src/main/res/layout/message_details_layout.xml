@@ -23,7 +23,6 @@
         android:text="Username"
         android:textSize="22sp"
         android:textAlignment="center"
-        android:textColor="@color/darkText"
 
         android:background="#EAEAEA"
 
@@ -38,8 +37,8 @@
 
     <ToggleButton
         android:id="@+id/blockUser"
-        style="@style/colorThemeButton"
         android:background="@color/transparent"
+        android:textColor="@color/colorPrimaryDark"
 
         android:onClick="onMuteClick"
         android:textOff="@string/mute"
@@ -58,8 +57,8 @@
         android:id="@+id/banUser"
         android:text="@string/ban"
         android:onClick="banUserClick"
-        style="@style/colorThemeButton"
         android:background="@color/transparent"
+        android:textColor="@color/colorPrimaryDark"
 
         android:layout_width="70dp"
         android:layout_height="wrap_content"

@@ -1,7 +1,6 @@
 package com.cs595.uwm.chatbylocation.view;
 
 import android.Manifest;
-import android.app.Activity;
 import android.app.DialogFragment;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -15,7 +14,6 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -23,7 +21,6 @@ import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListView;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -39,11 +36,9 @@ import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.Locale;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Created by Nathan on 3/13/17.
@@ -56,7 +51,6 @@ public class SelectActivity extends AppCompatActivity
         LocationListener {
 
     public static final int REQUEST_FINE_LOCATION_ACCESS = 19;
-    private boolean hasFineLocationAccess = false;
 
     private GoogleApiClient googleApiClient;
     public static Location location;
@@ -69,12 +63,11 @@ public class SelectActivity extends AppCompatActivity
                     Database.getRoomIdentityReference()) {
                 @Override
                 protected void populateView(View view, RoomIdentity roomIdentity, int position) {
-                    //trace("All items enabled: " + this.areAllItemsEnabled());
 
                     // Get all list item components
                     final TextView roomName = (TextView) view.findViewById(R.id.roomName);
-                    final TextView roomCoords = (TextView) view.findViewById(R.id.roomCoords);
                     final TextView roomRadius = (TextView) view.findViewById(R.id.roomRadius);
+                    final TextView roomBearing = (TextView) view.findViewById(R.id.roomBearing);
                     final ImageView roomIsPrivate = (ImageView) view.findViewById(R.id.roomIsPrivate);
                     final ImageView enterSymbol = (ImageView) view.findViewById(R.id.roomEnterSymbol);
                     final Button joinButton = (Button) view.findViewById(R.id.joinButton);
@@ -82,8 +75,8 @@ public class SelectActivity extends AppCompatActivity
 
                     // Pre-hide them before deciding whether to show room in list
                     roomName.setVisibility(View.GONE);
-                    roomCoords.setVisibility(View.GONE);
                     roomRadius.setVisibility(View.GONE);
+                    roomBearing.setVisibility(View.GONE);
                     roomIsPrivate.setVisibility(View.GONE);
                     enterSymbol.setVisibility(View.GONE);
                     //joinButton.setVisibility(View.GONE);
@@ -109,8 +102,8 @@ public class SelectActivity extends AppCompatActivity
                     // Otherwise show it in the room list
                     else {
                         roomName.setVisibility(View.VISIBLE);
-                        roomCoords.setVisibility(View.VISIBLE);
                         roomRadius.setVisibility(View.VISIBLE);
+                        roomBearing.setVisibility(View.VISIBLE);
                         enterSymbol.setVisibility(View.VISIBLE);
                         //joinButton.setVisibility(View.VISIBLE);
                         divider.setVisibility(View.VISIBLE);
@@ -126,8 +119,11 @@ public class SelectActivity extends AppCompatActivity
                     BanController.addRoom(getRef(position).getKey());
 
                     roomName.setText(roomIdentity.getName());
-                    roomCoords.setText(formatCoords(roomIdentity.getLat(), roomIdentity.getLongg()));
+                    //roomBearing.setText(formatCoords(roomIdentity.getLat(), roomIdentity.getLongg()));
                     roomRadius.setText("Radius: " + roomIdentity.getRad() + "m");
+                    trace('\n' + roomIdentity.getName());
+                    float distance = (int) (distanceToCenter(lat, lng) * 100) / 100.0f;
+                    roomBearing.setText("Center: " + distance + " m,  " + getBearingName(lat, lng));
 
                     joinButton.setTag(getRef(position).getKey());
                 }
@@ -307,7 +303,9 @@ public class SelectActivity extends AppCompatActivity
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 // Notify list adapter to update when data changes
-                roomListAdapter.notifyDataSetChanged();
+                if (roomListAdapter != null) {
+                    roomListAdapter.notifyDataSetChanged();
+                }
             }
             @Override
             public void onCancelled(DatabaseError databaseError) {
@@ -363,24 +361,61 @@ public class SelectActivity extends AppCompatActivity
                 REQUEST_FINE_LOCATION_ACCESS);
     }
 
-    private boolean withinRoomRadius(float oLat, float oLon, int radius) {
-        if (location == null) {
-            trace("Null location");
-            return false;
-        }
+    private float distanceToCenter(float oLat, float oLng) {
+        if (location == null) return Float.MAX_VALUE;
+        float results[] = { 0.0f };
+        Location.distanceBetween(oLat, oLng, location.getLatitude(), location.getLongitude(), results);
+        return results[0];
+    }
+
+    private boolean withinRoomRadius(float oLat, float oLng, int radius) {
+        if (location == null) return false;
         double myLat = location.getLatitude();
         double myLng = location.getLongitude();
         double meanLat = Math.toRadians(myLat + oLat / 2);
         double kpdLat = 111.13209 - 0.56605*Math.cos(2*meanLat) + 0.00120*Math.cos(4*meanLat);
         double kpdLon = 111.41513*Math.cos(meanLat) - 0.09455*Math.cos(3*meanLat) + 0.00012*Math.cos(5*meanLat);
         double dNS = kpdLat*(myLat - oLat);
-        double dEW = kpdLon*(myLng - oLon);
+        double dEW = kpdLon*(myLng - oLng);
         double distance = 1000 * Math.sqrt(Math.pow(dNS, 2) + Math.pow(dEW, 2));
-        //trace("Distance = " + distance + " m");
-        return distance  <= radius;
+        trace("distance: difference = " + (distance - distanceToCenter(oLat, oLng)));
+        return distance <= radius;
     }
 
-    private String formatCoords(String lat, String lon) {
+    private String getBearingName(float oLat, float oLng) {
+        if (location == null) return "";
+        Location origin = new Location("");
+        origin.setLatitude(oLat);
+        origin.setLongitude(oLng);
+        float bearing = location.bearingTo(origin) % 360;
+        trace("bearing = " + bearing);
+        if ( -157.5 > bearing || bearing > 157.5) {
+            return "S";
+        }
+        else if (bearing < -112.5) {
+            return "SW";
+        }
+        else if (bearing < -67.5) {
+            return "W";
+        }
+        else if (bearing < -22.5) {
+            return "NW";
+        }
+        else if (bearing < 22.5) {
+            return "N";
+        }
+        else if (bearing < 67.5) {
+            return "NE";
+        }
+        else if (bearing < 112.5) {
+            return "E";
+        }
+        else {
+            return "SE";
+        }
+    }
+
+    private String formatCoords(String lat, String lng) {
         float remainder = 0;
 
         float latf = Math.abs(Float.valueOf(lat));
@@ -389,14 +424,14 @@ public class SelectActivity extends AppCompatActivity
         int latMinute = Math.abs((int) remainder);
         float latSecond = 60 * (remainder - latMinute);
 
-        float lngf = Math.abs(Float.valueOf(lon));
+        float lngf = Math.abs(Float.valueOf(lng));
         int lngDegree = (int) lngf;
         remainder = 60 * (lngf - lngDegree);
         int lngMinute = (int) remainder;
         float lngSecond = 60 * (remainder - lngMinute);
 
         String ns = (Float.valueOf(lat) >= 0) ? "N" : "S";
-        String ew = (Float.valueOf(lon) >= 0) ? "E" : "W";
+        String ew = (Float.valueOf(lng) >= 0) ? "E" : "W";
 
         return latDegree + "\u00b0 " + latMinute + "\' " + String.format(Locale.getDefault(), "%.0f", latSecond) + "\" " + ns + ", " +
                 lngDegree + "\u00b0 " + lngMinute + "\' " + String.format(Locale.getDefault(), "%.0f", lngSecond) + "\" " + ew;

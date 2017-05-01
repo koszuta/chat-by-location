@@ -21,7 +21,6 @@
         android:id="@+id/user_name_in_list"
         tools:text="User Name"
         android:textSize="24sp"
-        android:textColor="@color/darkText"
 
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -34,8 +33,8 @@
 
     <ToggleButton
         android:id="@+id/mute_button_user"
-        style="@style/colorThemeButton"
         android:background="@color/transparent"
+        android:textColor="@color/colorPrimaryDark"
 
         android:onClick="onMuteClick"
         android:textOff="@string/mute"
