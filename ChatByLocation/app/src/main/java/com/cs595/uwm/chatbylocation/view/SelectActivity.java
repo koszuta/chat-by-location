@@ -249,6 +249,22 @@ public class SelectActivity extends AppCompatActivity
     }
 
     public Location getLastLocation() {
+        trace("Connected to location api");
+        LocationRequest locationRequest = new LocationRequest();
+        locationRequest.setInterval(0)
+                .setFastestInterval(0)
+                .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            LocationServices.FusedLocationApi.requestLocationUpdates(googleApiClient, locationRequest, this);
+            location = LocationServices.FusedLocationApi.getLastLocation(googleApiClient);
+            if(roomListAdapter != null) {
+                roomListAdapter.notifyDataSetChanged();
+            }
+        } else {
+            trace("No permissions after location api connection");
+            requestFineLocationPermission();
+        }
         return location;
     }
 

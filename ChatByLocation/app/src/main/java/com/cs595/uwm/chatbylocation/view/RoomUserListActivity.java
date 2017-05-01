@@ -76,8 +76,11 @@ public class RoomUserListActivity extends AppCompatActivity {
             public View getView(int position, View convertView, ViewGroup parent) {
 
                 UserIdentity user = getItem(position);
-                if (user == null) return convertView;
-
+                if (user == null) {
+                    View v = new View(getContext());
+                    v.setVisibility(View.GONE);
+                    return v;
+                }
                 //create new view if not yet created
                 if (convertView == null) {
                     convertView = LayoutInflater.from(getContext()).inflate(R.layout.user_list_item, parent, false);
