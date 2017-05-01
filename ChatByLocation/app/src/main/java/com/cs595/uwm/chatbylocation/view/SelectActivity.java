@@ -170,8 +170,15 @@ public class SelectActivity extends AppCompatActivity
         displayRoomList();
     }
     @Override
+    protected void onResume() {
+        googleApiClient.connect();
+        trace("Reconnected to location api on resume");
+        super.onResume();
+    }
+    @Override
     protected void onStop() {
         googleApiClient.disconnect();
+        trace("Disconnected to location api on stop");
         super.onStop();
     }
 

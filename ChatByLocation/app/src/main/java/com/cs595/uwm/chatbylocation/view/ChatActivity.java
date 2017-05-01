@@ -163,6 +163,18 @@ public class ChatActivity extends AppCompatActivity
 
         displayChatMessages();
     }
+    @Override
+    protected void onResume() {
+        mGoogleApiClient.connect();
+        trace("Reconnected to location api on resume");
+        super.onResume();
+    }
+    @Override
+    protected void onStop() {
+        mGoogleApiClient.disconnect();
+        trace("Disconnected to location api on stop");
+        super.onStop();
+    }
 
     private void createGoogleApi() {
         if (mGoogleApiClient == null) {
