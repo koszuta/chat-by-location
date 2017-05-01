@@ -154,7 +154,7 @@ public class RoomUserListActivity extends AppCompatActivity {
             }
         };
 
-        Database.getRoomUsersReference().child(Database.getCurrentRoomID())
+        Database.getRoomUsersReference().child(Database.getCurrentRoomID()).child("users")
                 .addListenerForSingleValueEvent(usersListener);
         lV.setAdapter(itemsAdapter);
     }

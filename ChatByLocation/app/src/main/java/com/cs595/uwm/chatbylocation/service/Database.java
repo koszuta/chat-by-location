@@ -92,7 +92,7 @@ public class Database {
 
             String userId = getUserId();
             if (userId != null) {
-                getRoomUsersReference().child(roomID).child(userId).setValue(true);
+                getRoomUsersReference().child(roomID).child("users").child(userId).setValue(true);
                 getCurrentUserReference().child("roomJoinTime").setValue(System.currentTimeMillis());
             }
 
@@ -119,7 +119,7 @@ public class Database {
             if (!(removeFrom == null || removeFrom.equals(""))) {
                 // Remove user from roomUsers list
                 if (userId != null) {
-                    getRoomUsersReference().child(removeFrom).child(userId).removeValue();
+                    getRoomUsersReference().child(removeFrom).child("users").child(userId).removeValue();
                     getCurrentUserReference().child("currentRoomID").setValue("");
 
                     if(isOwner){
@@ -297,8 +297,7 @@ public class Database {
 
     public static void registerRoomUsersListener(String roomID){
 
-        //DatabaseReference roomUsersRef = getRoomUsersReference().child("roomID").child("users");
-        DatabaseReference roomUsersRef = getRoomUsersReference().child("roomID");
+        DatabaseReference roomUsersRef = getRoomUsersReference().child("roomID").child("users");
 
         if(roomUsersListener != null) {
             roomUsersRef.removeEventListener(roomUsersListener);
@@ -320,7 +319,7 @@ public class Database {
             }
         };
 
-        Database.getRoomUsersReference().child(roomID).addValueEventListener(roomUsersListener);
+        Database.getRoomUsersReference().child(roomID).child("users").addValueEventListener(roomUsersListener);
     }
 
     public static void registerChangeOwnerListener(final String roomID){
@@ -525,10 +524,6 @@ public class Database {
         shouldSignOut = true;
         removeCurrentUserListeners();
         setUserRoom(null);
-    }
-
-    public static void setUsersListener(final ValueEventListener usersListener) {
-        getRoomUsersReference().child(currentRoomID).addListenerForSingleValueEvent(usersListener);
     }
 
     public static String getUserUsername() {
