@@ -11,7 +11,7 @@
         android:id="@+id/set_location"/>
 
     <item
-        android:visible="true"
+        android:visible="false"
         android:title="View Map"
         android:icon="@drawable/ic_map"
         app:showAsAction="never"
